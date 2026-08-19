@@ -215,14 +215,15 @@
   .nav-desktop {
     display: none;
   }
+  .header-cta,
+  .btn-header-order {
+    display: none !important;
+  }
   .mobile-menu-toggle {
     display: flex;
   }
   .brand-name {
     font-size: 1.2rem;
   }
-  .btn-header-order {
-    padding: 0.6rem 1.1rem;
-    font-size: 0.72rem;
-  }
 }
+
