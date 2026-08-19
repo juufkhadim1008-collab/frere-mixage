@@ -1,0 +1,210 @@
+/* Hero Section — Mockup-accurate */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: var(--header-height);
+  padding-bottom: var(--space-8);
+  overflow: hidden;
+  background-color: var(--bg-primary);
+}
+
+/* Background Image — Full coverage */
+.hero-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hero-image-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  filter: brightness(0.82) contrast(1.08) saturate(0.95);
+  transform: scale(1.02);
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Left-to-right dark gradient so text is readable, right side shows models */
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(10, 10, 12, 0.92) 0%, 
+    rgba(10, 10, 12, 0.82) 32%, 
+    rgba(10, 10, 12, 0.45) 60%, 
+    rgba(10, 10, 12, 0.15) 85%, 
+    rgba(10, 10, 12, 0.25) 100%
+  );
+}
+
+.hero-overlay-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: linear-gradient(180deg, rgba(10, 10, 12, 0) 0%, rgba(10, 10, 12, 0.7) 100%);
+}
+
+/* Hero Content — Left-aligned */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+  padding-top: var(--space-12);
+}
+
+/* Title */
+.hero-title {
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 1.02;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-6);
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.hero-title-highlight {
+  display: block;
+  font-style: italic;
+  font-weight: 400;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtitle */
+.hero-subtitle {
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-8);
+  max-width: 420px;
+}
+
+/* CTA Buttons */
+.hero-cta-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.hero-btn-primary {
+  padding: 1.15rem 2.2rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+}
+
+.hero-btn-secondary {
+  padding: 1.15rem 2rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+}
+
+/* Scroll Down Indicator — Bottom left */
+.hero-scroll-indicator {
+  position: absolute;
+  bottom: var(--space-8);
+  left: var(--space-6);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: color var(--transition-fast);
+  text-decoration: none;
+}
+
+.hero-scroll-indicator:hover {
+  color: var(--gold);
+}
+
+.scroll-arrow {
+  font-size: 0.85rem;
+  transition: transform var(--transition-normal);
+}
+
+.hero-scroll-indicator:hover .scroll-arrow {
+  transform: translateY(3px);
+}
+
+/* Responsive Hero */
+@media (max-width: 1024px) {
+  .hero-overlay {
+    background: linear-gradient(90deg, 
+      rgba(10, 10, 12, 0.92) 0%, 
+      rgba(10, 10, 12, 0.75) 40%, 
+      rgba(10, 10, 12, 0.35) 100%
+    );
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    min-height: 100vh;
+    padding-top: calc(var(--header-height) + var(--space-4));
+    padding-bottom: var(--space-12);
+  }
+
+  .hero-overlay {
+    background: linear-gradient(180deg, 
+      rgba(10, 10, 12, 0.5) 0%, 
+      rgba(10, 10, 12, 0.88) 55%, 
+      rgba(10, 10, 12, 0.95) 100%
+    );
+  }
+
+  .hero-content {
+    padding-top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: calc(100vh - var(--header-height) - var(--space-16));
+  }
+
+  .hero-title {
+    font-size: clamp(2.2rem, 10vw, 3.2rem);
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    text-align: center;
+    justify-content: center;
+  }
+
+  .hero-scroll-indicator {
+    display: none;
+  }
+}
