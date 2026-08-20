@@ -15,19 +15,50 @@ export const WhatsAppService = {
   },
 
   /**
-   * Message de commande directe pour une pièce
+   * Construit l'URL publique absolue de l'image du produit pour aperçu WhatsApp
+   */
+  getProductImageUrl(product) {
+    if (!product || !product.images || product.images.length === 0) return '';
+    const rawImg = product.images[0];
+    if (!rawImg || typeof rawImg !== 'string') return '';
+    
+    // Si c'est déjà une URL web absolue (ex: Supabase Cloud Storage)
+    if (rawImg.startsWith('http://') || rawImg.startsWith('https://')) {
+      return rawImg;
+    }
+    
+    // Si c'est une image Base64 locale
+    if (rawImg.startsWith('data:image')) {
+      return '';
+    }
+    
+    // Si c'est un chemin relatif
+    const origin = typeof window !== 'undefined' && window.location.origin 
+      ? window.location.origin 
+      : 'https://frere-mixage.vercel.app';
+    const cleanPath = rawImg.replace(/^\.?\//, '');
+    return `${origin}/${cleanPath}`;
+  },
+
+  /**
+   * Message de commande directe pour une pièce avec photo
    */
   generateOrderMessage({ product, size, quantity, customer = null, delivery = null }) {
-    const total = product.price * quantity;
+    const total = product.price * (quantity || 1);
+    const imageUrl = this.getProductImageUrl(product);
     
     let msg = `Bonjour Frère Mixage 👋🏽\n\n`;
     msg += `Je souhaite commander :\n\n`;
     msg += `✨ *Tenue :* ${product.name}\n`;
-    msg += `🏷️ *Catégorie :* ${product.categoryLabel}\n`;
+    msg += `🏷️ *Catégorie :* ${product.categoryLabel || product.category || 'Haute Couture'}\n`;
     msg += `📏 *Taille :* ${size || 'À définir'}\n`;
-    msg += `🔢 *Quantité :* ${quantity}\n`;
+    msg += `🔢 *Quantité :* ${quantity || 1}\n`;
     msg += `💰 *Prix unitaire :* ${formatPrice(product.price)}\n`;
     msg += `💵 *Total :* ${formatPrice(total)}\n`;
+
+    if (imageUrl) {
+      msg += `\n📸 *Photo de la création :*\n${imageUrl}\n`;
+    }
 
     if (customer && (customer.firstName || customer.phone)) {
       msg += `\n👤 *Informations client :*\n`;
@@ -57,15 +88,22 @@ export const WhatsAppService = {
   },
 
   /**
-   * Message de suivi d'une commande déjà validée
+   * Message de suivi d'une commande déjà validée avec photo
    */
   generateOrderTrackingMessage(order) {
+    const imageUrl = this.getProductImageUrl(order.product);
+
     let msg = `Bonjour Frère Mixage 👋🏽\n\n`;
     msg += `Je vous contacte concernant ma commande passée sur votre site :\n\n`;
     msg += `🔖 *N° de commande :* ${order.orderNumber}\n`;
     msg += `✨ *Tenue :* ${order.product.name} (Taille ${order.size})\n`;
     msg += `👤 *Client :* ${order.customer.firstName} ${order.customer.lastName}\n`;
     msg += `💰 *Total :* ${formatPrice(order.totalAmount)}\n`;
+
+    if (imageUrl) {
+      msg += `\n📸 *Photo de la tenue :*\n${imageUrl}\n`;
+    }
+
     msg += `\nJe souhaiterais avoir des informations sur le suivi de livraison. Merci !`;
     return msg;
   },
