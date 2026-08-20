@@ -4,6 +4,7 @@
  */
 
 import { INITIAL_DATA } from './mock-data.js';
+import { AuthService } from '../../assets/js/services/auth-service.js';
 
 class AdminDashboard {
   constructor() {
@@ -90,7 +91,25 @@ class AdminDashboard {
     });
   }
 
-  init() {
+  async init() {
+    // 1. Vérification sécurisée de l'authentification et du rôle
+    try {
+      const session = await AuthService.getSession();
+      if (!session) {
+        window.location.href = './login.html';
+        return;
+      }
+      this.currentProfile = await AuthService.getCurrentProfile(session.user.id);
+      if (!this.currentProfile || this.currentProfile.is_active === false) {
+        alert('Votre compte a été désactivé. Veuillez contacter le propriétaire.');
+        await AuthService.logout();
+        return;
+      }
+      this.currentUserRole = this.currentProfile.role || 'assistant';
+    } catch (e) {
+      console.warn('[Dashboard.init] Erreur auth :', e);
+    }
+
     if (!this.state.invoices) {
       this.state.invoices = JSON.parse(JSON.stringify(INITIAL_DATA.invoices || []));
     }
@@ -259,6 +278,14 @@ class AdminDashboard {
   }
 
   navigateTo(viewId, updateHash = true) {
+    // Protection stricte des routes selon le rôle
+    if ((viewId === 'team' || viewId === 'settings') && this.currentUserRole === 'assistant') {
+      this.showToast('Accès non autorisé : Cette section est réservée au Propriétaire.', 'error');
+      if (updateHash) window.location.hash = 'overview';
+      this.navigateTo('overview', false);
+      return;
+    }
+
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) return;
 
@@ -2840,22 +2867,202 @@ class AdminDashboard {
   }
 
   renderUserHeader() {
-    const user = this.state.team[0];
-    if (!user) return;
+    const user = this.currentProfile || this.state.team[0] || {};
 
     // Sidebar user info
     const sidebarAvatar = document.querySelector('.sidebar-user-avatar');
     const sidebarName = document.querySelector('.sidebar-user-name');
     const sidebarRole = document.querySelector('.sidebar-user-role');
-    if (sidebarAvatar) sidebarAvatar.src = user.avatar;
-    if (sidebarName) sidebarName.textContent = user.name;
-    if (sidebarRole) sidebarRole.textContent = user.roleLabel || 'Propriétaire';
+    
+    if (sidebarAvatar) sidebarAvatar.src = user.avatar_url || this.state.team[0]?.avatar || '../assets/images/ab8459f150d5d7db346654de338434e5.jpg';
+    if (sidebarName) sidebarName.textContent = user.full_name || user.name || 'Administrateur';
+    if (sidebarRole) {
+      const isOwner = (user.role === 'owner' || this.currentUserRole === 'owner');
+      sidebarRole.textContent = isOwner ? '👑 Propriétaire' : '👔 Assistant';
+      sidebarRole.style.color = isOwner ? 'var(--gold)' : '#93C5FD';
+    }
 
     // Topbar user info
     const topbarAvatar = document.querySelector('.user-avatar-btn');
     const topbarName = document.querySelector('.user-profile-name');
-    if (topbarAvatar) topbarAvatar.src = user.avatar;
-    if (topbarName) topbarName.textContent = user.name;
+    if (topbarAvatar) topbarAvatar.src = user.avatar_url || this.state.team[0]?.avatar || '../assets/images/ab8459f150d5d7db346654de338434e5.jpg';
+    if (topbarName) topbarName.textContent = user.full_name || user.name || 'Admin';
+
+    // Masquage dynamique pour le rôle ASSISTANT
+    if (this.currentUserRole === 'assistant') {
+      // Masquer ÉQUIPE et PARAMÈTRES
+      document.querySelectorAll('[data-view="team"], [data-view="settings"]').forEach(el => {
+        const parentLi = el.closest('li');
+        if (parentLi) parentLi.style.display = 'none';
+      });
+      document.querySelectorAll('.nav-section-title').forEach(el => {
+        if (el.textContent.trim() === 'ÉQUIPE') {
+          if (el.parentElement) el.parentElement.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  // ===================================================================
+  // 12. GESTION DE L'ÉQUIPE (OWNER ONLY)
+  // ===================================================================
+  async renderTeam() {
+    const tbody = document.getElementById('team-table-tbody');
+    if (!tbody) return;
+
+    if (this.currentUserRole !== 'owner') {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2.5rem;">Cette section est strictement réservée au Propriétaire.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--gold-light); padding: 1.5rem;">Chargement des membres de l'équipe...</td></tr>`;
+
+    try {
+      const members = await AuthService.getTeamMembers();
+      if (!members || members.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2.5rem;">Aucun membre enregistré pour le moment.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = members.map(m => {
+        const isOwner = m.role === 'owner';
+        const roleBadge = isOwner 
+          ? '<span class="badge" style="background: rgba(212, 175, 55, 0.15); color: #ECC880; border: 1px solid var(--gold-border); font-weight: 700;">👑 PROPRIÉTAIRE</span>' 
+          : '<span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #93C5FD; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700;">👔 ASSISTANT</span>';
+
+        const statusBadge = m.is_active 
+          ? '<span class="badge badge-stock-ok">ACTIF</span>' 
+          : '<span class="badge badge-stock-out" style="background: rgba(239, 68, 68, 0.15); color: #FCA5A5; border: 1px solid rgba(239, 68, 68, 0.3);">DÉSACTIVÉ</span>';
+
+        const displayPhone = AuthService.formatPhoneDisplay(m.phone || 'Non renseigné');
+        const formattedDate = new Date(m.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+        const actionButtons = isOwner 
+          ? '<span style="font-size: 0.75rem; color: var(--text-dim);">Compte Principal</span>' 
+          : `
+            <button class="btn btn-sm ${m.is_active ? 'btn-secondary' : 'btn-primary'}" 
+                    style="${m.is_active ? 'border-color: rgba(239, 68, 68, 0.4); color: #FCA5A5;' : ''}"
+                    onclick="window.dashboard.toggleMemberStatus('${m.id}', ${m.is_active})">
+              ${m.is_active ? 'Désactiver' : 'Activer'}
+            </button>
+          `;
+
+        return `
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--admin-card-inner); border: 1px solid var(--gold-border); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--gold); font-size: 0.9rem;">
+                  ${(m.full_name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <strong style="color: #FFFFFF;">${m.full_name || 'Membre'}</strong>
+                  <div style="font-size: 0.72rem; color: var(--text-dim);">${isOwner ? 'Fondateur' : 'Gestion de la boutique'}</div>
+                </div>
+              </div>
+            </td>
+            <td><code style="color: var(--gold-light); font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">${displayPhone}</code></td>
+            <td>${roleBadge}</td>
+            <td>${statusBadge}</td>
+            <td>${formattedDate}</td>
+            <td style="text-align: right;">${actionButtons}</td>
+          </tr>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('[renderTeam] Erreur :', err);
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #F87171; padding: 2rem;">Erreur de chargement : ${err.message}</td></tr>`;
+    }
+  }
+
+  openAddAssistantModal() {
+    const modalBox = document.getElementById('modal-generic-body');
+    const modalTitle = document.getElementById('modal-generic-title');
+    if (!modalBox || !modalTitle) return;
+
+    modalTitle.textContent = "Ajouter un membre à l'équipe";
+    modalBox.innerHTML = `
+      <form id="form-add-assistant" onsubmit="window.dashboard.submitAddAssistant(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Nom complet du membre *</label>
+          <input type="text" id="asst-full-name" class="form-input" placeholder="Ex: Amadou Ndiaye" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Numéro de téléphone (Sénégal) *</label>
+          <input type="tel" id="asst-phone" class="form-input" placeholder="+221 77 000 00 00" required>
+          <small style="color: var(--text-dim); font-size: 0.72rem; display: block; margin-top: 4px;">Format international automatique (+221XXXXXXXXX).</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Rôle attribué</label>
+          <input type="text" class="form-input" value="👔 ASSISTANT (Gestion boutique, stocks & commandes)" disabled style="opacity: 0.8; cursor: not-allowed; background: rgba(0,0,0,0.3); color: var(--gold);">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Mot de passe temporaire *</label>
+          <input type="password" id="asst-password" class="form-input" placeholder="Au moins 6 caractères" required minlength="6">
+          <small style="color: var(--text-dim); font-size: 0.72rem; display: block; margin-top: 4px;">Permettra au membre de se connecter directement sur /admin/login.</small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="window.dashboard.closeModals()">Annuler</button>
+          <button type="submit" id="btn-submit-assistant" class="btn btn-primary btn-sm">+ Créer le compte Assistant</button>
+        </div>
+      </form>
+    `;
+
+    document.getElementById('admin-generic-modal')?.classList.add('active');
+  }
+
+  async submitAddAssistant(e) {
+    e.preventDefault();
+    const fullName = document.getElementById('asst-full-name')?.value.trim();
+    const phone = document.getElementById('asst-phone')?.value.trim();
+    const password = document.getElementById('asst-password')?.value;
+    const btn = document.getElementById('btn-submit-assistant');
+
+    if (!fullName || !phone || !password) {
+      this.showToast('Veuillez renseigner tous les champs obligatoires.', 'error');
+      return;
+    }
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Création en cours...';
+    }
+
+    try {
+      await AuthService.createAssistant(fullName, phone, password);
+      this.showToast(`Compte assistant de « ${fullName} » créé avec succès !`, 'success');
+      this.closeModals();
+      this.renderTeam();
+    } catch (err) {
+      this.showToast(err.message || 'Erreur lors de la création du compte.', 'error');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = '+ Créer le compte Assistant';
+      }
+    }
+  }
+
+  async toggleMemberStatus(userId, currentIsActive) {
+    const actionName = currentIsActive ? 'désactiver' : 'réactiver';
+    if (!confirm(`Confirmez-vous vouloir ${actionName} ce compte ?`)) return;
+
+    try {
+      await AuthService.toggleUserStatus(userId, !currentIsActive);
+      this.showToast(`Statut du membre mis à jour.`, 'success');
+      this.renderTeam();
+    } catch (err) {
+      this.showToast(err.message || 'Erreur lors de la modification.', 'error');
+    }
+  }
+
+  async handleLogout() {
+    if (confirm('Voulez-vous vous déconnecter du Dashboard Frère Mixage ?')) {
+      await AuthService.logout();
+    }
   }
 
   // ===================================================================
