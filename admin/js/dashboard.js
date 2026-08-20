@@ -872,7 +872,7 @@ class AdminDashboard {
     this.renderUploadedPreviews();
   }
 
-  saveProduct(statusOverride = null) {
+  async saveProduct(statusOverride = null) {
     const editId = document.getElementById('edit-prod-id')?.value;
     const name = document.getElementById('input-prod-name')?.value.trim();
     const cat = document.getElementById('select-prod-category')?.value || 'traditionnel';
@@ -903,10 +903,10 @@ class AdminDashboard {
       'traditionnel': 'Tenues Traditionnelles',
       'costumes': 'Costumes Africains',
       'modernes': 'Tenues Modernes',
-      'evenementiel': 'Collection Événementielle (ex: Magal)'
+      'evenementiel': 'Collection Événementielle'
     };
 
-    const catObj = this.state.categories.find(c => c.slug === cat) || { 
+    const catObj = this.state.categories?.find(c => c.slug === cat) || { 
       name: catMap[cat] || 'Tenues Traditionnelles', 
       slug: cat || 'traditionnel' 
     };
@@ -915,9 +915,33 @@ class AdminDashboard {
       ? [...this.uploadedImages] 
       : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=800'];
 
+    const { ProductService } = await import('../../assets/js/services/product-service.js');
+
     if (editId) {
       const index = this.state.products.findIndex(p => p.id === editId);
       if (index !== -1) {
+        const existing = this.state.products[index];
+        const dbId = existing.dbId || (existing.id && existing.id.length > 25 ? existing.id : null);
+
+        if (dbId) {
+          try {
+            await ProductService.updateProduct(dbId, {
+              name,
+              categorySlug: catObj.slug,
+              price,
+              sale_price: origPrice,
+              description: desc,
+              fabric,
+              status,
+              is_featured: status === 'published',
+              images: imagesToUse,
+              stock: stockObj
+            });
+          } catch (e) {
+            console.error('[Supabase] Erreur mise à jour produit :', e);
+          }
+        }
+
         this.state.products[index] = {
           ...this.state.products[index],
           name,
@@ -933,13 +957,6 @@ class AdminDashboard {
           stock: stockObj
         };
 
-        this.state.recentActivity.unshift({
-          type: 'product_modified',
-          title: `Création modifiée : ${name}`,
-          detail: `Tarif : ${price.toLocaleString('fr-FR')} FCFA • Statut : ${status}`,
-          time: 'À l’instant'
-        });
-
         this.saveState();
         this.resetProductForm();
         this.renderProducts();
@@ -952,8 +969,29 @@ class AdminDashboard {
       }
     }
 
+    // Création d'un nouveau produit sur Supabase Cloud
+    let createdDbId = null;
+    try {
+      const res = await ProductService.createProduct({
+        name,
+        categorySlug: catObj.slug,
+        price,
+        sale_price: origPrice,
+        description: desc,
+        fabric,
+        status,
+        is_featured: status === 'published',
+        images: imagesToUse,
+        stock: stockObj
+      });
+      if (res && res.id) createdDbId = res.id;
+    } catch (e) {
+      console.error('[Supabase] Erreur création produit :', e);
+    }
+
     const newProduct = {
-      id: `prod-${Date.now()}`,
+      id: createdDbId || `prod-${Date.now()}`,
+      dbId: createdDbId,
       code: `FM-${Math.floor(100 + Math.random() * 900)}`,
       name,
       category: catObj.name,
@@ -970,31 +1008,6 @@ class AdminDashboard {
     };
 
     this.state.products.unshift(newProduct);
-    this.state.recentActivity.unshift({
-      type: 'product_added',
-      title: `Nouvelle création ajoutée : ${name}`,
-      detail: `${catObj.name} — ${price.toLocaleString('fr-FR')} FCFA`,
-      time: 'À l’instant'
-    });
-
-    // Synchronisation Cloud Supabase
-    import('../../assets/js/services/product-service.js').then(({ ProductService }) => {
-      ProductService.createProduct({
-        name,
-        categorySlug: catObj.slug,
-        price,
-        sale_price: origPrice ? price : null,
-        description: desc,
-        fabric,
-        status,
-        is_featured: status === 'published',
-        images: imagesToUse,
-        stock: stockObj
-      }).then(res => {
-        if (res && res.id) newProduct.dbId = res.id;
-      }).catch(e => console.warn('[Supabase] Sync produit :', e));
-    });
-
     this.saveState();
     this.resetProductForm();
     this.renderProducts();
@@ -1003,6 +1016,29 @@ class AdminDashboard {
     this.renderOverview();
     this.showToast(`La tenue « ${name} » a été enregistrée et synchronisée !`, 'success');
     this.navigateTo('products');
+  }
+
+  async deleteProduct(productId) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette création ?')) return;
+
+    const target = this.state.products.find(p => p.id === productId);
+    const dbId = target?.dbId || (productId && productId.length > 25 ? productId : null);
+
+    if (dbId) {
+      try {
+        const { ProductService } = await import('../../assets/js/services/product-service.js');
+        await ProductService.deleteProduct(dbId);
+      } catch (e) {
+        console.error('[Supabase] Erreur suppression produit :', e);
+      }
+    }
+
+    this.state.products = this.state.products.filter(p => p.id !== productId);
+    this.saveState();
+    this.renderProducts();
+    this.renderStocks();
+    this.renderOverview();
+    this.showToast('Création supprimée du catalogue.', 'info');
   }
 
   // ===================================================================

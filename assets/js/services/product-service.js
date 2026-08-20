@@ -184,4 +184,69 @@ export class ProductService {
 
     return newProd;
   }
+
+  /**
+   * Met à jour un produit existant dans Supabase
+   */
+  static async updateProduct(productId, productData) {
+    const supabase = await getSupabaseClient();
+
+    // 1. Récupérer la catégorie ID
+    const { data: catData } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', productData.categorySlug || 'traditionnel')
+      .single();
+
+    const categoryId = catData ? catData.id : null;
+
+    // 2. Mettre à jour le produit
+    const updatePayload = {
+      name: productData.name,
+      description: productData.description,
+      price: productData.price,
+      sale_price: productData.sale_price || null,
+      fabric: productData.fabric,
+      status: productData.status || 'published',
+      is_featured: Boolean(productData.is_featured),
+      images: productData.images || [],
+      updated_at: new Date().toISOString()
+    };
+    if (categoryId) updatePayload.category_id = categoryId;
+
+    const { error: prodError } = await supabase
+      .from('products')
+      .update(updatePayload)
+      .eq('id', productId);
+
+    if (prodError) throw prodError;
+
+    // 3. Mettre à jour les variantes
+    if (productData.stock) {
+      for (const [size, qty] of Object.entries(productData.stock)) {
+        await supabase
+          .from('product_variants')
+          .upsert({
+            product_id: productId,
+            size: size,
+            stock: parseInt(qty, 10) || 0
+          }, { onConflict: 'product_id,size' });
+      }
+    }
+  }
+
+  /**
+   * Supprime un produit et ses variantes de Supabase
+   */
+  static async deleteProduct(productId) {
+    const supabase = await getSupabaseClient();
+    
+    // Supprimer les variantes d'abord
+    await supabase.from('product_variants').delete().eq('product_id', productId);
+    
+    // Supprimer le produit
+    const { error } = await supabase.from('products').delete().eq('id', productId);
+    if (error) throw error;
+  }
 }
+
