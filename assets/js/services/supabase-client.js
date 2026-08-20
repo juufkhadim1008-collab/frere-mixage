@@ -1,6 +1,6 @@
 /**
  * Client Supabase unifié pour Frère Mixage (Vitrine & Dashboard)
- * Supporte à la fois Vite (import.meta.env) et l'exécution directe dans le navigateur.
+ * Supporte Vite (import.meta.env) et l'environnement de production.
  */
 
 const DEFAULT_SUPABASE_URL = 'https://xcwcecfveyoavqfktsua.supabase.co';
@@ -14,9 +14,7 @@ try {
     supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
     supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
   }
-} catch (e) {
-  // Ignoré dans les contextes sans import.meta.env
-}
+} catch (e) {}
 
 let client = null;
 
@@ -25,33 +23,37 @@ export async function getSupabaseClient() {
 
   // 1. Essai import ES module standard
   try {
-    const { createClient } = await import('@supabase/supabase-js');
-    client = createClient(supabaseUrl, supabaseAnonKey);
-    return client;
-  } catch (err) {
-    // 2. Fallback CDN dynamique si le module local n'est pas bundle
-    if (window.supabase && typeof window.supabase.createClient === 'function') {
-      client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const supabaseModule = await import('@supabase/supabase-js');
+    if (supabaseModule && supabaseModule.createClient) {
+      client = supabaseModule.createClient(supabaseUrl, supabaseAnonKey);
       return client;
     }
+  } catch (err) {}
 
-    // Charger le CDN à la volée
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-      script.onload = () => {
-        if (window.supabase && window.supabase.createClient) {
-          client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-          resolve(client);
-        } else {
-          reject(new Error('Échec initialisation Supabase CDN'));
-        }
-      };
-      script.onerror = () => reject(new Error('Impossible de charger la librairie Supabase'));
-      document.head.appendChild(script);
-    });
+  // 2. Fallback CDN dynamique si le module n'est pas résolu
+  if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+    client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+    return client;
   }
+
+  // 3. Injection CDN
+  return new Promise((resolve, reject) => {
+    if (typeof document === 'undefined') return resolve(null);
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+    script.onload = () => {
+      if (window.supabase && window.supabase.createClient) {
+        client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        resolve(client);
+      } else {
+        reject(new Error('Échec initialisation Supabase'));
+      }
+    };
+    script.onerror = () => reject(new Error('Impossible de charger la librairie Supabase'));
+    document.head.appendChild(script);
+  });
 }
 
 export const SUPABASE_URL = supabaseUrl;
 export const SUPABASE_ANON_KEY = supabaseAnonKey;
+

@@ -311,63 +311,6 @@
 
   </div>
 
-  <script type="module">
-    import { AuthService } from '../assets/js/services/auth-service.js';
-
-    const form = document.getElementById('admin-login-form');
-    const phoneInput = document.getElementById('input-phone');
-    const passwordInput = document.getElementById('input-password');
-    const submitBtn = document.getElementById('btn-login-submit');
-    const errorBox = document.getElementById('login-error-box');
-    const errorText = document.getElementById('login-error-text');
-    const forgotLink = document.getElementById('link-forgot-password');
-
-    // Vérifier si déjà connecté
-    AuthService.getSession().then(session => {
-      if (session) {
-        window.location.href = './index.html';
-      }
-    });
-
-    // Formatage automatique en direct du numéro sénégalais
-    phoneInput.addEventListener('input', (e) => {
-      let val = e.target.value;
-      if (val.startsWith('7') && val.length === 9) {
-        e.target.value = `+221 ${val.slice(0,2)} ${val.slice(2,5)} ${val.slice(5,7)} ${val.slice(7,9)}`;
-      }
-    });
-
-    // Soumission du formulaire
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorBox.style.display = 'none';
-      submitBtn.disabled = true;
-      const originalText = submitBtn.innerHTML;
-      submitBtn.innerHTML = `<span>Vérification en cours...</span>`;
-
-      try {
-        const phone = phoneInput.value.trim();
-        const password = passwordInput.value;
-
-        const result = await AuthService.loginWithPhone(phone, password);
-        
-        // Redirection vers le dashboard
-        window.location.href = './index.html';
-      } catch (err) {
-        errorText.textContent = err.message || 'Échec de la connexion.';
-        errorBox.style.display = 'flex';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-      }
-    });
-
-    // Mot de passe oublié
-    forgotLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert("Pour réinitialiser votre mot de passe, veuillez contacter le Propriétaire de la Maison Frère Mixage.");
-    });
-  </script>
-
+  <script type="module" src="./js/login.js"></script>
 </body>
 </html>
