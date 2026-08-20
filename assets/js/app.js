@@ -102,9 +102,18 @@ export async function syncDynamicContent() {
 
       // Badges
       if (remoteAbout.badges) {
-        if (remoteAbout.badges[0]) document.getElementById('atelier-badge-1')?.textContent = remoteAbout.badges[0];
-        if (remoteAbout.badges[1]) document.getElementById('atelier-badge-2')?.textContent = remoteAbout.badges[1];
-        if (remoteAbout.badges[2]) document.getElementById('atelier-badge-3')?.textContent = remoteAbout.badges[2];
+        if (remoteAbout.badges[0]) {
+          const b1 = document.getElementById('atelier-badge-1');
+          if (b1) b1.textContent = remoteAbout.badges[0];
+        }
+        if (remoteAbout.badges[1]) {
+          const b2 = document.getElementById('atelier-badge-2');
+          if (b2) b2.textContent = remoteAbout.badges[1];
+        }
+        if (remoteAbout.badges[2]) {
+          const b3 = document.getElementById('atelier-badge-3');
+          if (b3) b3.textContent = remoteAbout.badges[2];
+        }
       }
 
       // Photos
