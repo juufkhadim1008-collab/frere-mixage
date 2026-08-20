@@ -164,7 +164,11 @@ frere-mixage/
 
 Lorsque vous reprenez le travail sur ce projet :
 1. **Toujours saluer l'utilisateur avec `Salam Mastü !`**.
-2. **Conserver l'harmonie des 4 Collections** : `traditionnel`, `costumes`, `modernes`, `evenementiel`.
-3. **Respecter la charte graphique** : Dégradé doré `#C6A868` à `#D4AF37`, fond noir `#0A0A0C` / `#121216`, boutons `btn-primary` avec dégradé or.
-4. **Toujours compresser les images avant enregistrement** dans le `localStorage` pour préserver le quota navigateur.
-5. **Maintenir la compatibilité Vercel** : Conserver `rollupOptions.input` dans `vite.config.js` et les règles de réécriture dans `vercel.json` pour que le déploiement multi-pages fonctionne sans erreur.
+2. **Synchronisation Automatique Totale (Supabase + GitHub + Vercel)** : À CHAQUE modification effectuée (code, schémas SQL, données, design ou fonctionnalités), vous devez impérativement et systématiquement :
+   - Appliquer les migrations/requêtes sur la base **Supabase Cloud**.
+   - Enregistrer, commiter et pousser le code sur **GitHub** (`git push origin main`).
+   - S'assurer que le déploiement automatique **Vercel** se déroule avec succès sans décalage.
+3. **Conserver l'harmonie des 4 Collections** : `traditionnel`, `costumes`, `modernes`, `evenementiel`.
+4. **Respecter la charte graphique** : Dégradé doré `#C6A868` à `#D4AF37`, fond noir `#0A0A0C` / `#121216`, boutons `btn-primary` avec dégradé or.
+5. **Toujours compresser les images avant enregistrement** dans le `localStorage` pour préserver le quota navigateur.
+6. **Maintenir la compatibilité Vercel** : Conserver `rollupOptions.input` dans `vite.config.js` et les règles de réécriture dans `vercel.json` pour que le déploiement multi-pages fonctionne sans erreur.
