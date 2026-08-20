@@ -12,7 +12,7 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 
 class AdminDashboard {
   constructor() {
-    this.storageKey = 'frere_mixage_admin_state_v3';
+    this.storageKey = 'frere_mixage_admin_state_v4';
     this.state = this.loadState();
     this.currentView = 'overview';
     this.currentOrderFilter = 'all';
@@ -133,7 +133,7 @@ class AdminDashboard {
     try {
       // 1. Charger les produits réels depuis Supabase
       const dbProducts = await ProductService.getAllProductsAdmin();
-      if (dbProducts && dbProducts.length > 0) {
+      if (Array.isArray(dbProducts)) {
         this.state.products = dbProducts.map(p => {
           const stockMap = {};
           if (p.product_variants) {
@@ -660,6 +660,22 @@ class AdminDashboard {
         p.category.toLowerCase().includes(query) ||
         (p.fabric && p.fabric.toLowerCase().includes(query))
       );
+    }
+
+    if (!this.state.products || this.state.products.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4.5rem 1.5rem; background: var(--admin-card); border: 1px dashed var(--gold-border); border-radius: 16px;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">👔</div>
+          <h3 style="font-family: var(--font-title); font-size: 1.4rem; color: #FFFFFF; margin-bottom: 0.5rem;">Catalogue vierge</h3>
+          <p style="font-size: 0.95rem; color: var(--text-dim); max-width: 480px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
+            Toutes les tenues de démonstration ont été supprimées. Vous pouvez maintenant ajouter vos propres créations avec vos photos, descriptions, tarifs et tailles.
+          </p>
+          <button class="btn btn-primary" onclick="window.dashboard.navigateTo('add-product')">
+            <span>+ Ajouter ma première création</span>
+          </button>
+        </div>
+      `;
+      return;
     }
 
     if (filtered.length === 0) {
