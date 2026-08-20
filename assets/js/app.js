@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 export async function syncDynamicContent() {
   let state = {};
   try {
-    const raw = localStorage.getItem('frere_mixage_admin_state_v3') || 
+    const raw = localStorage.getItem('frere_mixage_admin_state_v4') || 
+                localStorage.getItem('frere_mixage_admin_state_v3') || 
                 localStorage.getItem('frere_mixage_admin_state_v2') || 
                 localStorage.getItem('frere_mixage_admin_state_v1');
     if (raw) state = JSON.parse(raw);
