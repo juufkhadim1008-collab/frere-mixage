@@ -39,6 +39,14 @@ document.addEventListener('DOMContentLoaded', () => {
  * Synchronise les contenus éditables (Témoignages, À Propos, Paramètres) depuis Supabase Cloud
  */
 export async function syncDynamicContent() {
+  let state = {};
+  try {
+    const raw = localStorage.getItem('frere_mixage_admin_state_v3') || 
+                localStorage.getItem('frere_mixage_admin_state_v2') || 
+                localStorage.getItem('frere_mixage_admin_state_v1');
+    if (raw) state = JSON.parse(raw);
+  } catch (e) {}
+
   // 1. Chargement et rendu des témoignages depuis Supabase
   try {
     const remoteTestimonials = await ContentService.getPublicTestimonials();

@@ -195,6 +195,8 @@ class AdminDashboard {
           }))
         }));
         this.saveState();
+      }
+
       // 3. Charger les témoignages réels depuis Supabase
       const { ContentService } = await import('../../assets/js/services/content-service.js');
       const dbTestimonials = await ContentService.getAllTestimonialsAdmin();
@@ -1729,6 +1731,14 @@ class AdminDashboard {
     order.status = newStatus;
     order.statusLabel = labels[newStatus] || newStatus;
 
+    // Synchronisation Supabase Cloud
+    const dbId = order.dbId || (orderId && orderId.length > 20 ? orderId : null);
+    if (dbId) {
+      import('../../assets/js/services/order-service.js').then(({ OrderService }) => {
+        OrderService.updateOrderStatus(dbId, newStatus).catch(e => console.warn('[Supabase] Sync statut commande:', e));
+      });
+    }
+
     this.state.recentActivity.unshift({
       type: 'status_change',
       title: `Commande #${order.id} mise à jour`,
@@ -2681,6 +2691,9 @@ class AdminDashboard {
         avatar,
         quote
       };
+      this.state.testimonials.unshift(newTest);
+    }
+
     // Synchronisation Cloud Supabase
     import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
       ContentService.saveTestimonial({ id, name, role, rating, isActive, avatar, quote }).catch(e => console.warn('[Supabase] Sync testimonial:', e));
