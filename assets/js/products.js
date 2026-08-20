@@ -3,6 +3,8 @@
  * Synchronisation dynamique avec le Dashboard Administrateur (localStorage)
  */
 
+import { ProductService } from './services/product-service.js';
+
 const DEFAULT_PRODUCTS = [
   {
     id: 'boubou-royal',
@@ -217,7 +219,6 @@ export function getActiveProducts() {
  */
 export async function fetchLiveProductsFromSupabase() {
   try {
-    const { ProductService } = await import('./services/product-service.js');
     const remote = await ProductService.getPublishedProducts();
     if (remote && remote.length > 0) {
       memoryProducts = remote;

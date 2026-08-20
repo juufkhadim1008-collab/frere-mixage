@@ -5,6 +5,11 @@
 
 import { INITIAL_DATA } from './mock-data.js';
 import { AuthService } from '../../assets/js/services/auth-service.js';
+import { ProductService } from '../../assets/js/services/product-service.js';
+import { OrderService } from '../../assets/js/services/order-service.js';
+import { ContentService } from '../../assets/js/services/content-service.js';
+import { StockService } from '../../assets/js/services/stock-service.js';
+import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 
 class AdminDashboard {
   constructor() {
@@ -135,9 +140,6 @@ class AdminDashboard {
 
   async syncWithSupabase() {
     try {
-      const { ProductService } = await import('../../assets/js/services/product-service.js');
-      const { OrderService } = await import('../../assets/js/services/order-service.js');
-
       // 1. Charger les produits réels depuis Supabase
       const dbProducts = await ProductService.getAllProductsAdmin();
       if (dbProducts && dbProducts.length > 0) {
@@ -198,7 +200,6 @@ class AdminDashboard {
       }
 
       // 3. Charger les témoignages réels depuis Supabase
-      const { ContentService } = await import('../../assets/js/services/content-service.js');
       const dbTestimonials = await ContentService.getAllTestimonialsAdmin();
       if (dbTestimonials && dbTestimonials.length > 0) {
         this.state.testimonials = dbTestimonials.map(t => ({
@@ -917,8 +918,6 @@ class AdminDashboard {
       ? [...this.uploadedImages] 
       : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=800'];
 
-    const { ProductService } = await import('../../assets/js/services/product-service.js');
-
     if (editId) {
       const index = this.state.products.findIndex(p => p.id === editId);
       if (index !== -1) {
@@ -1028,7 +1027,6 @@ class AdminDashboard {
 
     if (dbId) {
       try {
-        const { ProductService } = await import('../../assets/js/services/product-service.js');
         await ProductService.deleteProduct(dbId);
       } catch (e) {
         console.error('[Supabase] Erreur suppression produit :', e);
@@ -1147,10 +1145,8 @@ class AdminDashboard {
 
     // Synchronisation Cloud Supabase
     if (product.dbId) {
-      import('../../assets/js/services/stock-service.js').then(({ StockService }) => {
-        sizes.forEach(sz => {
-          StockService.updateStock(product.dbId, sz, product.stock[sz]).catch(e => console.warn('[Supabase] Stock sync:', e));
-        });
+      sizes.forEach(sz => {
+        StockService.updateStock(product.dbId, sz, product.stock[sz]).catch(e => console.warn('[Supabase] Stock sync:', e));
       });
     }
 
@@ -1734,9 +1730,7 @@ class AdminDashboard {
     // Synchronisation Supabase Cloud
     const dbId = order.dbId || (orderId && orderId.length > 20 ? orderId : null);
     if (dbId) {
-      import('../../assets/js/services/order-service.js').then(({ OrderService }) => {
-        OrderService.updateOrderStatus(dbId, newStatus).catch(e => console.warn('[Supabase] Sync statut commande:', e));
-      });
+      OrderService.updateOrderStatus(dbId, newStatus).catch(e => console.warn('[Supabase] Sync statut commande:', e));
     }
 
     this.state.recentActivity.unshift({
@@ -2695,9 +2689,7 @@ class AdminDashboard {
     }
 
     // Synchronisation Cloud Supabase
-    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
-      ContentService.saveTestimonial({ id, name, role, rating, isActive, avatar, quote }).catch(e => console.warn('[Supabase] Sync testimonial:', e));
-    });
+    ContentService.saveTestimonial({ id, name, role, rating, isActive, avatar, quote }).catch(e => console.warn('[Supabase] Sync testimonial:', e));
 
     this.saveState();
     this.closeModals();
@@ -2709,9 +2701,7 @@ class AdminDashboard {
     if (!confirm('Supprimer ce témoignage ?')) return;
 
     // Suppression Cloud Supabase
-    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
-      ContentService.deleteTestimonial(id).catch(e => console.warn('[Supabase] Delete testimonial:', e));
-    });
+    ContentService.deleteTestimonial(id).catch(e => console.warn('[Supabase] Delete testimonial:', e));
 
     this.state.testimonials = this.state.testimonials.filter(t => t.id !== id);
     this.saveState();
@@ -2848,9 +2838,7 @@ class AdminDashboard {
     ];
 
     // Synchronisation Cloud Supabase
-    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
-      ContentService.saveAboutContent(a).catch(e => console.warn('[Supabase] Sync about:', e));
-    });
+    ContentService.saveAboutContent(a).catch(e => console.warn('[Supabase] Sync about:', e));
 
     this.saveState();
     this.showToast('Contenu "Les Coulisses de la Maison" et images mis à jour en direct !', 'success');
