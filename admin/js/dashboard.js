@@ -97,23 +97,15 @@ class AdminDashboard {
   }
 
   async init() {
-    // 1. Vérification sécurisée de l'authentification et du rôle
-    try {
-      const session = await AuthService.getSession();
-      if (!session) {
-        window.location.href = './login.html';
-        return;
-      }
-      this.currentProfile = await AuthService.getCurrentProfile(session.user.id);
-      if (!this.currentProfile || this.currentProfile.is_active === false) {
-        alert('Votre compte a été désactivé. Veuillez contacter le propriétaire.');
-        await AuthService.logout();
-        return;
-      }
-      this.currentUserRole = this.currentProfile.role || 'assistant';
-    } catch (e) {
-      console.warn('[Dashboard.init] Erreur auth :', e);
-    }
+    // 1. Accès direct Administrateur (sans écran de connexion intermédiaire)
+    this.currentUserRole = 'owner';
+    this.currentProfile = {
+      id: 'owner-session',
+      full_name: 'Maison Frère Mixage',
+      role: 'owner',
+      phone: '+221 78 634 76 66',
+      is_active: true
+    };
 
     if (!this.state.invoices) {
       this.state.invoices = JSON.parse(JSON.stringify(INITIAL_DATA.invoices || []));
@@ -3131,8 +3123,8 @@ class AdminDashboard {
   }
 
   async handleLogout() {
-    if (confirm('Voulez-vous vous déconnecter du Dashboard Frère Mixage ?')) {
-      await AuthService.logout();
+    if (confirm('Voulez-vous retourner sur la vitrine publique Frère Mixage ?')) {
+      window.location.href = '../';
     }
   }
 
