@@ -241,29 +241,42 @@ export function initCheckoutModal() {
     btnSubmitOrder.innerHTML = `<span class="spinner"></span> Sécurisation en cours...`;
 
     try {
-      // 1. Création de la commande
-      const order = await OrderService.createOrder({
+      // 1. Création atomique de la commande côté serveur (Supabase RPC)
+      const fullName = `${orderState.customer.firstName || ''} ${orderState.customer.lastName || ''}`.trim() || 'Client Frère Mixage';
+      
+      const serverResult = await OrderService.createOrderAtomic({
+        customerName: fullName,
+        customerPhone: orderState.customer.phone,
+        customerEmail: orderState.customer.email || null,
+        deliveryAddress: orderState.customer.address || 'Dakar',
+        deliveryCity: orderState.customer.city || 'Dakar',
+        paymentMethod: orderState.paymentMethod || 'cash_on_delivery',
+        notes: orderState.customer.notes || null,
+        items: [{
+          productId: orderState.product.dbId || null,
+          productSlug: orderState.product.id,
+          size: orderState.size,
+          quantity: orderState.quantity
+        }]
+      });
+
+      const order = {
+        orderNumber: serverResult.order_number,
+        id: serverResult.order_id,
+        customer: orderState.customer,
         product: orderState.product,
         size: orderState.size,
         quantity: orderState.quantity,
-        customer: orderState.customer,
-        delivery: orderState.delivery,
-        paymentMethod: orderState.paymentMethod
-      });
+        totalAmount: serverResult.total,
+        payment: { method: orderState.paymentMethod }
+      };
 
-      // 2. Traitement du paiement / Passerelle
-      await PaymentService.processPayment({
-        order,
-        method: orderState.paymentMethod,
-        customerPhone: orderState.customer.phone
-      });
-
-      // 3. Fermeture du tunnel & Affichage de la confirmation de commande
+      // 2. Fermeture du tunnel & Affichage de la confirmation de commande
       closeModal();
       showConfirmationModal(order);
     } catch (error) {
-      alert('Une erreur est survenue lors de la validation. Veuillez réessayer ou commander sur WhatsApp.');
-      console.error(error);
+      alert(error.message || 'Une erreur est survenue lors de la validation. Veuillez réessayer ou commander sur WhatsApp.');
+      console.error('[CheckoutModal] Erreur création commande :', error);
     } finally {
       btnSubmitOrder.disabled = false;
       btnSubmitOrder.innerHTML = originalText;

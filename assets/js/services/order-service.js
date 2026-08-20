@@ -1,113 +1,103 @@
-import { CONFIG } from '../config.js';
-
-const STORAGE_KEY = 'frere_mixage_orders_v1';
-
 /**
- * Service de gestion des commandes pour Frère Mixage
+ * Service Commandes — Maison Frère Mixage
+ * Traite les commandes de manière atomique et sécurisée via la fonction RPC Supabase.
  */
-export const OrderService = {
+
+import { getSupabaseClient } from './supabase-client.js';
+
+export class OrderService {
   /**
-   * Génère un numéro de commande unique et prestigieux (ex: FM-2026-8742)
+   * Crée une commande de manière transactionnelle côté serveur
+   * Vérifie le stock, calcule les prix serveur et décrémente le stock en une seule transaction atomique.
    */
-  generateOrderNumber() {
-    const year = new Date().getFullYear();
-    const random = Math.floor(1000 + Math.random() * 9000);
-    return `FM-${year}-${random}`;
-  },
-
-  /**
-   * Crée et enregistre une nouvelle commande
-   */
-  async createOrder({ product, size, quantity, customer, delivery, paymentMethod }) {
-    // Calculs
-    const subtotal = product.price * quantity;
-    const deliveryFee = delivery ? delivery.price : 0;
-    const totalAmount = subtotal + deliveryFee;
-
-    const order = {
-      orderNumber: this.generateOrderNumber(),
-      createdAt: new Date().toISOString(),
-      status: 'confirmed', // 'pending', 'confirmed', 'in_preparation', 'shipped', 'delivered', 'cancelled'
-      product: {
-        id: product.id,
-        name: product.name,
-        category: product.categoryLabel,
-        price: product.price,
-        image: product.images[0]
-      },
-      size,
-      quantity,
-      subtotal,
-      deliveryFee,
-      totalAmount,
-      customer: {
-        firstName: customer.firstName.trim(),
-        lastName: customer.lastName.trim(),
-        phone: customer.phone.trim(),
-        address: customer.address.trim(),
-        city: customer.city ? customer.city.trim() : 'Dakar',
-        notes: customer.notes ? customer.notes.trim() : ''
-      },
-      delivery: {
-        id: delivery?.id || 'dakar-express',
-        name: delivery?.name || 'Livraison standard'
-      },
-      payment: {
-        method: paymentMethod, // 'wave', 'orangeMoney', 'card', 'cashOnDelivery'
-        status: paymentMethod === 'cashOnDelivery' ? 'pending_on_delivery' : 'processing',
-        transactionRef: `TXN-${Date.now()}`
-      }
-    };
-
-    // 1. Sauvegarde locale pour consultation et suivi
-    this.saveOrderLocally(order);
-
-    // 2. Point d'intégration Backend (prêt pour un envoi sécurisé vers votre serveur)
+  static async createOrderAtomic(payload) {
     try {
-      if (CONFIG.api.createOrderUrl && !CONFIG.api.createOrderUrl.startsWith('/api')) {
-        await fetch(CONFIG.api.createOrderUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
-        });
-      }
-    } catch (e) {
-      console.warn('[OrderService] Mode hors-ligne / mockup serveur actif.');
+      const supabase = await getSupabaseClient();
+      
+      const { data, error } = await supabase.rpc('process_order_atomic', {
+        p_customer_name: payload.customerName,
+        p_customer_phone: payload.customerPhone,
+        p_customer_email: payload.customerEmail || null,
+        p_delivery_address: payload.deliveryAddress || 'Dakar',
+        p_delivery_city: payload.deliveryCity || 'Dakar',
+        p_payment_method: payload.paymentMethod || 'cash_on_delivery',
+        p_notes: payload.notes || null,
+        p_items: payload.items.map(item => ({
+          product_id: item.productId || null,
+          product_slug: item.productSlug || item.productId || null,
+          size: item.size,
+          quantity: parseInt(item.quantity, 10) || 1
+        }))
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('[OrderService.createOrderAtomic] Erreur transactionnelle :', err);
+      throw err;
     }
-
-    return order;
-  },
-
-  /**
-   * Sauvegarde une commande dans le stockage local du navigateur
-   */
-  saveOrderLocally(order) {
-    try {
-      const orders = this.getOrders();
-      orders.unshift(order);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(orders));
-    } catch (e) {
-      console.error('Erreur sauvegarde locale commande', e);
-    }
-  },
-
-  /**
-   * Récupère la liste des commandes locales
-   */
-  getOrders() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
-  },
-
-  /**
-   * Récupère la dernière commande passée
-   */
-  getLastOrder() {
-    const orders = this.getOrders();
-    return orders.length > 0 ? orders[0] : null;
   }
-};
+
+  /**
+   * Récupère la liste des commandes pour le Dashboard Administrateur
+   */
+  static async getAllOrdersAdmin() {
+    try {
+      const supabase = await getSupabaseClient();
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          order_number,
+          status,
+          subtotal,
+          delivery_fee,
+          total,
+          payment_method,
+          payment_status,
+          delivery_address,
+          notes,
+          created_at,
+          customers (
+            id,
+            full_name,
+            phone,
+            email,
+            city,
+            address
+          ),
+          order_items (
+            id,
+            product_name_snapshot,
+            size,
+            quantity,
+            unit_price,
+            total_price
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.warn('[OrderService.getAllOrdersAdmin] Erreur :', err);
+      return null;
+    }
+  }
+
+  /**
+   * Met à jour le statut d'une commande
+   */
+  static async updateOrderStatus(orderId, newStatus) {
+    const supabase = await getSupabaseClient();
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', orderId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  }
+}
