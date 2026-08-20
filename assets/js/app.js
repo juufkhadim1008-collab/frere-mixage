@@ -6,6 +6,7 @@ import { initSizeGuide } from './components/size-guide.js';
 import { initFloatingCTA } from './components/floating-cta.js';
 import { WhatsAppService } from './services/whatsapp.js';
 import { ContentService } from './services/content-service.js';
+import { getActiveProducts } from './products.js';
 
 /**
  * Initialisation principale de l'application FRÈRE MIXAGE
@@ -28,10 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Initialisation des observateurs de défilement pour les animations fluides
   initScrollReveals();
 
-  // 5. Écoute des mises à jour en direct depuis l'admin dans un autre onglet
+  // 5. Écoute des mises à jour en direct depuis Supabase et l'admin
   window.addEventListener('storage', () => {
     initCatalog();
     syncDynamicContent();
+  });
+
+  window.addEventListener('supabase-products-synced', (e) => {
+    updateCollectionCovers(e.detail);
   });
 });
 
@@ -263,51 +268,46 @@ export async function syncDynamicContent() {
     }
 
     // 4. Mise à jour des images et titres d'aperçu des 4 collections
-    if (state.products && state.products.length > 0) {
-      document.querySelectorAll('.collection-card').forEach(card => {
-        const catKey = card.dataset.category; // 'traditionnel', 'costumes', 'modernes', 'evenementiel'
-        const imgEl = card.querySelector('img.collection-image');
-        const titleEl = card.querySelector('.collection-title');
-        const descEl = card.querySelector('.collection-desc');
-        if (!imgEl || !catKey) return;
-
-        // Vérifier si une catégorie a une image personnalisée ou des textes dans le dashboard
-        const customCat = state.categories?.find(c => {
-          const slug = (c.slug || '').toLowerCase();
-          const name = (c.name || '').toLowerCase();
-          return slug.includes(catKey) || name.includes(catKey) || 
-                 (catKey === 'traditionnel' && (slug.includes('boubou') || name.includes('boubou') || slug.includes('tradition'))) ||
-                 (catKey === 'evenementiel' && (slug.includes('evenement') || name.includes('evenement') || slug.includes('magal') || name.includes('magal')));
-        });
-
-        if (customCat) {
-          if (titleEl && customCat.name) titleEl.textContent = customCat.name;
-          if (descEl && customCat.description) descEl.textContent = customCat.description;
-          if (customCat.image && customCat.image.trim()) {
-            imgEl.src = customCat.image;
-            return;
-          }
-        }
-
-        // Sinon, trouver la dernière création publiée de cette catégorie
-        const latestProd = state.products.find(p => {
-          if (p.status !== 'published') return false;
-          const pCat = (p.categorySlug || p.category || '').toLowerCase();
-          if (catKey === 'traditionnel' && (pCat.includes('tradition') || pCat.includes('boubou'))) return true;
-          if (catKey === 'costumes' && pCat.includes('costume')) return true;
-          if (catKey === 'modernes' && (pCat.includes('ensemble') || pCat.includes('moderne') || pCat.includes('chemise') || pCat.includes('pantalon'))) return true;
-          if (catKey === 'evenementiel' && (pCat.includes('evenement') || pCat.includes('magal') || pCat.includes('gamou') || pCat.includes('korite') || pCat.includes('fete'))) return true;
-          return pCat.includes(catKey);
-        });
-
-        if (latestProd && latestProd.images && latestProd.images.length > 0) {
-          imgEl.src = latestProd.images[0];
-        }
-      });
-    }
+    updateCollectionCovers(state.products);
   } catch (e) {
     console.warn('Erreur lors de la synchronisation dynamique du site public :', e);
   }
+}
+
+/**
+ * Met à jour les 4 cartes de collections avec la toute dernière photo publiée de cette catégorie
+ */
+export function updateCollectionCovers(products = null) {
+  const currentProds = products || getActiveProducts();
+  const defaultImages = {
+    traditionnel: './assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+    costumes: './assets/images/hero-frere-mixage.jpg',
+    modernes: './assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+    evenementiel: './assets/images/hero-frere-mixage.jpg'
+  };
+
+  document.querySelectorAll('.collection-card').forEach(card => {
+    const catKey = card.dataset.category; // 'traditionnel', 'costumes', 'modernes', 'evenementiel'
+    const imgEl = card.querySelector('img.collection-image');
+    if (!imgEl || !catKey) return;
+
+    // Trouver la dernière création publiée de cette catégorie
+    const latestProd = (currentProds || []).find(p => {
+      if (p.status === 'draft') return false;
+      const pCat = (p.categorySlug || p.category || '').toLowerCase();
+      if (catKey === 'traditionnel' && (pCat.includes('tradition') || pCat.includes('boubou'))) return true;
+      if (catKey === 'costumes' && pCat.includes('costume')) return true;
+      if (catKey === 'modernes' && (pCat.includes('ensemble') || pCat.includes('moderne') || pCat.includes('chemise') || pCat.includes('pantalon'))) return true;
+      if (catKey === 'evenementiel' && (pCat.includes('evenement') || pCat.includes('magal') || pCat.includes('gamou') || pCat.includes('korite') || pCat.includes('fete'))) return true;
+      return pCat.includes(catKey);
+    });
+
+    if (latestProd && latestProd.images && latestProd.images.length > 0 && latestProd.images[0]) {
+      imgEl.src = latestProd.images[0];
+    } else if (defaultImages[catKey]) {
+      imgEl.src = defaultImages[catKey];
+    }
+  });
 }
 
 /**
