@@ -1,4 +1,4 @@
-import { PRODUCTS, CATEGORIES, formatPrice, getProductsByCategory } from '../products.js';
+import { getActiveCategories, formatPrice, getProductsByCategory } from '../products.js';
 import { openProductModal } from './product-modal.js';
 import { openCheckoutWithProduct } from './checkout-modal.js';
 
@@ -11,9 +11,11 @@ export function initCatalog() {
 
   if (!productsGrid) return;
 
+  const categories = getActiveCategories();
+
   // 1. Rendu des boutons de filtre de catégories
   if (filterContainer) {
-    filterContainer.innerHTML = CATEGORIES.map((cat, index) => `
+    filterContainer.innerHTML = categories.map((cat, index) => `
       <button 
         class="filter-pill ${index === 0 ? 'active' : ''}" 
         data-category="${cat.id}"

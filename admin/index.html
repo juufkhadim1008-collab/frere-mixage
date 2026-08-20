@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <title>Dashboard Administrateur — Frère Mixage</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%230A0A0C' rx='20'/%3E%3Cpath d='M30 25h40v12H44v14h22v12H44v22H30V25z' fill='%23C5A059'/%3E%3C/svg%3E" />
+
+  <!-- Stylesheet Admin -->
+  <link rel="stylesheet" href="./css/dashboard.css" />
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- ==========================================
+         SIDEBAR NAVIGATION
+         ========================================== -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      
+      <!-- Brand Logo -->
+      <div class="sidebar-header">
+        <a href="#overview" style="display: flex; align-items: center; gap: 8px;">
+          <img src="../assets/images/logo-frere-mixage.png" alt="Frère Mixage" class="sidebar-logo-img" />
+        </a>
+        <span class="sidebar-badge">ADMIN</span>
+      </div>
+
+      <!-- Navigation Sections -->
+      <nav class="sidebar-nav">
+        
+        <!-- Section PRINCIPAL -->
+        <div>
+          <div class="nav-section-title">PRINCIPAL</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#overview" class="nav-item-link active" data-view="overview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Vue d'ensemble</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section BOUTIQUE -->
+        <div>
+          <div class="nav-section-title">BOUTIQUE</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#products" class="nav-item-link" data-view="products">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span>Produits</span>
+              </a>
+            </li>
+            <li>
+              <a href="#add-product" class="nav-item-link" data-view="add-product">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Ajouter une tenue</span>
+              </a>
+            </li>
+            <li>
+              <a href="#stocks" class="nav-item-link" data-view="stocks">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                <span>Stocks</span>
+                <span class="nav-badge-count" id="nav-stock-count">7</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section COMMANDES -->
+        <div>
+          <div class="nav-section-title">COMMANDES</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#orders" class="nav-item-link" data-view="orders" data-filter="all">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span>Commandes</span>
+                <span class="nav-badge-count" id="nav-pending-count">1</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section FACTURATION & COMPTABILITÉ -->
+        <div>
+          <div class="nav-section-title">COMPTABILITÉ & FINANCE</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#accounting" class="nav-item-link" data-view="accounting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span>Comptabilité</span>
+              </a>
+            </li>
+            <li>
+              <a href="#invoices" class="nav-item-link" data-view="invoices">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                <span>Factures & Devis</span>
+              </a>
+            </li>
+            <li>
+              <a href="#create-invoice" class="nav-item-link" data-view="create-invoice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Créer une facture</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section CLIENTS -->
+        <div>
+          <div class="nav-section-title">CLIENTS</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#customers" class="nav-item-link" data-view="customers">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Clients</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section SITE & CONTENU -->
+        <div>
+          <div class="nav-section-title">SITE & CONTENU</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#testimonials" class="nav-item-link" data-view="testimonials">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                <span>Témoignages</span>
+              </a>
+            </li>
+            <li>
+              <a href="#about" class="nav-item-link" data-view="about">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span>À Propos & Histoire</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section ÉQUIPE -->
+        <div>
+          <div class="nav-section-title">ÉQUIPE</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#team" class="nav-item-link" data-view="team">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Utilisateurs</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section PARAMÈTRES -->
+        <div>
+          <div class="nav-section-title">PARAMÈTRES</div>
+          <ul class="nav-list">
+            <li>
+              <a href="#settings" class="nav-item-link" data-view="settings">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Paramètres</span>
+              </a>
+            </li>
+            <li>
+              <a href="#profile" class="nav-item-link" data-view="profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Mon profil</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </nav>
+
+      <!-- Sidebar User Footer -->
+      <div class="sidebar-footer">
+        <div class="sidebar-user-info">
+          <img src="../assets/images/ab8459f150d5d7db346654de338434e5.jpg" alt="Mamadou Lamine Ndiaye" class="sidebar-user-avatar" />
+          <div>
+            <div class="sidebar-user-name">Mamadou L. Ndiaye</div>
+            <div class="sidebar-user-role">Propriétaire</div>
+          </div>
+        </div>
+        <button class="btn-logout" title="Déconnexion (Simulation)" onclick="window.dashboard.showToast('Déconnexion simulée.', 'info')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ==========================================
+         MAIN CONTENT AREA
+         ========================================== -->
+    <main class="admin-main">
+      
+      <!-- Topbar -->
+      <header class="admin-topbar">
+        <div class="topbar-left">
+          <button class="btn-mobile-toggle" id="mobile-toggle-btn" aria-label="Ouvrir le menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="global-search-input" placeholder="Rechercher une commande, tenue ou client..." />
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <a href="../index.html" target="_blank" class="btn-view-store" title="Voir la boutique en ligne">
+            <span>Boutique en direct</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+
+          <button class="btn-topbar-action" title="Notifications" onclick="window.dashboard.navigateTo('overview')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="topbar-notification-dot"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Views Container -->
+      <div class="admin-content">
+
+        <!-- ====================================================
+             1. VUE : VUE D'ENSEMBLE (#overview)
+             ==================================================== -->
+        <section id="view-overview" class="view-section active">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Bonjour, bienvenue dans votre espace Frère Mixage.</h1>
+              <p class="page-subtitle">Voici un aperçu de votre activité et des performances de l'atelier.</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-primary btn-sm" onclick="window.dashboard.navigateTo('add-product')">
+                + Ajouter une tenue
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards -->
+          <div class="kpi-grid">
+            
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Chiffre d'affaires</span>
+                <div class="kpi-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-revenue">1 250 000 FCFA</div>
+              <div class="kpi-growth growth-positive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span>+18.4% ce mois</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Commandes</span>
+                <div class="kpi-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-orders">24</div>
+              <div class="kpi-growth growth-positive">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span>+6 cette semaine</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Produits</span>
+                <div class="kpi-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-products">86</div>
+              <div class="kpi-growth" style="color: var(--text-dim);">
+                <span>Catalogue actif</span>
+              </div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Stock Faible</span>
+                <div class="kpi-icon" style="color: var(--status-preparing);">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+              </div>
+              <div class="kpi-value" id="kpi-low-stock" style="color: var(--status-preparing);">7</div>
+              <div class="kpi-growth growth-warning">
+                <span>À réapprovisionner</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Main Grid: Évolution des ventes & Produits Populaires -->
+          <div class="overview-main-grid">
+            
+            <!-- Évolution des ventes -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Évolution des ventes (12 derniers mois)</h3>
+                <span style="font-size: 0.75rem; color: var(--gold-light); font-weight: 600;">FCFA / Mois</span>
+              </div>
+              <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Produits Populaires -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Produits populaires</h3>
+                <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('products')">Voir tout</button>
+              </div>
+              <div class="popular-products-list" id="overview-popular-products">
+                <!-- Rendu Dynamique JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Grid: Dernières Commandes & Activité / Alertes -->
+          <div class="overview-bottom-grid">
+            
+            <!-- Dernières Commandes -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Dernières commandes reçues</h3>
+                <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('orders')">Toutes les commandes →</button>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>N° Commande</th>
+                      <th>Client</th>
+                      <th>Produit</th>
+                      <th>Montant</th>
+                      <th>Date</th>
+                      <th>Statut</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-recent-orders-tbody">
+                    <!-- Rendu Dynamique JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Activité Récente & Alertes -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+              
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Activité récente</h3>
+                </div>
+                <div class="activity-timeline" id="overview-activity-timeline">
+                  <!-- Rendu Dynamique JS -->
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Alertes de gestion</h3>
+                </div>
+                <div class="alerts-list" id="overview-alerts-list">
+                  <!-- Rendu Dynamique JS -->
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             2. VUE : PRODUITS (#products)
+             ==================================================== -->
+        <section id="view-products" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Nos Pièces & Tenues</h1>
+              <p class="page-subtitle">Gérez le catalogue des boubous, costumes et créations Frère Mixage.</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.dashboard.navigateTo('add-product')">
+              + Ajouter une tenue
+            </button>
+          </div>
+
+          <!-- Filters & Search Toolbar -->
+          <div class="filter-bar">
+            <div class="filter-pills" id="products-filters">
+              <button class="filter-pill-btn active" data-pfilter="all" onclick="window.dashboard.setProductFilter('all', this)">Toutes</button>
+              <button class="filter-pill-btn" data-pfilter="traditionnel" onclick="window.dashboard.setProductFilter('traditionnel', this)">Tenues Traditionnelles</button>
+              <button class="filter-pill-btn" data-pfilter="costumes" onclick="window.dashboard.setProductFilter('costumes', this)">Costumes Africains</button>
+              <button class="filter-pill-btn" data-pfilter="modernes" onclick="window.dashboard.setProductFilter('modernes', this)">Tenues Modernes</button>
+              <button class="filter-pill-btn" data-pfilter="evenementiel" onclick="window.dashboard.setProductFilter('evenementiel', this)">Événementiel (Magal)</button>
+              <button class="filter-pill-btn" data-pfilter="nouveautes" onclick="window.dashboard.setProductFilter('nouveautes', this)">Nouveautés</button>
+              <button class="filter-pill-btn" data-pfilter="promotions" onclick="window.dashboard.setProductFilter('promotions', this)">Promotions</button>
+            </div>
+
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="products-search-input" placeholder="Rechercher par nom, tissu..." oninput="window.dashboard.renderProducts()" />
+            </div>
+          </div>
+
+          <!-- Products Grid -->
+          <div class="products-admin-grid" id="products-grid-container">
+            <!-- Rendu Dynamique JS -->
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             3. VUE : AJOUTER / MODIFIER UNE TENUE (#add-product)
+             ==================================================== -->
+        <section id="view-add-product" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title" id="add-product-page-title">Ajouter une nouvelle tenue</h1>
+              <p class="page-subtitle" id="add-product-page-subtitle">Renseignez les détails, photos, tarifs et stocks par taille pour la publication.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('products')">
+              ← Retour aux produits
+            </button>
+          </div>
+
+          <form id="form-add-product">
+            <input type="hidden" id="edit-prod-id" value="" />
+            <div class="form-layout-grid">
+              
+              <!-- Colonne Gauche -->
+              <div>
+                
+                <!-- Section 1 : Informations -->
+                <div class="form-section">
+                  <h3 class="form-section-title">Informations de la création</h3>
+                  
+                  <div class="form-group">
+                    <label class="form-label">Nom de la tenue *</label>
+                    <input type="text" id="input-prod-name" class="form-input" placeholder="Ex: Grand Boubou Impérial Touba" required />
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Collection / Catégorie *</label>
+                      <select id="select-prod-category" class="form-select" required>
+                        <option value="traditionnel">Tenues Traditionnelles (Grands Boubous)</option>
+                        <option value="costumes">Costumes Africains</option>
+                        <option value="modernes">Tenues Modernes</option>
+                        <option value="evenementiel">Collection Événementielle (ex: Magal / Cérémonies)</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Tissu & Matière</label>
+                      <input type="text" id="input-prod-fabric" class="form-input" placeholder="Ex: Bazin Riche Getzner teinté main" />
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Description & Savoir-faire</label>
+                    <textarea id="textarea-prod-desc" class="form-textarea" rows="4" placeholder="Détaillez la coupe, les broderies, l'histoire de la pièce..."></textarea>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Badge commercial (optionnel)</label>
+                    <input type="text" id="input-prod-badge" class="form-input" placeholder="Ex: Bestseller, Pièce Unique, Korité 2026" />
+                  </div>
+                </div>
+
+                <!-- Section 2 : Photos -->
+                <div class="form-section">
+                  <h3 class="form-section-title">Photographies de la pièce</h3>
+                  
+                  <div class="image-upload-dropzone" id="product-image-dropzone">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <div class="upload-text">Glissez vos images ici ou cliquez pour parcourir</div>
+                    <div class="upload-hint">Formats acceptés : JPG, PNG, WEBP (Haute résolution recommandée)</div>
+                    <input type="file" id="product-file-input" multiple accept="image/*" style="display: none;" />
+                  </div>
+
+                  <div class="upload-previews-grid" id="upload-previews-container">
+                    <!-- Miniatures prévisualisées -->
+                  </div>
+                </div>
+
+                <!-- Section 3 : Tailles et Stocks -->
+                <div class="form-section">
+                  <h3 class="form-section-title">Tailles & Quantités en stock</h3>
+                  <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem;">
+                    Indiquez la quantité de pièces immédiatement disponibles à l'atelier pour chaque taille.
+                  </p>
+
+                  <div class="size-stock-grid">
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">XS</div>
+                      <input type="number" id="stock-xs" class="size-stock-input" min="0" value="0" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">S</div>
+                      <input type="number" id="stock-s" class="size-stock-input" min="0" value="2" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">M</div>
+                      <input type="number" id="stock-m" class="size-stock-input" min="0" value="4" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">L</div>
+                      <input type="number" id="stock-l" class="size-stock-input" min="0" value="6" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">XL</div>
+                      <input type="number" id="stock-xl" class="size-stock-input" min="0" value="2" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">XXL</div>
+                      <input type="number" id="stock-xxl" class="size-stock-input" min="0" value="0" />
+                    </div>
+                    <div class="size-stock-card">
+                      <div class="size-stock-label">XXXL</div>
+                      <input type="number" id="stock-xxxl" class="size-stock-input" min="0" value="0" />
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Colonne Droite : Tarification & Publication -->
+              <div>
+                
+                <!-- Tarifs -->
+                <div class="form-section">
+                  <h3 class="form-section-title">Tarification</h3>
+
+                  <div class="form-group">
+                    <label class="form-label">Prix de vente (FCFA) *</label>
+                    <input type="number" id="input-prod-price" class="form-input" placeholder="Ex: 150000" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Prix barré / promotionnel (FCFA)</label>
+                    <input type="number" id="input-prod-orig-price" class="form-input" placeholder="Ex: 180000" />
+                    <span style="font-size: 0.7rem; color: var(--text-dim);">Laissez vide si pas de promotion.</span>
+                  </div>
+                </div>
+
+                <!-- Publication -->
+                <div class="form-section">
+                  <h3 class="form-section-title">Statut de publication</h3>
+
+                  <div class="status-radio-group">
+                    <label class="status-radio-card">
+                      <input type="radio" name="prod_status" value="published" checked />
+                      <span class="status-radio-text">Publié (Visible immédiatement)</span>
+                    </label>
+                    <label class="status-radio-card">
+                      <input type="radio" name="prod_status" value="draft" />
+                      <span class="status-radio-text">Brouillon (Non visible sur le site)</span>
+                    </label>
+                    <label class="status-radio-card">
+                      <input type="radio" name="prod_status" value="sold_out" />
+                      <span class="status-radio-text">Épuisé (Affiché en rupture)</span>
+                    </label>
+                  </div>
+
+                  <div style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 10px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                      Publier la tenue
+                    </button>
+                    <button type="button" id="btn-save-draft" class="btn btn-secondary" style="width: 100%; justify-content: center;">
+                      Enregistrer comme brouillon
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </form>
+
+        </section>
+
+        <!-- ====================================================
+             4. VUE : GESTION DES STOCKS (#stocks)
+             ==================================================== -->
+        <section id="view-stocks" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Gestion des stocks</h1>
+              <p class="page-subtitle">Suivi précis des disponibilités par taille et alertes de réapprovisionnement.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="window.dashboard.navigateTo('add-product')">
+              + Nouvelle création
+            </button>
+          </div>
+
+          <!-- Stock Summary KPI Grid -->
+          <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 1.5rem;">
+            <div class="kpi-card">
+              <span class="kpi-title">Stock total pièces</span>
+              <div class="kpi-value" id="stock-kpi-total">42</div>
+              <span class="kpi-growth" style="color: var(--gold-light);">Disponibles en atelier</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Modèles à stock faible</span>
+              <div class="kpi-value" id="stock-kpi-low" style="color: var(--status-preparing);">2</div>
+              <span class="kpi-growth growth-warning">≤ 3 pièces restantes</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-title">Modèles épuisés</span>
+              <div class="kpi-value" id="stock-kpi-out" style="color: var(--status-cancelled);">1</div>
+              <span class="kpi-growth" style="color: var(--status-cancelled);">Rupture totale</span>
+            </div>
+          </div>
+
+          <!-- Stock Matrix Table -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="admin-table stock-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Tenue & Catégorie</th>
+                    <th>Disponibilité par Taille (XS à XXXL)</th>
+                    <th>Total</th>
+                    <th>État</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="stocks-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             5. VUE : COMPTABILITÉ (#accounting)
+             ==================================================== -->
+        <section id="view-accounting" class="view-section">
+          
+          <!-- En-tête Comptabilité -->
+          <div class="page-header" style="align-items: flex-start;">
+            <div>
+              <div style="font-size: 0.72rem; color: var(--gold); text-transform: uppercase; font-weight: 700; margin-bottom: 2px;">Admin / Comptabilité</div>
+              <h1 class="page-title">Comptabilité & Finance</h1>
+              <p class="page-subtitle">Recettes, dépenses, rentabilité par projet et alertes impayés.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button class="btn btn-primary btn-shimmer" onclick="window.dashboard.openAddExpenseModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Ajouter une dépense
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Cards (Style Luxe Frère Mixage) -->
+          <div class="accounting-kpi-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem;">
+            
+            <!-- KPI 1 : Recettes Totales (Or / Vert) -->
+            <div class="card accounting-kpi-card" style="border-top: 3px solid var(--gold); border-color: rgba(212, 175, 55, 0.3); position: relative;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em;">RECETTES TOTALES</span>
+                  <div class="kpi-value text-gradient-gold" id="acc-total-revenue" style="font-size: 1.6rem; margin: 0.35rem 0 0.2rem 0; font-family: var(--font-heading);">600 000 FCFA</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);" id="acc-month-revenue">Ce mois: 20 000 FCFA</div>
+                </div>
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(212, 175, 55, 0.15); color: var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; border: 1px solid rgba(212, 175, 55, 0.3);">
+                  ↗
+                </div>
+              </div>
+              <div style="margin-top: 0.75rem; display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; background: rgba(212, 175, 55, 0.1); color: var(--gold-light); font-size: 0.68rem; font-weight: 700; border: 1px solid rgba(212, 175, 55, 0.2);">
+                ↘ 84,4% vs mois précédent
+              </div>
+            </div>
+
+            <!-- KPI 2 : Dépenses Totales (Ambre / Rubis Doux) -->
+            <div class="card accounting-kpi-card" style="border-top: 3px solid #E57373; border-color: rgba(229, 115, 115, 0.3); position: relative;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #E57373; text-transform: uppercase; letter-spacing: 0.08em;">DÉPENSES TOTALES</span>
+                  <div class="kpi-value" id="acc-total-expenses" style="color: var(--text-main); font-size: 1.6rem; margin: 0.35rem 0 0.2rem 0; font-family: var(--font-heading);">378 000 FCFA</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);" id="acc-month-expenses">Ce mois: 3 000 FCFA</div>
+                </div>
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(229, 115, 115, 0.15); color: #E57373; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; border: 1px solid rgba(229, 115, 115, 0.3);">
+                  ↘
+                </div>
+              </div>
+            </div>
+
+            <!-- KPI 3 : Bénéfice Net (Émeraude / Or) -->
+            <div class="card accounting-kpi-card" style="border-top: 3px solid #10B981; border-color: rgba(16, 185, 129, 0.3); position: relative;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.08em;">BÉNÉFICE NET</span>
+                  <div class="kpi-value text-gradient-gold" id="acc-net-profit" style="font-size: 1.6rem; margin: 0.35rem 0 0.2rem 0; font-family: var(--font-heading);">222 000 FCFA</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);" id="acc-net-margin">Marge: 37.0%</div>
+                </div>
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: #10B981; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                  ✦
+                </div>
+              </div>
+            </div>
+
+            <!-- KPI 4 : Factures Impayées (Ambre Doré) -->
+            <div class="card accounting-kpi-card" style="border-top: 3px solid #F59E0B; border-color: rgba(245, 158, 11, 0.3); position: relative;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 700; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.08em;">FACTURES IMPAYÉES</span>
+                  <div class="kpi-value" id="acc-unpaid-invoices" style="color: var(--text-main); font-size: 1.6rem; margin: 0.35rem 0 0.2rem 0; font-family: var(--font-heading);">0 FCFA</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);" id="acc-unpaid-count">0 facture en attente</div>
+                </div>
+                <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(245, 158, 11, 0.15); color: #F59E0B; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; border: 1px solid rgba(245, 158, 11, 0.3);">
+                  !
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Barre d'outils Période & Exports -->
+          <div class="filter-bar" style="background: var(--admin-card); padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">PÉRIODE</span>
+              <select id="acc-period-select" class="form-select" style="width: 180px; padding: 0.45rem 0.8rem; font-size: 0.8rem;" onchange="window.dashboard.changeAccountingPeriod(this.value)">
+                <option value="year" selected>Cette année</option>
+                <option value="month">Ce mois-ci</option>
+                <option value="quarter">Ce trimestre</option>
+                <option value="all">Tout l'historique</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button class="btn btn-secondary btn-sm" onclick="window.dashboard.exportAccountingExcel()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                Exporter Excel
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Exporter PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Section Graphiques (Double Colonne) -->
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            
+            <!-- Graphique 1 : Évolution Mensuelle -->
+            <div class="card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title" style="font-size: 1.05rem;">Évolution mensuelle</h3>
+                  <span style="font-size: 0.72rem; color: var(--text-dim);">12 derniers mois</span>
+                </div>
+                <!-- Légende -->
+                <div style="display: flex; gap: 12px; font-size: 0.75rem; align-items: center;">
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #D4AF37;"></span> Recettes</span>
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #8C7853;"></span> Dépenses</span>
+                  <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 10px; height: 10px; border-radius: 2px; background: #10B981;"></span> Bénéfice</span>
+                </div>
+              </div>
+              <div style="height: 280px; width: 100%; position: relative;">
+                <canvas id="accountingMonthlyChart" width="700" height="280" style="width: 100%; height: 100%;"></canvas>
+              </div>
+            </div>
+
+            <!-- Graphique 2 : Dépenses par catégorie (Donut) -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title" style="font-size: 1.05rem;">Dépenses par catégorie</h3>
+              </div>
+              <div style="height: 200px; width: 100%; position: relative; display: flex; align-items: center; justify-content: center;">
+                <canvas id="accountingExpensesDonut" width="200" height="200"></canvas>
+              </div>
+              <div id="acc-expenses-legend" style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 0.75rem; font-size: 0.75rem;">
+                <!-- Rendu Dynamique JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Journal des Dépenses Récentes -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Journal des Dépenses & Achats de l'Atelier</h3>
+              <button class="btn btn-secondary btn-sm" onclick="window.dashboard.openAddExpenseModal()">+ Ajouter une dépense</button>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Catégorie</th>
+                    <th>Description de la dépense</th>
+                    <th>Paiement</th>
+                    <th>Montant (FCFA)</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="accounting-expenses-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             6. VUE : COMMANDES (#orders)
+             ==================================================== -->
+        <section id="view-orders" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Gestion des commandes</h1>
+              <p class="page-subtitle">Consultez, filtrez et mettez à jour les commandes reçues sur le site ou WhatsApp.</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.dashboard.openCreateOrderModal()">
+              + Nouvelle commande
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar">
+            <div class="filter-pills" id="orders-filters">
+              <button class="filter-pill-btn active" data-ofilter="all" onclick="window.dashboard.currentOrderFilter='all'; window.dashboard.renderOrders();">Toutes</button>
+              <button class="filter-pill-btn" data-ofilter="new" onclick="window.dashboard.currentOrderFilter='new'; window.dashboard.renderOrders();">Nouvelles (En attente)</button>
+              <button class="filter-pill-btn" data-ofilter="confirmed" onclick="window.dashboard.currentOrderFilter='confirmed'; window.dashboard.renderOrders();">Confirmées</button>
+              <button class="filter-pill-btn" data-ofilter="preparing" onclick="window.dashboard.currentOrderFilter='preparing'; window.dashboard.renderOrders();">En préparation</button>
+              <button class="filter-pill-btn" data-ofilter="shipped" onclick="window.dashboard.currentOrderFilter='shipped'; window.dashboard.renderOrders();">Expédiées</button>
+              <button class="filter-pill-btn" data-ofilter="delivered" onclick="window.dashboard.currentOrderFilter='delivered'; window.dashboard.renderOrders();">Livrées</button>
+            </div>
+
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="orders-search-input" placeholder="N° commande, client, tél..." oninput="window.dashboard.renderOrders()" />
+            </div>
+          </div>
+
+          <!-- Orders Table -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>N° Commande</th>
+                    <th>Client & Contact</th>
+                    <th>Tenue & Taille</th>
+                    <th>Montant Total</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             7. VUE : DÉTAIL COMMANDE (#order-detail)
+             ==================================================== -->
+        <section id="view-order-detail" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                <h1 class="page-title" id="order-detail-title" style="margin-bottom: 0;">Commande #FM-00125</h1>
+                <div id="order-detail-status-badge"></div>
+              </div>
+              <p class="page-subtitle" id="order-detail-date">Passée le 20 Août 2026 à 12:45 • Paiement Wave Sénégal</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+              <button class="btn btn-secondary btn-sm" onclick="window.print()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Imprimer Bon
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('orders')">
+                ← Retour liste
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Stepper Timeline -->
+          <div class="order-timeline-card">
+            <h3 style="font-size: 1rem; color: var(--text-main); margin-bottom: 0.5rem;">Suivi & Transition d'état</h3>
+            <p style="font-size: 0.75rem; color: var(--text-dim);">Cliquez sur une étape pour mettre à jour instantanément l'avancement de la commande.</p>
+            <div class="order-stepper" id="order-detail-stepper">
+              <!-- Stepper Dynamique JS -->
+            </div>
+          </div>
+
+          <!-- Grid: Articles & Infos Client -->
+          <div class="order-detail-grid">
+            
+            <!-- Articles commandés -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Pièces commandées</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Article</th>
+                      <th>Taille</th>
+                      <th>Quantité</th>
+                      <th>Prix Unitaire</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="order-detail-items-tbody">
+                    <!-- Rendu Dynamique JS -->
+                  </tbody>
+                </table>
+              </div>
+              <div style="padding-top: 1.5rem; display: flex; justify-content: flex-end; align-items: baseline; gap: 1rem;">
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Total Réglé :</span>
+                <strong style="font-size: 1.6rem; color: var(--gold-light); font-family: 'Playfair Display', Georgia, serif;" id="order-detail-total-amount">150 000 FCFA</strong>
+              </div>
+            </div>
+
+            <!-- Client & Livraison -->
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Client & Livraison Dakar</h3>
+              </div>
+              <div id="order-detail-customer-box">
+                <!-- Rendu Dynamique JS -->
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             8. VUE : CLIENTS (#customers)
+             ==================================================== -->
+        <section id="view-customers" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Fichier Clients</h1>
+              <p class="page-subtitle">Historique des commandes, fidélité et coordonnées des clients Frère Mixage.</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.dashboard.openCreateCustomerModal()">
+              + Nouveau Client
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Client & Ville</th>
+                    <th>Téléphone</th>
+                    <th>Email</th>
+                    <th>Commandes</th>
+                    <th>Total Dépensé</th>
+                    <th>Dernière Commande</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="customers-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             NOUVEAU : VUE FACTURES & DEVIS (#invoices)
+             ==================================================== -->
+        <section id="view-invoices" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Factures & Devis</h1>
+              <p class="page-subtitle">Gestion et émission de vos factures et devis sur-mesure pour vos clients.</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.dashboard.navigateTo('create-invoice')">
+              + Créer une Facture / Devis
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar">
+            <div class="filter-pills" id="invoices-filters">
+              <button class="filter-pill-btn active" data-ifilter="all" onclick="window.dashboard.currentInvoiceFilter='all'; window.dashboard.renderInvoices();">Tous</button>
+              <button class="filter-pill-btn" data-ifilter="invoice" onclick="window.dashboard.currentInvoiceFilter='invoice'; window.dashboard.renderInvoices();">Factures</button>
+              <button class="filter-pill-btn" data-ifilter="quote" onclick="window.dashboard.currentInvoiceFilter='quote'; window.dashboard.renderInvoices();">Devis</button>
+              <button class="filter-pill-btn" data-ifilter="paid" onclick="window.dashboard.currentInvoiceFilter='paid'; window.dashboard.renderInvoices();">Payées</button>
+              <button class="filter-pill-btn" data-ifilter="pending" onclick="window.dashboard.currentInvoiceFilter='pending'; window.dashboard.renderInvoices();">En attente</button>
+            </div>
+
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="invoices-search-input" placeholder="N° document, client..." oninput="window.dashboard.renderInvoices()" />
+            </div>
+          </div>
+
+          <!-- Invoices Table -->
+          <div class="card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>N° Document</th>
+                    <th>Type</th>
+                    <th>Client & Contact</th>
+                    <th>Date d'émission</th>
+                    <th>Échéance</th>
+                    <th>Montant Total</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="invoices-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             NOUVEAU : VUE CRÉATEUR FACTURE / DEVIS AVEC LIVE PREVIEW (#create-invoice)
+             ==================================================== -->
+        <section id="view-create-invoice" class="view-section">
+          
+          <div class="page-header" style="margin-bottom: 1.5rem;">
+            <div>
+              <h1 class="page-title" id="create-invoice-title" style="font-size: 1.6rem; margin-bottom: 2px;">Nouvelle facture</h1>
+              <p class="page-subtitle" style="font-size: 0.82rem;">Renseignez les informations et les lignes de prestation. La preview se met à jour en direct.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('invoices')">
+              ← Retour aux factures
+            </button>
+          </div>
+
+          <div class="invoice-split-layout">
+            
+            <!-- Colonne Gauche : Formulaire de Saisie -->
+            <div class="invoice-form-column">
+              <form id="form-create-invoice">
+                
+                <!-- Section INFORMATIONS -->
+                <div class="form-section" style="margin-bottom: 1.25rem;">
+                  <h3 class="form-section-title" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); border: none; padding: 0; margin-bottom: 1rem;">
+                    INFORMATIONS
+                  </h3>
+
+                  <div class="form-row-2" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                      <label class="form-label">Nom du Client *</label>
+                      <input type="text" id="inv-customer-name" class="form-input" list="inv-existing-customers-list" placeholder="Ex: Ousmane Diop" oninput="window.dashboard.handleCustomerNameInput(this.value)" required />
+                      <datalist id="inv-existing-customers-list">
+                        <!-- Options injectées dynamiquement -->
+                      </datalist>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Téléphone (Sénégal) *</label>
+                      <input type="text" id="inv-customer-phone" class="form-input" placeholder="+221 77 000 00 00" oninput="window.dashboard.updateLiveInvoicePreview()" required />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                      <label class="form-label">Email du Client</label>
+                      <input type="email" id="inv-customer-email" class="form-input" placeholder="client@domaine.com" oninput="window.dashboard.updateLiveInvoicePreview()" />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Adresse / Quartier (Dakar)</label>
+                      <input type="text" id="inv-customer-address" class="form-input" placeholder="Almadies, Dakar" oninput="window.dashboard.updateLiveInvoicePreview()" />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                      <label class="form-label">Projet / Collection</label>
+                      <select id="inv-project-select" class="form-select" onchange="window.dashboard.updateLiveInvoicePreview()">
+                        <option value="Aucun projet">Aucun projet</option>
+                        <option value="Collection Korité 2026">Collection Korité 2026</option>
+                        <option value="Pack Cérémonie & Mariage">Pack Cérémonie & Mariage</option>
+                        <option value="Sur-mesure Haute Couture">Sur-mesure Haute Couture</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Objet *</label>
+                      <input type="text" id="inv-subject" class="form-input" placeholder="Ex: Confection de 2 Grands Boubous Getzner" value="Confection et livraison de tenues traditionnelles sur mesure" oninput="window.dashboard.updateLiveInvoicePreview()" required />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2" style="margin-bottom: 1.2rem;">
+                    <div class="form-group">
+                      <label class="form-label">Statut</label>
+                      <select id="inv-status" class="form-select" onchange="window.dashboard.updateLiveInvoicePreview()">
+                        <option value="Emise" selected>Émise</option>
+                        <option value="En attente">En attente</option>
+                        <option value="Payée">Payée</option>
+                        <option value="Brouillon">Brouillon</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Échéance</label>
+                      <input type="date" id="inv-due-date" class="form-input" value="2026-08-27" oninput="window.dashboard.updateLiveInvoicePreview()" />
+                    </div>
+                  </div>
+
+                  <!-- Switches BRS / TVA -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.5rem;">
+                    <div class="switch-toggle-wrapper">
+                      <span class="switch-label">BRS 5%</span>
+                      <label class="switch-input">
+                        <input type="checkbox" id="toggle-brs" onchange="window.dashboard.handleTaxToggle('brs')" />
+                        <span class="slider-round"></span>
+                      </label>
+                    </div>
+                    <div class="switch-toggle-wrapper">
+                      <span class="switch-label">TVA 18%</span>
+                      <label class="switch-input">
+                        <input type="checkbox" id="toggle-tva" checked onchange="window.dashboard.handleTaxToggle('tva')" />
+                        <span class="slider-round"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <span style="font-size: 0.7rem; color: var(--text-dim); display: block; text-align: center; margin-top: 4px;">
+                    BRS et TVA sont mutuellement exclusifs
+                  </span>
+                </div>
+
+                <!-- Section LIGNES DE PRESTATIONS -->
+                <div class="form-section" style="margin-bottom: 1.25rem;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h3 class="form-section-title" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); border: none; padding: 0; margin-bottom: 0;">
+                      LIGNES DE PRESTATIONS
+                    </h3>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="window.dashboard.addInvoiceLineCompact()">
+                      + Ajouter une ligne
+                    </button>
+                  </div>
+
+                  <div id="invoice-compact-lines-container">
+                    <!-- Lignes injectées JS -->
+                  </div>
+
+                  <!-- Récapitulatif Sous-total HT, TVA, Total TTC -->
+                  <div style="background: var(--admin-card-inner); padding: 1rem; border-radius: var(--radius-sm); margin-top: 1rem; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);">
+                      <span>Sous-total HT</span>
+                      <strong id="form-subtotal-ht" style="color: var(--text-main);">0 FCFA</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--text-muted);" id="form-tax-row">
+                      <span id="form-tax-label">TVA 18%</span>
+                      <strong id="form-tax-amount" style="color: var(--text-main);">0 FCFA</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 800; color: var(--gold-light); border-top: 1px solid var(--border-subtle); padding-top: 8px; margin-top: 4px;">
+                      <span>Total TTC</span>
+                      <span id="form-total-ttc">0 FCFA</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section Notes -->
+                <div class="form-section" style="margin-bottom: 1.5rem;">
+                  <label class="form-label" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Notes
+                  </label>
+                  <textarea id="inv-notes-input" class="form-textarea" rows="3" placeholder="Conditions particulières, références, modalité Wave / Orange Money..." oninput="window.dashboard.updateLiveInvoicePreview()">Merci de votre confiance. Paiement par Wave Business ou virement bancaire. | contact@freremixage.com | +221 77 000 00 00</textarea>
+                </div>
+
+                <!-- Actions du Formulaire -->
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button type="submit" class="btn btn-primary" style="flex-grow: 1; justify-content: center;">
+                    Enregistrer la facture
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="window.print()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Imprimer / PDF
+                  </button>
+                </div>
+
+              </form>
+            </div>
+
+            <!-- Colonne Droite : APERÇU EN DIRECT (Live Preview Sheet) -->
+            <div class="invoice-preview-column">
+              <div class="invoice-preview-header">
+                <span>APERÇU EN DIRECT</span>
+                <span style="font-size: 0.65rem; color: var(--gold); font-weight: 600;">Mise à jour instantanée</span>
+              </div>
+
+              <div class="invoice-preview-wrapper">
+                <div class="invoice-sheet-dark-a4" id="invoice-sheet-print">
+                  
+                  <!-- Top Grid avec Logo & Coordonnées réduites -->
+                  <div class="sheet-top-grid">
+                    <div>
+                      <img src="../assets/images/logo-frere-mixage.png" alt="Frère Mixage" class="sheet-logo" />
+                    </div>
+                    <div class="sheet-company-meta">
+                      <strong>Dakar, Sénégal</strong><br>
+                      contact@freremixage.com<br>
+                      +221 77 000 00 00<br>
+                      NINEA : 012431722<br>
+                      RC : SN DKR A 34285
+                    </div>
+                  </div>
+
+                  <!-- Titre Facture & Réf / Date -->
+                  <div class="sheet-title-box">
+                    <h2 class="sheet-main-title" id="sheet-title-text">FACTURE</h2>
+                    <div class="sheet-ref-date">
+                      <span id="sheet-ref-number">DEV/FAC-2026-FM-001</span><br>
+                      Date : <span id="sheet-date-text">20/08/2026</span>
+                    </div>
+                  </div>
+
+                  <!-- Destinataire -->
+                  <div class="sheet-destinataire-box">
+                    <span class="sheet-section-tag">DESTINATAIRE</span>
+                    <div class="sheet-client-name" id="sheet-client-name-display">Client Particulier</div>
+                    <div class="sheet-client-details" id="sheet-client-details-display">Dakar, Sénégal • +221 77 000 00 00</div>
+                  </div>
+
+                  <!-- Tableau des Articles -->
+                  <table class="sheet-table">
+                    <thead>
+                      <tr>
+                        <th>DESCRIPTION</th>
+                        <th style="width: 50px; text-align: center;">QTÉ</th>
+                        <th class="num" style="width: 110px;">PRIX UNIT.</th>
+                        <th class="num" style="width: 120px;">TOTAL</th>
+                      </tr>
+                    </thead>
+                    <tbody id="sheet-items-tbody">
+                      <!-- Lignes injectées en direct -->
+                    </tbody>
+                  </table>
+
+                  <!-- Totaux & Bandeau Épuré Or / Noir TOTAL TTC -->
+                  <div class="sheet-totals-box">
+                    <div class="sheet-total-row">
+                      <span>Sous-total HT</span>
+                      <strong id="sheet-subtotal-display">0 FCFA</strong>
+                    </div>
+                    <div class="sheet-total-row" id="sheet-tax-row">
+                      <span id="sheet-tax-label">TVA 18%</span>
+                      <strong id="sheet-tax-display">0 FCFA</strong>
+                    </div>
+                    <div class="sheet-grand-total-banner" id="sheet-grand-total-box">
+                      <span>TOTAL TTC</span>
+                      <span id="sheet-grand-total-display">0 FCFA</span>
+                    </div>
+                  </div>
+
+                  <!-- Pied de page officiel -->
+                  <div class="sheet-footer-notice" id="sheet-footer-notice-text">
+                    Merci de votre confiance. Paiement par Wave Business ou virement bancaire. | contact@freremixage.com | +221 77 000 00 00
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             9. VUE : ÉQUIPE (#team)
+             ==================================================== -->
+        <section id="view-team" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Équipe & Accès</h1>
+              <p class="page-subtitle">Gestion des comptes administrateurs (Propriétaire et Assistants d'atelier).</p>
+            </div>
+            <button class="btn btn-primary" onclick="window.dashboard.openInviteMemberModal()">
+              + Inviter un collaborateur
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Membre</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="team-table-tbody">
+                  <!-- Rendu Dynamique JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             10. VUE : PARAMÈTRES (#settings)
+             ==================================================== -->
+        <section id="view-settings" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Paramètres de l'Atelier</h1>
+              <p class="page-subtitle">Coordonnées de l'entreprise, options de livraison et personnalisation de la boutique.</p>
+            </div>
+          </div>
+
+          <form id="form-settings">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+              
+              <!-- Coordonnées Frère Mixage -->
+              <div class="form-section">
+                <h3 class="form-section-title">Informations de Frère Mixage</h3>
+
+                <div class="form-group">
+                  <label class="form-label">Nom commercial de l'enseigne</label>
+                  <input type="text" id="setting-brand-name" class="form-input" value="FRÈRE MIXAGE" />
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Téléphone standard</label>
+                    <input type="text" id="setting-phone" class="form-input" value="+221 77 000 00 00" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">WhatsApp officiel</label>
+                    <input type="text" id="setting-whatsapp" class="form-input" value="+221 77 000 00 00" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email professionnel</label>
+                  <input type="email" id="setting-email" class="form-input" value="contact@freremixage.com" />
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Adresse de l'atelier</label>
+                    <input type="text" id="setting-address" class="form-input" value="Sacré-Cœur 3, Dakar" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Ville / Pays</label>
+                    <input type="text" id="setting-city" class="form-input" value="Dakar, Sénégal" />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Livraison & Boutique -->
+              <div class="form-section">
+                <h3 class="form-section-title">Livraison & Boutique</h3>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Frais de livraison Dakar</label>
+                    <input type="text" id="setting-dakar-delivery" class="form-input" value="2 500 FCFA" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Frais Régions & Banlieue</label>
+                    <input type="text" id="setting-regions-delivery" class="form-input" value="5 000 FCFA" />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Message d'annonce sur la boutique</label>
+                  <textarea id="setting-banner-message" class="form-textarea" rows="3">Nouvelle collection d'exception disponible pour vos cérémonies et grands événements.</textarea>
+                </div>
+
+                <div style="margin-top: 1.5rem;">
+                  <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    Enregistrer les paramètres
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+
+        </section>
+
+        <!-- ====================================================
+             11. VUE : GESTION DES TÉMOIGNAGES (#testimonials)
+             ==================================================== -->
+        <section id="view-testimonials" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Témoignages & Avis Clients</h1>
+              <p class="page-subtitle">Gérez les retours clients et avis affichés sur la page d'accueil du site officiel.</p>
+            </div>
+            <div class="page-header-actions">
+              <button class="btn btn-primary" onclick="window.dashboard.openCreateTestimonialModal()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Ajouter un témoignage
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-card">
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Client & Profil</th>
+                    <th>Ville / Pays & Statut</th>
+                    <th>Note</th>
+                    <th>Extrait du témoignage</th>
+                    <th>Statut Site</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="testimonials-table-tbody">
+                  <!-- Lignes de témoignages injectées dynamiquement -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             12. VUE : ÉDITEUR DU CONTENU À PROPOS (#about)
+             ==================================================== -->
+        <section id="view-about" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Contenu "À Propos" & Atelier</h1>
+              <p class="page-subtitle">Modifiez les textes de l'histoire, des piliers et du savoir-faire affichés sur le site public.</p>
+            </div>
+          </div>
+
+          <form id="form-about-content">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+              
+              <!-- Colonne Gauche : Titres & Histoire -->
+              <div class="form-section">
+                <h3 class="form-section-title">En-tête & Citation Phare</h3>
+
+                <div class="form-group">
+                  <label class="form-label">Grand Titre de Section</label>
+                  <input type="text" id="about-section-title" class="form-input" value="POURQUOI FRÈRE MIXAGE ?" required />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Sous-titre explicatif</label>
+                  <textarea id="about-section-subtitle" class="form-textarea" rows="2">L’alliance de la tradition tailleur sénégalaise et des standards de la haute couture internationale.</textarea>
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label class="form-label">Citation Signature</label>
+                    <input type="text" id="about-quote" class="form-input" value="« Plus qu’une tenue, une signature. »" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Auteur de la citation</label>
+                    <input type="text" id="about-quote-author" class="form-input" value="— Maison Frère Mixage" />
+                  </div>
+                </div>
+
+                <h3 class="form-section-title" style="margin-top: 1.5rem;">Histoire de la Maison (Atelier Dakar)</h3>
+
+                <div class="form-group">
+                  <label class="form-label">Paragraphe 1 — L'Artisanat & Silhouette</label>
+                  <textarea id="about-paragraph-1" class="form-textarea" rows="3">Dans notre atelier de Dakar, chaque vêtement naît d’un dialogue intime entre tradition ancestrale et silhouette contemporaine. Nos artisans découpent, assemblent et brodent à la main chaque pièce avec une rigueur absolue.</textarea>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Paragraphe 2 — Noblesse des Matières</label>
+                  <textarea id="about-paragraph-2" class="form-textarea" rows="3">Du drapé majestueux du Bazin teinté artisanalement à la précision géométrique de nos boutonnières, rien n’est laissé au hasard. Porter Frère Mixage, c’est affirmer un statut, une fierté et un raffinement sans compromis.</textarea>
+                </div>
+
+                <!-- Badges de Savoir-Faire Atelier -->
+                <h3 class="form-section-title" style="margin-top: 1.5rem;">Badges Savoir-faire Atelier</h3>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Badge 1</label>
+                  <input type="text" id="about-badge-1" class="form-input" value="Coupe & Assemblage Main" />
+                </div>
+                <div class="form-group" style="margin-bottom: 0.5rem;">
+                  <label class="form-label">Badge 2</label>
+                  <input type="text" id="about-badge-2" class="form-input" value="Broderie Fil d'Or Noble" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Badge 3</label>
+                  <input type="text" id="about-badge-3" class="form-input" value="Teinture Grand Teint Fixe" />
+                </div>
+
+                <!-- Photos des Coulisses de l'Atelier -->
+                <h3 class="form-section-title" style="margin-top: 1.5rem;">Photographies de l'Atelier (Les Coulisses)</h3>
+                
+                <div style="background: var(--admin-card-inner); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                  <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 0.75rem;">
+                    <img id="about-img1-preview" src="https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=80&w=800" style="width: 70px; height: 70px; border-radius: 6px; object-fit: cover; border: 1px solid var(--gold-border);" alt="Photo 1">
+                    <div style="flex: 1;">
+                      <label class="form-label" style="color: var(--gold);">Photo 1 — Maître tailleur & Atelier</label>
+                      <input type="text" id="about-image-1" class="form-input" placeholder="URL de l'image 1" oninput="document.getElementById('about-img1-preview').src = this.value">
+                    </div>
+                  </div>
+                  <input type="file" class="form-input" accept="image/*" onchange="window.dashboard.handleAboutImageUpload(event, 1)">
+                </div>
+
+                <div style="background: var(--admin-card-inner); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                  <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 0.75rem;">
+                    <img id="about-img2-preview" src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800" style="width: 70px; height: 70px; border-radius: 6px; object-fit: cover; border: 1px solid var(--gold-border);" alt="Photo 2">
+                    <div style="flex: 1;">
+                      <label class="form-label" style="color: var(--gold);">Photo 2 — Étoffes & Finitions</label>
+                      <input type="text" id="about-image-2" class="form-input" placeholder="URL de l'image 2" oninput="document.getElementById('about-img2-preview').src = this.value">
+                    </div>
+                  </div>
+                  <input type="file" class="form-input" accept="image/*" onchange="window.dashboard.handleAboutImageUpload(event, 2)">
+                </div>
+
+              </div>
+
+              <!-- Colonne Droite : Les 4 Piliers -->
+              <div class="form-section">
+                <h3 class="form-section-title">Les 4 Piliers Fondateurs</h3>
+
+                <!-- Pilier 1 -->
+                <div style="background: var(--admin-card-inner); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                  <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <label class="form-label" style="color: var(--gold);">Pilier 1 — Titre</label>
+                    <input type="text" id="about-pillar-1-title" class="form-input" value="SAVOIR-FAIRE" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="about-pillar-1-desc" class="form-textarea" rows="2">Des créations réalisées avec une attention chirurgicale et une précision millimétrée par nos maîtres couturiers.</textarea>
+                  </div>
+                </div>
+
+                <!-- Pilier 2 -->
+                <div style="background: var(--admin-card-inner); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                  <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <label class="form-label" style="color: var(--gold);">Pilier 2 — Titre</label>
+                    <input type="text" id="about-pillar-2-title" class="form-input" value="QUALITÉ" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="about-pillar-2-desc" class="form-textarea" rows="2">Des matières nobles d’exception (Bazin riche Getzner, lins peignés, soies) et des finitions choisies avec exigence.</textarea>
+                  </div>
+                </div>
+
+                <!-- Pilier 3 -->
+                <div style="background: var(--admin-card-inner); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                  <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <label class="form-label" style="color: var(--gold);">Pilier 3 — Titre</label>
+                    <input type="text" id="about-pillar-3-title" class="form-input" value="STYLE" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="about-pillar-3-desc" class="form-textarea" rows="2">Une identité africaine moderne, fière et raffinée qui impose une présence naturelle et magnétique en toute occasion.</textarea>
+                  </div>
+                </div>
+
+                <!-- Pilier 4 -->
+                <div style="background: var(--admin-card-inner); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); margin-bottom: 1rem;">
+                  <div class="form-group" style="margin-bottom: 0.5rem;">
+                    <label class="form-label" style="color: var(--gold);">Pilier 4 — Titre</label>
+                    <input type="text" id="about-pillar-4-title" class="form-input" value="SUR MESURE" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="about-pillar-4-desc" class="form-textarea" rows="2">Des créations parfaitement adaptées à votre personnalité, à votre morphologie et à la grandeur de vos événements.</textarea>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 1rem;">
+                  Enregistrer les modifications de l'Atelier
+                </button>
+
+              </div>
+
+            </div>
+          </form>
+
+        </section>
+
+        <!-- ====================================================
+             13. VUE : MON PROFIL (#profile)
+             ==================================================== -->
+        <section id="view-profile" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Mon Profil Administrateur</h1>
+              <p class="page-subtitle">Gérez vos informations personnelles, votre photo de profil et coordonnées de contact.</p>
+            </div>
+          </div>
+
+          <div class="profile-banner">
+            <div style="position: relative;">
+              <img id="profile-avatar-display" src="../assets/images/ab8459f150d5d7db346654de338434e5.jpg" class="profile-avatar-lg" alt="Avatar">
+              <label for="profile-avatar-upload" style="position: absolute; bottom: 0; right: 0; background: var(--gold); color: #000; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.5);" title="Changer la photo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </label>
+              <input type="file" id="profile-avatar-upload" accept="image/*" style="display: none;" onchange="window.dashboard.handleAvatarUpload(event)">
+            </div>
+            <div>
+              <h2 id="profile-header-name" style="font-size: 1.5rem; color: var(--text-main); margin-bottom: 4px;">Mamadou Lamine Ndiaye</h2>
+              <p id="profile-header-role" style="font-size: 0.82rem; color: var(--gold-light);">Propriétaire & Fondateur — Frère Mixage</p>
+            </div>
+          </div>
+
+          <div class="form-section" style="max-width: 680px;">
+            <h3 class="form-section-title">Modifier mes informations</h3>
+            <form id="form-profile">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Nom complet *</label>
+                  <input type="text" id="profile-name-input" class="form-input" value="Mamadou Lamine Ndiaye" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Numéro de Téléphone (Sénégal) *</label>
+                  <input type="text" id="profile-phone-input" class="form-input" value="+221 77 000 00 00" placeholder="+221 77 000 00 00" required />
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Adresse Email *</label>
+                  <input type="email" id="profile-email-input" class="form-input" value="owner@freremixage.com" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Rôle / Fonction</label>
+                  <input type="text" id="profile-role-input" class="form-input" value="Propriétaire & Fondateur" />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">URL de la photo de profil (Optionnel si vous préférez un lien direct)</label>
+                <input type="text" id="profile-avatar-url-input" class="form-input" placeholder="https://..." oninput="window.dashboard.handleAvatarUrlChange(this.value)" />
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="form-label">Nouveau mot de passe</label>
+                  <input type="password" class="form-input" placeholder="••••••••" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirmer mot de passe</label>
+                  <input type="password" class="form-input" placeholder="••••••••" />
+                </div>
+              </div>
+
+              <div style="margin-top: 1.5rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                  Enregistrer les modifications du profil
+                </button>
+              </div>
+            </form>
+          </div>
+
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ==========================================
+       MODAL GÉNÉRIQUE (Détail, Stock, Catégorie)
+       ========================================== -->
+  <div class="admin-modal-backdrop" id="admin-generic-modal">
+    <div class="admin-modal-box">
+      <button class="modal-close-btn" data-modal-close>&times;</button>
+      <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.35rem; color: var(--text-main); margin-bottom: 1rem;" id="modal-generic-title">Modal Title</h3>
+      <div id="modal-generic-body">
+        <!-- Contenu dynamique -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Script Admin Engine -->
+  <script type="module" src="./js/dashboard.js"></script>
+</body>
+</html>

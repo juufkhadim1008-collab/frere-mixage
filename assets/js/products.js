@@ -1,15 +1,16 @@
 /**
  * Catalogue des pièces de haute couture FRÈRE MIXAGE
- * Structure de données optimisée et facilement extensible.
+ * Synchronisation dynamique avec le Dashboard Administrateur (localStorage)
  */
-export const PRODUCTS = [
+
+const DEFAULT_PRODUCTS = [
   {
     id: 'boubou-royal',
     name: 'Boubou Royal',
     category: 'boubous',
     categoryLabel: 'Boubou traditionnel',
-    price: 15000,
-    originalPrice: 50000,
+    price: 150000,
+    originalPrice: 180000,
     badge: 'Bestseller',
     featured: true,
     leadTime: 'Disponible sous 24-48h',
@@ -23,25 +24,17 @@ export const PRODUCTS = [
     ],
     images: [
       'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=85&w=1200'
+      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=85&w=1200'
     ],
-    // Seules ces tailles sont réellement disponibles en stock
     availableSizes: ['M', 'L', 'XL', 'XXL'],
-    stock: {
-      'S': 0, // Épuisé (non sélectionnable)
-      'M': 4,
-      'L': 6,
-      'XL': 3,
-      'XXL': 2
-    }
+    stock: { 'S': 0, 'M': 4, 'L': 6, 'XL': 3, 'XXL': 2 }
   },
   {
     id: 'elegance-noire',
     name: 'Élégance Noire',
     category: 'costumes',
     categoryLabel: 'Costume africain',
-    price: 55000,
+    price: 135000,
     originalPrice: null,
     badge: 'Exclusivité',
     featured: true,
@@ -56,25 +49,18 @@ export const PRODUCTS = [
     ],
     images: [
       'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=85&w=1200'
     ],
     availableSizes: ['S', 'M', 'L', 'XL'],
-    stock: {
-      'S': 2,
-      'M': 5,
-      'L': 4,
-      'XL': 1,
-      'XXL': 0 // Épuisé
-    }
+    stock: { 'S': 2, 'M': 5, 'L': 4, 'XL': 1, 'XXL': 0 }
   },
   {
     id: 'heritage',
     name: 'Héritage Teranga',
     category: 'boubous',
     categoryLabel: 'Boubou traditionnel',
-    price: 50000,
-    originalPrice: 55000,
+    price: 140000,
+    originalPrice: 160000,
     badge: 'Pièce Maîtresse',
     featured: true,
     leadTime: 'Disponible sous 24h',
@@ -83,118 +69,59 @@ export const PRODUCTS = [
     details: [
       'Étoffe lourde au tombé somptueux et infroissable',
       'Broderies denses au point de chaînette exécutées par nos maîtres artisans',
-      'Encolure renforcée pour une tenue impeccable au fil des années',
-      'Livré avec sa housse de protection haute couture siglée'
+      'Encolure renforcée pour une tenue impeccable au fil des années'
     ],
     images: [
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'
-    ],
-    availableSizes: ['M', 'L', 'XL', 'XXL'],
-    stock: {
-      'S': 0,
-      'M': 3,
-      'L': 5,
-      'XL': 4,
-      'XXL': 2
-    }
-  },
-  {
-    id: 'sahel-minimaliste',
-    name: 'Sahélien Minimal',
-    category: 'modernes',
-    categoryLabel: 'Tenue moderne',
-    price: 42000,
-    originalPrice: null,
-    badge: 'Nouveauté',
-    featured: false,
-    leadTime: 'Disponible sous 24h',
-    description: 'Une silhouette contemporaine pensée pour le quotidien de l’homme d’affaires moderne. Tunique épurée col mao avec boutonnière cachée et pantalon fuselé en lin de première qualité.',
-    fabric: 'Lin lavé premium & sergé de coton respirant',
-    details: [
-      'Confort thermique exceptionnel adapté aux climats tropicaux',
-      'Lignes droites minimalistes sans surcharge visuelle',
-      'Finitions d’emmanchures surpiquées au millimètre',
-      'Poches latérales discrètes et poche poitrine passepoilée'
-    ],
-    images: [
-      'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&q=85&w=1200'
-    ],
-    availableSizes: ['S', 'M', 'L', 'XL'],
-    stock: {
-      'S': 3,
-      'M': 6,
-      'L': 4,
-      'XL': 2,
-      'XXL': 0
-    }
-  },
-  {
-    id: 'costume-imperiale-dakar',
-    name: 'Impérial Dakar',
-    category: 'costumes',
-    categoryLabel: 'Costume africain',
-    price: 65000,
-    originalPrice: 70000,
-    badge: 'Cérémonie',
-    featured: false,
-    leadTime: 'Disponible sous 48h',
-    description: 'Une création audacieuse conçue pour les galas, mariages et moments solennels. Veste croisée 6 boutons avec revers châle rehaussé d’un galon artisanal noir et doré.',
-    fabric: 'Cachemire léger & jacquard de soie structuré',
-    details: [
-      'Épaulettes anglaises travaillées pour une stature dominante',
-      'Doublure intérieure ornée du sceau monogramme Frère Mixage',
-      'Double fente d’aisance au dos',
-      'Boutons métalliques gravés en or vieilli'
-    ],
-    images: [
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=85&w=1200'
-    ],
-    availableSizes: ['M', 'L', 'XL'],
-    stock: {
-      'S': 0,
-      'M': 2,
-      'L': 3,
-      'XL': 2,
-      'XXL': 0
-    }
-  },
-  {
-    id: 'boubou-senateur-or',
-    name: 'Sénateur Or Mat',
-    category: 'boubous',
-    categoryLabel: 'Boubou traditionnel',
-    price: 48000,
-    originalPrice: null,
-    badge: 'Raffinement',
-    featured: false,
-    leadTime: 'Disponible sous 24h',
-    description: 'Le classicisme sénégalais poussé à son paroxysme. Une coupe sénateur 3 pièces avec chasuble brodée, chemise intérieure à col officier et pantalon parfaitement taillé.',
-    fabric: 'Super Bazin 100% Coton Lustré',
-    details: [
-      'Teinture artisanale fixe grand teint éclat longue durée',
-      'Plastron brodé avec motifs géométriques mandingues stylisés',
-      'Aisance totale et respirabilité du tissu',
-      'Finitions intérieures gansées au biais de coton'
-    ],
-    images: [
-      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200',
       'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=85&w=1200'
     ],
+    availableSizes: ['M', 'L', 'XL', 'XXL'],
+    stock: { 'S': 0, 'M': 3, 'L': 5, 'XL': 4, 'XXL': 2 }
+  },
+  {
+    id: 'sahara-minuit',
+    name: 'Sahara Minuit',
+    category: 'modernes',
+    categoryLabel: 'Tenue moderne',
+    price: 85000,
+    originalPrice: null,
+    badge: 'Tendance',
+    featured: false,
+    leadTime: 'Disponible sous 24-48h',
+    description: 'L’ensemble deux pièces indispensable pour l’homme d’affaires ou les sorties raffinées. Veste courte à col mao et pantalon fuselé confectionnés dans un lin lourd d’Afrique de l’Ouest.',
+    fabric: '100% Lin brut d’Afrique de l’Ouest',
+    details: [
+      'Tissu thermorégulateur idéal pour le climat tropical',
+      'Poches invisibles et coutures rabattues anglaises',
+      'Ceinture semi-élastiquée pour une liberté de mouvement totale'
+    ],
+    images: [
+      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=85&w=1200'
+    ],
+    availableSizes: ['M', 'L', 'XL'],
+    stock: { 'S': 0, 'M': 2, 'L': 3, 'XL': 1, 'XXL': 0 }
+  },
+  {
+    id: 'sultan-dor',
+    name: 'Sultan d’Or',
+    category: 'boubous',
+    categoryLabel: 'Boubou traditionnel',
+    price: 175000,
+    originalPrice: 210000,
+    badge: 'Prestige',
+    featured: true,
+    leadTime: 'Confection d’apparat (3 jours)',
+    description: 'Une création somptueuse aux reflets dorés chauds. Réservée aux grandes occasions, mariages prestigieux et cérémonies diplomatiques.',
+    fabric: 'Bazin Riche Teinté artisanalement & Fil d’or véritable',
+    details: [
+      'Bazin martelé à la main pour une brillance incomparable',
+      'Broderies complexes au plastron et aux poignets',
+      'Coupe ample traditionnelle'
+    ],
+    images: [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=85&w=1200'
+    ],
     availableSizes: ['L', 'XL', 'XXL'],
-    stock: {
-      'S': 0,
-      'M': 0,
-      'L': 4,
-      'XL': 5,
-      'XXL': 3
-    }
+    stock: { 'S': 0, 'M': 0, 'L': 2, 'XL': 1, 'XXL': 1 }
   },
   {
     id: 'sur-mesure-haute-couture',
@@ -206,57 +133,104 @@ export const PRODUCTS = [
     badge: 'Haute Couture',
     featured: true,
     leadTime: 'Confection personnalisée (5-7 jours)',
-    description: 'Une pièce unique créée exclusivement pour vous selon vos mensurations exactes. Choix des étoffes, sélection personnalisée des broderies, coupe adaptée à votre morphologie et rendez-vous d’essayage ou télé-consultation privée.',
+    description: 'Une pièce unique créée exclusivement pour vous selon vos mensurations exactes. Choix des étoffes, sélection personnalisée des broderies, coupe adaptée à votre morphologie.',
     fabric: 'Étoffe au choix (Bazin riche Getzner, Laine vierge, Soie sauvage)',
     details: [
       'Prise de mesures détaillée (en atelier ou guidée à distance)',
       'Patronnage individuel sur-mesure découpé à la main',
-      'Broderies ou boutons monogrammés à vos initiales',
-      'Accompagnement personnalisé par le maître couturier Frère Mixage'
+      'Accompagnement personnalisé par le maître couturier'
     ],
     images: [
-      'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&q=85&w=1200',
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=85&w=1200'
+      'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=85&w=1200'
     ],
     availableSizes: ['Sur Mesure', 'S', 'M', 'L', 'XL', 'XXL'],
-    stock: {
-      'Sur Mesure': 99,
-      'S': 99,
-      'M': 99,
-      'L': 99,
-      'XL': 99,
-      'XXL': 99
-    }
+    stock: { 'Sur Mesure': 99, 'S': 99, 'M': 99, 'L': 99, 'XL': 99, 'XXL': 99 }
   }
 ];
 
-export const CATEGORIES = [
-  { id: 'all', label: 'Toutes les créations', count: PRODUCTS.length },
-  { id: 'costumes', label: 'Costumes africains', count: PRODUCTS.filter(p => p.category === 'costumes').length },
-  { id: 'boubous', label: 'Boubous traditionnels', count: PRODUCTS.filter(p => p.category === 'boubous').length },
-  { id: 'modernes', label: 'Tenues modernes', count: PRODUCTS.filter(p => p.category === 'modernes').length },
-  { id: 'sur-mesure', label: 'Créations sur mesure', count: PRODUCTS.filter(p => p.category === 'sur-mesure').length }
-];
-
 /**
- * Récupère un produit par son identifiant unique
+ * Charge les produits dynamiques depuis le localStorage si modifié dans l'admin
  */
+export function getActiveProducts() {
+  try {
+    const saved = localStorage.getItem('frere_mixage_admin_state_v3') || 
+                  localStorage.getItem('frere_mixage_admin_state_v2') || 
+                  localStorage.getItem('frere_mixage_admin_state_v1');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.products && parsed.products.length > 0) {
+        return parsed.products.filter(p => p.status !== 'draft').map(p => {
+          const availableSizes = [];
+          if (p.stock) {
+            Object.keys(p.stock).forEach(sz => {
+              if (p.stock[sz] > 0) availableSizes.push(sz);
+            });
+          }
+          if (availableSizes.length === 0) availableSizes.push('M', 'L', 'XL');
+
+          let cat = 'traditionnel';
+          const catStr = (p.categorySlug || p.category || '').toLowerCase();
+          if (catStr.includes('costume')) cat = 'costumes';
+          else if (catStr.includes('ensemble') || catStr.includes('moderne') || catStr.includes('chemise') || catStr.includes('pantalon')) cat = 'modernes';
+          else if (catStr.includes('evenement') || catStr.includes('magal') || catStr.includes('gamou') || catStr.includes('korite') || catStr.includes('fete')) cat = 'evenementiel';
+          else if (catStr.includes('tradition') || catStr.includes('boubou')) cat = 'traditionnel';
+
+          return {
+            id: p.id || p.code,
+            name: p.name,
+            category: cat,
+            categoryLabel: p.category || 'Haute Couture',
+            price: p.price,
+            originalPrice: p.originalPrice || null,
+            badge: p.badge || (p.originalPrice ? 'Promotion' : ''),
+            featured: true,
+            leadTime: 'Disponible sous 24-48h',
+            description: p.description || 'Création d’exception taillée sur mesure.',
+            fabric: p.fabric || 'Bazin Riche / Laine d’Italie',
+            details: [
+              'Finitions haute couture soignées à l’atelier de Dakar',
+              'Broderies de précision',
+              'Coupe élégante et confortable'
+            ],
+            images: p.images && p.images.length > 0 ? p.images : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'],
+            availableSizes: availableSizes,
+            stock: p.stock || { 'M': 5, 'L': 5, 'XL': 5 }
+          };
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('Erreur lecture dynamic products:', e);
+  }
+  return DEFAULT_PRODUCTS;
+}
+
+export const PRODUCTS = getActiveProducts();
+
+export function getActiveCategories() {
+  const currentProds = getActiveProducts();
+  return [
+    { id: 'all', label: 'Toutes les créations', count: currentProds.length },
+    { id: 'traditionnel', label: 'Tenues Traditionnelles', count: currentProds.filter(p => p.category === 'traditionnel').length },
+    { id: 'costumes', label: 'Costumes Africains', count: currentProds.filter(p => p.category === 'costumes').length },
+    { id: 'modernes', label: 'Tenues Modernes', count: currentProds.filter(p => p.category === 'modernes').length },
+    { id: 'evenementiel', label: 'Collection Événementielle', count: currentProds.filter(p => p.category === 'evenementiel').length }
+  ];
+}
+
+export const CATEGORIES = getActiveCategories();
+
 export function getProductById(id) {
-  return PRODUCTS.find(p => p.id === id) || null;
+  const prods = getActiveProducts();
+  return prods.find(p => p.id === id) || DEFAULT_PRODUCTS.find(p => p.id === id) || null;
 }
 
-/**
- * Filtre les produits par catégorie
- */
 export function getProductsByCategory(categoryId) {
-  if (!categoryId || categoryId === 'all') return PRODUCTS;
-  return PRODUCTS.filter(p => p.category === categoryId);
+  const prods = getActiveProducts();
+  if (!categoryId || categoryId === 'all') return prods;
+  return prods.filter(p => p.category === categoryId);
 }
 
-/**
- * Formatage des prix en FCFA
- */
 export function formatPrice(amount) {
   return new Intl.NumberFormat('fr-FR', {
     style: 'decimal',

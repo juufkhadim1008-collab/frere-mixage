@@ -3,3 +3,7 @@ dist/
 .DS_Store
 *.log
 frere-mixage/
+
+# Secrets Supabase — ne jamais commiter
+.env
+.env.local

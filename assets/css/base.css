@@ -183,19 +183,28 @@ button {
 }
 
 .btn-primary {
-  background: var(--gold-gradient);
+  background: linear-gradient(135deg, #ECC88A 0%, #DFBF7D 25%, #C5A059 50%, #9B7B3B 75%, #DFC288 100%);
+  background-size: 250% 250%;
   color: #0A0A0C;
   font-weight: 700;
+  border: 1px solid rgba(255, 235, 180, 0.7);
   box-shadow: var(--shadow-gold);
-  border: 1px solid var(--gold-light);
+  animation: goldPulse 3.2s infinite cubic-bezier(0.4, 0, 0.2, 1), goldGradientShift 8s ease infinite;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              filter 0.35s ease,
+              background 0.35s ease;
 }
+
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-gold-lg);
-  filter: brightness(1.08);
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 14px 35px rgba(197, 160, 89, 0.5), 0 0 25px rgba(223, 194, 136, 0.35);
+  filter: brightness(1.12) saturate(1.1);
 }
+
 .btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 4px 15px rgba(197, 160, 89, 0.4);
 }
 
 .btn-secondary {

@@ -30,10 +30,52 @@
   transform: scale(1);
 }
 
-/* Shimmer Highlight Effect */
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+/* Shimmer Highlight & Pulse Effects for CTA */
+@keyframes shimmerSweep {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+  }
+  35%, 100% {
+    transform: translateX(250%) skewX(-25deg);
+  }
+}
+
+@keyframes goldPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.55), 0 8px 25px rgba(197, 160, 89, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(197, 160, 89, 0), 0 12px 35px rgba(197, 160, 89, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0), 0 8px 25px rgba(197, 160, 89, 0.3);
+  }
+}
+
+@keyframes goldGradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes arrowNudge {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-shimmer::after {
@@ -41,11 +83,17 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;
+  width: 60%;
   height: 100%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: skewX(-20deg) translateX(-150%);
-  animation: shimmer 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-150%) skewX(-25deg);
+  animation: shimmerSweep 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
 }
 
 /* Loading Spinner */

@@ -4,9 +4,16 @@ $root = $PSScriptRoot
 
 $listener = New-Object System.Net.HttpListener
 $listener.Prefixes.Add("http://localhost:$port/")
-$listener.Start()
+
+try {
+    $listener.Start()
+} catch {
+    Write-Host "Erreur au démarrage de l'écouteur : $_"
+    exit 1
+}
 
 Write-Host "Serveur FRÈRE MIXAGE démarré sur http://localhost:$port/"
+Write-Host "Dashboard admin disponible sur http://localhost:$port/admin/"
 Write-Host "Appuyez sur Ctrl+C pour arrêter le serveur."
 
 $mimeTypes = @{
@@ -30,36 +37,44 @@ $mimeTypes = @{
 try {
     while ($listener.IsListening) {
         $context = $listener.GetContext()
-        $request = $context.Request
-        $response = $context.Response
+        try {
+            $request = $context.Request
+            $response = $context.Response
 
-        $urlPath = [System.Uri]::UnescapeDataString($request.Url.AbsolutePath.TrimStart('/'))
-        if ([string]::IsNullOrWhiteSpace($urlPath)) {
-            $urlPath = "index.html"
-        }
+            $urlPath = [System.Uri]::UnescapeDataString($request.Url.AbsolutePath.TrimStart('/'))
+            if ([string]::IsNullOrWhiteSpace($urlPath)) {
+                $urlPath = "index.html"
+            }
 
-        # Sécurisation du chemin
-        $filePath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($root, $urlPath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)))
-        
-        if ($filePath.StartsWith($root) -and (Test-Path $filePath -PathType Leaf)) {
-            $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
-            $contentType = if ($mimeTypes.ContainsKey($ext)) { $mimeTypes[$ext] } else { "application/octet-stream" }
+            $filePath = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($root, $urlPath.Replace('/', [System.IO.Path]::DirectorySeparatorChar)))
             
-            $response.ContentType = $contentType
-            $response.Headers.Add("Access-Control-Allow-Origin", "*")
-            $response.Headers.Add("Cache-Control", "no-cache")
+            if (Test-Path $filePath -PathType Container) {
+                $filePath = [System.IO.Path]::Combine($filePath, "index.html")
+            }
 
-            $bytes = [System.IO.File]::ReadAllBytes($filePath)
-            $response.ContentLength64 = $bytes.Length
-            $response.OutputStream.Write($bytes, 0, $bytes.Length)
-        } else {
-            $response.StatusCode = 404
-            $buffer = [System.Text.Encoding]::UTF8.GetBytes("404 Not Found")
-            $response.ContentLength64 = $buffer.Length
-            $response.OutputStream.Write($buffer, 0, $buffer.Length)
+            if ($filePath.StartsWith($root) -and (Test-Path $filePath -PathType Leaf)) {
+                $ext = [System.IO.Path]::GetExtension($filePath).ToLower()
+                $contentType = if ($mimeTypes.ContainsKey($ext)) { $mimeTypes[$ext] } else { "application/octet-stream" }
+                
+                $response.ContentType = $contentType
+                $response.Headers.Add("Access-Control-Allow-Origin", "*")
+                $response.Headers.Add("Cache-Control", "no-cache")
+
+                $bytes = [System.IO.File]::ReadAllBytes($filePath)
+                $response.ContentLength64 = $bytes.Length
+                $response.OutputStream.Write($bytes, 0, $bytes.Length)
+            } else {
+                $response.StatusCode = 404
+                $buffer = [System.Text.Encoding]::UTF8.GetBytes("404 Not Found")
+                $response.ContentLength64 = $buffer.Length
+                $response.OutputStream.Write($buffer, 0, $buffer.Length)
+            }
+        } catch {
+            # Erreur de connexion ou interruption client
+        } finally {
+            try { $context.Response.OutputStream.Close() } catch {}
         }
-        $response.OutputStream.Close()
     }
 } finally {
-    $listener.Stop()
+    try { $listener.Stop() } catch {}
 }
