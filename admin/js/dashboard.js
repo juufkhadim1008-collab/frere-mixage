@@ -109,6 +109,79 @@ class AdminDashboard {
     this.renderAll();
     this.renderSalesChart();
     this.renderUserHeader();
+    
+    // Synchronisation en direct avec la base Supabase
+    this.syncWithSupabase();
+  }
+
+  async syncWithSupabase() {
+    try {
+      const { ProductService } = await import('../../assets/js/services/product-service.js');
+      const { OrderService } = await import('../../assets/js/services/order-service.js');
+
+      // 1. Charger les produits réels depuis Supabase
+      const dbProducts = await ProductService.getAllProductsAdmin();
+      if (dbProducts && dbProducts.length > 0) {
+        this.state.products = dbProducts.map(p => {
+          const stockMap = {};
+          if (p.product_variants) {
+            p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
+          }
+          return {
+            id: p.slug || p.id,
+            dbId: p.id,
+            name: p.name,
+            code: (p.slug || 'FM-REF').toUpperCase(),
+            category: p.categories ? p.categories.name : 'Tenue Traditionnelle',
+            categorySlug: p.categories ? p.categories.slug : 'traditionnel',
+            price: p.sale_price || p.price,
+            originalPrice: p.sale_price ? p.price : null,
+            status: p.status,
+            badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
+            description: p.description || '',
+            fabric: p.fabric || '',
+            images: (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'],
+            stock: stockMap
+          };
+        });
+        this.saveState();
+        this.renderProducts();
+        this.renderStocks();
+      }
+
+      // 2. Charger les commandes réelles depuis Supabase
+      const dbOrders = await OrderService.getAllOrdersAdmin();
+      if (dbOrders && dbOrders.length > 0) {
+        this.state.orders = dbOrders.map(o => ({
+          id: o.order_number || o.id,
+          dbId: o.id,
+          customer: {
+            name: o.customers ? o.customers.full_name : 'Client',
+            phone: o.customers ? o.customers.phone : '',
+            email: o.customers ? o.customers.email : '',
+            address: o.customers ? `${o.customers.address || ''}, ${o.customers.city || ''}` : o.delivery_address
+          },
+          status: o.status,
+          totalAmount: o.total,
+          subtotal: o.subtotal,
+          deliveryFee: o.delivery_fee,
+          paymentMethod: o.payment_method,
+          paymentStatus: o.payment_status,
+          date: new Date(o.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }),
+          items: (o.order_items || []).map(it => ({
+            name: it.product_name_snapshot,
+            size: it.size,
+            qty: it.quantity,
+            price: it.unit_price
+          }))
+        }));
+        this.saveState();
+        this.renderOrders();
+        this.renderOverview();
+      }
+    } catch (err) {
+      console.warn('[Dashboard.syncWithSupabase] Mode local actif :', err.message);
+    }
   }
 
   bindEvents() {
@@ -856,13 +929,31 @@ class AdminDashboard {
       time: 'À l’instant'
     });
 
+    // Synchronisation Cloud Supabase
+    import('../../assets/js/services/product-service.js').then(({ ProductService }) => {
+      ProductService.createProduct({
+        name,
+        categorySlug: catObj.slug,
+        price,
+        sale_price: origPrice ? price : null,
+        description: desc,
+        fabric,
+        status,
+        is_featured: status === 'published',
+        images: imagesToUse,
+        stock: stockObj
+      }).then(res => {
+        if (res && res.id) newProduct.dbId = res.id;
+      }).catch(e => console.warn('[Supabase] Sync produit :', e));
+    });
+
     this.saveState();
     this.resetProductForm();
     this.renderProducts();
     this.renderStocks();
     this.renderCategories();
     this.renderOverview();
-    this.showToast(`La tenue « ${name} » a été enregistrée et apparaît directement sur le site !`, 'success');
+    this.showToast(`La tenue « ${name} » a été enregistrée et synchronisée !`, 'success');
     this.navigateTo('products');
   }
 
@@ -967,6 +1058,15 @@ class AdminDashboard {
       const val = parseInt(document.getElementById(`quick-stock-${sz}`)?.value || 0, 10);
       product.stock[sz] = Math.max(0, val);
     });
+
+    // Synchronisation Cloud Supabase
+    if (product.dbId) {
+      import('../../assets/js/services/stock-service.js').then(({ StockService }) => {
+        sizes.forEach(sz => {
+          StockService.updateStock(product.dbId, sz, product.stock[sz]).catch(e => console.warn('[Supabase] Stock sync:', e));
+        });
+      });
+    }
 
     this.saveState();
     this.closeModals();
