@@ -40,7 +40,7 @@ export class ProductService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      if (!data || data.length === 0) return null;
+      if (!data || data.length === 0) return [];
 
       // Transformer en format unifié pour l'application
       return data.map(p => {

@@ -77,7 +77,7 @@ export function getActiveProducts() {
 export async function fetchLiveProductsFromSupabase() {
   try {
     const remote = await ProductService.getPublishedProducts();
-    if (remote && remote.length > 0) {
+    if (Array.isArray(remote)) {
       memoryProducts = remote;
       window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: remote }));
       return remote;

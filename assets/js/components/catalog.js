@@ -39,12 +39,7 @@ export function initCatalog() {
     });
   }
 
-  // 2. Rendu initial des produits
-  renderProducts(activeCategory);
-
-  // 3. Récupération en arrière-plan des produits Cloud Supabase
-  fetchLiveProductsFromSupabase().then(() => {
-    // Rafraîchir les compteurs et les cartes
+  function updateFilterCounts() {
     const updatedCats = getActiveCategories();
     if (filterContainer) {
       filterContainer.querySelectorAll('.filter-pill').forEach(btn => {
@@ -55,6 +50,20 @@ export function initCatalog() {
         }
       });
     }
+  }
+
+  // 2. Écoute de l'événement de synchronisation en direct
+  window.addEventListener('supabase-products-synced', () => {
+    updateFilterCounts();
+    renderProducts(activeCategory);
+  });
+
+  // 3. Rendu initial des produits
+  renderProducts(activeCategory);
+
+  // 4. Récupération en arrière-plan des produits Cloud Supabase
+  fetchLiveProductsFromSupabase().then(() => {
+    updateFilterCounts();
     renderProducts(activeCategory);
   });
 
