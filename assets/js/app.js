@@ -44,227 +44,137 @@ document.addEventListener('DOMContentLoaded', () => {
  * Synchronise les contenus éditables (Témoignages, À Propos, Paramètres) depuis Supabase Cloud
  */
 export async function syncDynamicContent() {
-  let state = {};
   try {
-    const raw = localStorage.getItem('frere_mixage_admin_state_v4') || 
-                localStorage.getItem('frere_mixage_admin_state_v3') || 
-                localStorage.getItem('frere_mixage_admin_state_v2') || 
-                localStorage.getItem('frere_mixage_admin_state_v1');
-    if (raw) state = JSON.parse(raw);
-  } catch (e) {}
+    let state = {};
+    try {
+      const raw = localStorage.getItem('frere_mixage_admin_state_v4') || 
+                  localStorage.getItem('frere_mixage_admin_state_v3') || 
+                  localStorage.getItem('frere_mixage_admin_state_v2') || 
+                  localStorage.getItem('frere_mixage_admin_state_v1');
+      if (raw) state = JSON.parse(raw);
+    } catch (e) {}
 
-  // 1. Chargement et rendu des témoignages depuis Supabase
-  try {
-    const remoteTestimonials = await ContentService.getPublicTestimonials();
-    const testimonialsGrid = document.querySelector('.testimonials-grid');
-    if (testimonialsGrid && remoteTestimonials && remoteTestimonials.length > 0) {
-      testimonialsGrid.innerHTML = remoteTestimonials.map((t, idx) => {
-        const stars = '★'.repeat(t.rating || 5);
-        return `
-          <div class="testimonial-card revealed stagger-${(idx % 3) + 1}">
-            <div>
-              <div class="testimonial-rating">${stars}</div>
-              <p class="testimonial-quote">
-                « ${t.quote} »
-              </p>
-            </div>
-            <div class="testimonial-author-box">
-              <img src="${t.avatar_url || t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
-                alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
+    // 1. Chargement et rendu des témoignages depuis Supabase ou état local
+    try {
+      const remoteTestimonials = await ContentService.getPublicTestimonials();
+      const testimonialsGrid = document.querySelector('.testimonials-grid');
+      if (testimonialsGrid && remoteTestimonials && remoteTestimonials.length > 0) {
+        testimonialsGrid.innerHTML = remoteTestimonials.map((t, idx) => {
+          const stars = '★'.repeat(t.rating || 5);
+          return `
+            <div class="testimonial-card revealed stagger-${(idx % 3) + 1}">
               <div>
-                <div class="testimonial-name">${t.name}</div>
-                <div class="testimonial-role">${t.role}</div>
+                <div class="testimonial-rating">${stars}</div>
+                <p class="testimonial-quote">
+                  « ${t.quote} »
+                </p>
+              </div>
+              <div class="testimonial-author-box">
+                <img src="${t.avatar_url || t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
+                  alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
+                <div>
+                  <div class="testimonial-name">${t.name}</div>
+                  <div class="testimonial-role">${t.role}</div>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-      }).join('');
-    }
-  } catch (e) {
-    console.warn('[Sync] Testimonials live error:', e);
-  }
-
-  // 2. Chargement et rendu de l'Atelier / À Propos depuis Supabase
-  try {
-    const remoteAbout = await ContentService.getAboutContent();
-    if (remoteAbout) {
-      const whyTitle = document.querySelector('#pourquoi .section-title');
-      if (whyTitle && remoteAbout.sectionTitle) whyTitle.textContent = remoteAbout.sectionTitle;
-
-      const whySubtitle = document.querySelector('#pourquoi .section-subtitle');
-      if (whySubtitle && remoteAbout.sectionSubtitle) whySubtitle.textContent = remoteAbout.sectionSubtitle;
-
-      const quoteText = document.getElementById('atelier-quote-text');
-      if (quoteText && remoteAbout.quote) quoteText.textContent = remoteAbout.quote;
-
-      const quoteAuthor = document.getElementById('atelier-quote-author');
-      if (quoteAuthor && remoteAbout.quoteAuthor) quoteAuthor.textContent = remoteAbout.quoteAuthor;
-
-      const p1 = document.getElementById('atelier-story-p1');
-      if (p1 && remoteAbout.storyParagraph1) p1.textContent = remoteAbout.storyParagraph1;
-
-      const p2 = document.getElementById('atelier-story-p2');
-      if (p2 && remoteAbout.storyParagraph2) p2.textContent = remoteAbout.storyParagraph2;
-
-      // Badges
-      if (remoteAbout.badges) {
-        if (remoteAbout.badges[0]) {
-          const b1 = document.getElementById('atelier-badge-1');
-          if (b1) b1.textContent = remoteAbout.badges[0];
-        }
-        if (remoteAbout.badges[1]) {
-          const b2 = document.getElementById('atelier-badge-2');
-          if (b2) b2.textContent = remoteAbout.badges[1];
-        }
-        if (remoteAbout.badges[2]) {
-          const b3 = document.getElementById('atelier-badge-3');
-          if (b3) b3.textContent = remoteAbout.badges[2];
-        }
+          `;
+        }).join('');
+      } else if (testimonialsGrid && state.testimonials && state.testimonials.length > 0) {
+        const testimonialsList = state.testimonials.filter(t => t.isActive !== false);
+        testimonialsGrid.innerHTML = testimonialsList.map((t, idx) => {
+          const stars = '★'.repeat(t.rating || 5);
+          return `
+            <div class="testimonial-card revealed stagger-${(idx % 3) + 1}">
+              <div>
+                <div class="testimonial-rating">${stars}</div>
+                <p class="testimonial-quote">
+                  « ${t.quote} »
+                </p>
+              </div>
+              <div class="testimonial-author-box">
+                <img src="${t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
+                  alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
+                <div>
+                  <div class="testimonial-name">${t.name}</div>
+                  <div class="testimonial-role">${t.role}</div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
       }
+    } catch (e) {
+      console.warn('[Sync] Testimonials live error:', e);
+    }
 
-      // Photos
-      if (remoteAbout.image1) document.getElementById('atelier-img-1')?.setAttribute('src', remoteAbout.image1);
-      if (remoteAbout.image2) document.getElementById('atelier-img-2')?.setAttribute('src', remoteAbout.image2);
+    // 2. Chargement et rendu de l'Atelier / À Propos depuis Supabase ou état local
+    try {
+      const remoteAbout = await ContentService.getAboutContent();
+      const about = remoteAbout || state.about;
+      if (about) {
+        const whyTitle = document.querySelector('#pourquoi .section-title');
+        if (whyTitle && about.sectionTitle) whyTitle.textContent = about.sectionTitle;
 
-      // Piliers
-      if (remoteAbout.pillars && remoteAbout.pillars.length === 4) {
-        const whyCards = document.querySelectorAll('.why-card');
-        whyCards.forEach((card, index) => {
-          const pillar = remoteAbout.pillars[index];
-          if (pillar) {
-            const titleEl = card.querySelector('.why-title');
-            const descEl = card.querySelector('.why-desc');
-            if (titleEl) titleEl.textContent = pillar.title;
-            if (descEl) descEl.textContent = pillar.desc;
+        const whySubtitle = document.querySelector('#pourquoi .section-subtitle');
+        if (whySubtitle && about.sectionSubtitle) whySubtitle.textContent = about.sectionSubtitle;
+
+        const quoteText = document.getElementById('atelier-quote-text');
+        if (quoteText && about.quote) quoteText.textContent = about.quote;
+
+        const quoteAuthor = document.getElementById('atelier-quote-author');
+        if (quoteAuthor && about.quoteAuthor) quoteAuthor.textContent = about.quoteAuthor;
+
+        const p1 = document.getElementById('atelier-story-p1');
+        if (p1 && about.storyParagraph1) p1.textContent = about.storyParagraph1;
+
+        const p2 = document.getElementById('atelier-story-p2');
+        if (p2 && about.storyParagraph2) p2.textContent = about.storyParagraph2;
+
+        // Badges
+        if (about.badges) {
+          if (about.badges[0]) {
+            const b1 = document.getElementById('atelier-badge-1');
+            if (b1) b1.textContent = about.badges[0];
           }
-        });
-      }
-    }
-  } catch (e) {
-    console.warn('[Sync] About live error:', e);
-  }
+          if (about.badges[1]) {
+            const b2 = document.getElementById('atelier-badge-2');
+            if (b2) b2.textContent = about.badges[1];
+          }
+          if (about.badges[2]) {
+            const b3 = document.getElementById('atelier-badge-3');
+            if (b3) b3.textContent = about.badges[2];
+          }
+        }
 
-    // 1. Mise à jour des Témoignages (toujours visibles et animés)
-    const testimonialsGrid = document.querySelector('.testimonials-grid');
-    if (testimonialsGrid) {
-      const testimonialsList = (state.testimonials && state.testimonials.length > 0) 
-        ? state.testimonials.filter(t => t.isActive !== false)
-        : [
-            {
-              name: 'Cheikh Diop',
-              role: 'Dakar, Sénégal • Client vérifié',
-              rating: 5,
-              quote: 'Une finition incroyable et une tenue qui correspond exactement à ce que je voulais pour mon mariage. Le tissu a un tombé royal.',
-              avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'
-            },
-            {
-              name: 'Mamadou Sy',
-              role: 'Paris, France • Diaspora',
-              rating: 5,
-              quote: 'Le boubou Royal est magnifique. La qualité de la broderie et la finesse du fil d’or sont vraiment au rendez-vous. Livraison rapide à Paris.',
-              avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150'
-            },
-            {
-              name: 'Abdoulaye Ndiaye',
-              role: 'Abidjan, Côte d’Ivoire • Client vérifié',
-              rating: 5,
-              quote: 'Service sur mesure exceptionnel. J’ai envoyé mes mesures en ligne et le costume tombait parfaitement dès le premier essayage.',
-              avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150'
+        // Photos
+        if (about.image1) document.getElementById('atelier-img-1')?.setAttribute('src', about.image1);
+        if (about.image2) document.getElementById('atelier-img-2')?.setAttribute('src', about.image2);
+
+        // Piliers
+        if (about.pillars && about.pillars.length === 4) {
+          const whyCards = document.querySelectorAll('.why-card');
+          whyCards.forEach((card, index) => {
+            const pillar = about.pillars[index];
+            if (pillar) {
+              const titleEl = card.querySelector('.why-title');
+              const descEl = card.querySelector('.why-desc');
+              if (titleEl) titleEl.textContent = pillar.title;
+              if (descEl) descEl.textContent = pillar.desc;
             }
-          ];
-
-      testimonialsGrid.innerHTML = testimonialsList.map((t, idx) => {
-        const stars = '★'.repeat(t.rating || 5);
-        return `
-          <div class="testimonial-card revealed stagger-${(idx % 3) + 1}">
-            <div>
-              <div class="testimonial-rating">${stars}</div>
-              <p class="testimonial-quote">
-                « ${t.quote} »
-              </p>
-            </div>
-            <div class="testimonial-author-box">
-              <img src="${t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
-                alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
-              <div>
-                <div class="testimonial-name">${t.name}</div>
-                <div class="testimonial-role">${t.role}</div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // 2. Mise à jour de la section À Propos & Coulisses de l'Atelier
-    if (state.about) {
-      const whyTitle = document.querySelector('#pourquoi .section-title');
-      if (whyTitle && state.about.sectionTitle) whyTitle.textContent = state.about.sectionTitle;
-
-      const whySubtitle = document.querySelector('#pourquoi .section-subtitle');
-      if (whySubtitle && state.about.sectionSubtitle) whySubtitle.textContent = state.about.sectionSubtitle;
-
-      const quoteText = document.getElementById('atelier-quote-text');
-      if (quoteText && state.about.quote) quoteText.textContent = state.about.quote;
-
-      const quoteAuthor = document.getElementById('atelier-quote-author');
-      if (quoteAuthor && state.about.quoteAuthor) quoteAuthor.textContent = state.about.quoteAuthor;
-
-      const p1 = document.getElementById('atelier-story-p1');
-      if (p1 && state.about.storyParagraph1) p1.textContent = state.about.storyParagraph1;
-
-      const p2 = document.getElementById('atelier-story-p2');
-      if (p2 && state.about.storyParagraph2) p2.textContent = state.about.storyParagraph2;
-
-      // Badges Savoir-faire
-      if (state.about.badges) {
-        if (state.about.badges[0]) {
-          const b1 = document.getElementById('atelier-badge-1');
-          if (b1) b1.textContent = state.about.badges[0];
-        }
-        if (state.about.badges[1]) {
-          const b2 = document.getElementById('atelier-badge-2');
-          if (b2) b2.textContent = state.about.badges[1];
-        }
-        if (state.about.badges[2]) {
-          const b3 = document.getElementById('atelier-badge-3');
-          if (b3) b3.textContent = state.about.badges[2];
+          });
         }
       }
-
-      // Photos Atelier (Les Coulisses)
-      if (state.about.image1) {
-        const img1 = document.getElementById('atelier-img-1');
-        if (img1) img1.src = state.about.image1;
-      }
-      if (state.about.image2) {
-        const img2 = document.getElementById('atelier-img-2');
-        if (img2) img2.src = state.about.image2;
-      }
-
-      // Piliers
-      if (state.about.pillars && state.about.pillars.length === 4) {
-        const whyCards = document.querySelectorAll('.why-card');
-        whyCards.forEach((card, index) => {
-          const pillar = state.about.pillars[index];
-          if (pillar) {
-            const titleEl = card.querySelector('.why-title');
-            const descEl = card.querySelector('.why-desc');
-            if (titleEl) titleEl.textContent = pillar.title;
-            if (descEl) descEl.textContent = pillar.desc;
-          }
-        });
-      }
+    } catch (e) {
+      console.warn('[Sync] About live error:', e);
     }
 
     // 3. Mise à jour des coordonnées / contacts
-    if (state.settings) {
-      if (state.settings.phone) {
-        document.querySelectorAll('a[href^="tel:"]').forEach(link => {
-          link.setAttribute('href', `tel:${state.settings.phone.replace(/\s+/g, '')}`);
-          link.textContent = state.settings.phone;
-        });
-      }
+    if (state.settings && state.settings.phone) {
+      document.querySelectorAll('a[href^="tel:"]').forEach(link => {
+        link.setAttribute('href', `tel:${state.settings.phone.replace(/\s+/g, '')}`);
+        link.textContent = state.settings.phone;
+      });
     }
 
     // 4. Mise à jour des images et titres d'aperçu des 4 collections
