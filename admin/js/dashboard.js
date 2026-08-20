@@ -195,8 +195,29 @@ class AdminDashboard {
           }))
         }));
         this.saveState();
-        this.renderOrders();
-        this.renderOverview();
+      // 3. Charger les témoignages réels depuis Supabase
+      const { ContentService } = await import('../../assets/js/services/content-service.js');
+      const dbTestimonials = await ContentService.getAllTestimonialsAdmin();
+      if (dbTestimonials && dbTestimonials.length > 0) {
+        this.state.testimonials = dbTestimonials.map(t => ({
+          id: t.id,
+          name: t.name,
+          role: t.role,
+          rating: t.rating,
+          quote: t.quote,
+          avatar: t.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+          isActive: t.is_active
+        }));
+        this.saveState();
+        this.renderTestimonials();
+      }
+
+      // 4. Charger le contenu À Propos / Atelier depuis Supabase
+      const dbAbout = await ContentService.getAboutContent();
+      if (dbAbout) {
+        this.state.about = dbAbout;
+        this.saveState();
+        this.renderAboutForm();
       }
     } catch (err) {
       console.warn('[Dashboard.syncWithSupabase] Mode local actif :', err.message);
@@ -2624,8 +2645,10 @@ class AdminDashboard {
         avatar,
         quote
       };
-      this.state.testimonials.unshift(newTest);
-    }
+    // Synchronisation Cloud Supabase
+    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
+      ContentService.saveTestimonial({ id, name, role, rating, isActive, avatar, quote }).catch(e => console.warn('[Supabase] Sync testimonial:', e));
+    });
 
     this.saveState();
     this.closeModals();
@@ -2635,6 +2658,12 @@ class AdminDashboard {
 
   deleteTestimonial(id) {
     if (!confirm('Supprimer ce témoignage ?')) return;
+
+    // Suppression Cloud Supabase
+    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
+      ContentService.deleteTestimonial(id).catch(e => console.warn('[Supabase] Delete testimonial:', e));
+    });
+
     this.state.testimonials = this.state.testimonials.filter(t => t.id !== id);
     this.saveState();
     this.renderTestimonials();
@@ -2768,6 +2797,11 @@ class AdminDashboard {
         desc: document.getElementById('about-pillar-4-desc')?.value || ''
       }
     ];
+
+    // Synchronisation Cloud Supabase
+    import('../../assets/js/services/content-service.js').then(({ ContentService }) => {
+      ContentService.saveAboutContent(a).catch(e => console.warn('[Supabase] Sync about:', e));
+    });
 
     this.saveState();
     this.showToast('Contenu "Les Coulisses de la Maison" et images mis à jour en direct !', 'success');

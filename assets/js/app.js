@@ -5,6 +5,7 @@ import { initCheckoutModal } from './components/checkout-modal.js';
 import { initSizeGuide } from './components/size-guide.js';
 import { initFloatingCTA } from './components/floating-cta.js';
 import { WhatsAppService } from './services/whatsapp.js';
+import { ContentService } from './services/content-service.js';
 
 /**
  * Initialisation principale de l'application FRÈRE MIXAGE
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSizeGuide();
   initFloatingCTA();
 
-  // 2. Synchronisation du contenu dynamique depuis le Dashboard (Témoignages, À Propos, Contacts)
+  // 2. Synchronisation du contenu dynamique depuis Supabase & le Dashboard (Témoignages, À Propos, Contacts)
   syncDynamicContent();
 
   // 3. Gestion des CTAs Hero et Raccourcis
@@ -35,15 +36,90 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Synchronise les contenus éditables (Témoignages, À Propos, Paramètres) depuis le Dashboard
+ * Synchronise les contenus éditables (Témoignages, À Propos, Paramètres) depuis Supabase Cloud
  */
-export function syncDynamicContent() {
+export async function syncDynamicContent() {
+  // 1. Chargement et rendu des témoignages depuis Supabase
   try {
-    const raw = localStorage.getItem('frere_mixage_admin_state_v3') || 
-                localStorage.getItem('frere_mixage_admin_state_v2') || 
-                localStorage.getItem('frere_mixage_admin_state_v1');
-    if (!raw) return;
-    const state = JSON.parse(raw);
+    const remoteTestimonials = await ContentService.getPublicTestimonials();
+    const testimonialsGrid = document.querySelector('.testimonials-grid');
+    if (testimonialsGrid && remoteTestimonials && remoteTestimonials.length > 0) {
+      testimonialsGrid.innerHTML = remoteTestimonials.map((t, idx) => {
+        const stars = '★'.repeat(t.rating || 5);
+        return `
+          <div class="testimonial-card revealed stagger-${(idx % 3) + 1}">
+            <div>
+              <div class="testimonial-rating">${stars}</div>
+              <p class="testimonial-quote">
+                « ${t.quote} »
+              </p>
+            </div>
+            <div class="testimonial-author-box">
+              <img src="${t.avatar_url || t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
+                alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
+              <div>
+                <div class="testimonial-name">${t.name}</div>
+                <div class="testimonial-role">${t.role}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (e) {
+    console.warn('[Sync] Testimonials live error:', e);
+  }
+
+  // 2. Chargement et rendu de l'Atelier / À Propos depuis Supabase
+  try {
+    const remoteAbout = await ContentService.getAboutContent();
+    if (remoteAbout) {
+      const whyTitle = document.querySelector('#pourquoi .section-title');
+      if (whyTitle && remoteAbout.sectionTitle) whyTitle.textContent = remoteAbout.sectionTitle;
+
+      const whySubtitle = document.querySelector('#pourquoi .section-subtitle');
+      if (whySubtitle && remoteAbout.sectionSubtitle) whySubtitle.textContent = remoteAbout.sectionSubtitle;
+
+      const quoteText = document.getElementById('atelier-quote-text');
+      if (quoteText && remoteAbout.quote) quoteText.textContent = remoteAbout.quote;
+
+      const quoteAuthor = document.getElementById('atelier-quote-author');
+      if (quoteAuthor && remoteAbout.quoteAuthor) quoteAuthor.textContent = remoteAbout.quoteAuthor;
+
+      const p1 = document.getElementById('atelier-story-p1');
+      if (p1 && remoteAbout.storyParagraph1) p1.textContent = remoteAbout.storyParagraph1;
+
+      const p2 = document.getElementById('atelier-story-p2');
+      if (p2 && remoteAbout.storyParagraph2) p2.textContent = remoteAbout.storyParagraph2;
+
+      // Badges
+      if (remoteAbout.badges) {
+        if (remoteAbout.badges[0]) document.getElementById('atelier-badge-1')?.textContent = remoteAbout.badges[0];
+        if (remoteAbout.badges[1]) document.getElementById('atelier-badge-2')?.textContent = remoteAbout.badges[1];
+        if (remoteAbout.badges[2]) document.getElementById('atelier-badge-3')?.textContent = remoteAbout.badges[2];
+      }
+
+      // Photos
+      if (remoteAbout.image1) document.getElementById('atelier-img-1')?.setAttribute('src', remoteAbout.image1);
+      if (remoteAbout.image2) document.getElementById('atelier-img-2')?.setAttribute('src', remoteAbout.image2);
+
+      // Piliers
+      if (remoteAbout.pillars && remoteAbout.pillars.length === 4) {
+        const whyCards = document.querySelectorAll('.why-card');
+        whyCards.forEach((card, index) => {
+          const pillar = remoteAbout.pillars[index];
+          if (pillar) {
+            const titleEl = card.querySelector('.why-title');
+            const descEl = card.querySelector('.why-desc');
+            if (titleEl) titleEl.textContent = pillar.title;
+            if (descEl) descEl.textContent = pillar.desc;
+          }
+        });
+      }
+    }
+  } catch (e) {
+    console.warn('[Sync] About live error:', e);
+  }
 
     // 1. Mise à jour des Témoignages (toujours visibles et animés)
     const testimonialsGrid = document.querySelector('.testimonials-grid');
