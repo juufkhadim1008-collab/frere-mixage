@@ -251,8 +251,9 @@ function setupGlobalActions() {
 
   const bespokeBtn = document.getElementById('btn-bespoke-cta');
   if (bespokeBtn) {
-    bespokeBtn.addEventListener('click', () => {
-      openProductModal('sur-mesure-haute-couture');
+    bespokeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      WhatsAppService.openBespokeChat();
     });
   }
 

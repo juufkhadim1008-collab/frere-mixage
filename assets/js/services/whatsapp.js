@@ -118,6 +118,15 @@ export const WhatsAppService = {
   },
 
   /**
+   * Ouvre la conversation WhatsApp dédiée à une création Sur Mesure
+   */
+  openBespokeChat() {
+    const message = this.generateBespokeMessage();
+    const url = this.buildUrl(message);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  },
+
+  /**
    * Ouvre la conversation générale WhatsApp
    */
   openGeneralChat() {
