@@ -196,7 +196,7 @@ export class ProductService {
       .from('categories')
       .select('id')
       .eq('slug', productData.categorySlug || 'traditionnel')
-      .single();
+      .maybeSingle();
 
     const categoryId = catData ? catData.id : null;
 
@@ -214,25 +214,61 @@ export class ProductService {
     };
     if (categoryId) updatePayload.category_id = categoryId;
 
-    const { error: prodError } = await supabase
-      .from('products')
-      .update(updatePayload)
-      .eq('id', productId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
+    let resolvedDbId = isUuid ? productId : null;
 
-    if (prodError) throw prodError;
+    if (isUuid) {
+      const { error: prodError } = await supabase
+        .from('products')
+        .update(updatePayload)
+        .eq('id', productId);
+
+      if (prodError) console.warn('[ProductService.updateProduct] UUID update warning:', prodError.message);
+    } else {
+      const { data: existingProd } = await supabase
+        .from('products')
+        .select('id')
+        .eq('slug', productId)
+        .maybeSingle();
+
+      if (existingProd) {
+        resolvedDbId = existingProd.id;
+        const { error: prodError } = await supabase
+          .from('products')
+          .update(updatePayload)
+          .eq('id', existingProd.id);
+
+        if (prodError) console.warn('[ProductService.updateProduct] Slug update warning:', prodError.message);
+      } else {
+        const slug = productId || (productData.name || 'tenue').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4);
+        const { data: inserted, error: insertError } = await supabase
+          .from('products')
+          .insert({
+            ...updatePayload,
+            slug: slug
+          })
+          .select('id')
+          .maybeSingle();
+
+        if (inserted) resolvedDbId = inserted.id;
+        if (insertError) console.warn('[ProductService.updateProduct] Insert warning:', insertError.message);
+      }
+    }
 
     // 3. Mettre à jour les variantes
-    if (productData.stock) {
+    if (resolvedDbId && productData.stock) {
       for (const [size, qty] of Object.entries(productData.stock)) {
         await supabase
           .from('product_variants')
           .upsert({
-            product_id: productId,
+            product_id: resolvedDbId,
             size: size,
             stock: parseInt(qty, 10) || 0
           }, { onConflict: 'product_id,size' });
       }
     }
+
+    return { id: resolvedDbId };
   }
 
   /**
@@ -240,13 +276,19 @@ export class ProductService {
    */
   static async deleteProduct(productId) {
     const supabase = await getSupabaseClient();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
     
-    // Supprimer les variantes d'abord
-    await supabase.from('product_variants').delete().eq('product_id', productId);
-    
-    // Supprimer le produit
-    const { error } = await supabase.from('products').delete().eq('id', productId);
-    if (error) throw error;
+    let targetId = isUuid ? productId : null;
+    if (!isUuid) {
+      const { data: found } = await supabase.from('products').select('id').eq('slug', productId).maybeSingle();
+      if (found) targetId = found.id;
+    }
+
+    if (targetId) {
+      await supabase.from('product_variants').delete().eq('product_id', targetId);
+      const { error } = await supabase.from('products').delete().eq('id', targetId);
+      if (error) console.warn('[ProductService.deleteProduct] Warning:', error.message);
+    }
   }
 }
 

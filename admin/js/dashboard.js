@@ -913,25 +913,26 @@ class AdminDashboard {
       const index = this.state.products.findIndex(p => p.id === editId);
       if (index !== -1) {
         const existing = this.state.products[index];
-        const dbId = existing.dbId || (existing.id && existing.id.length > 25 ? existing.id : null);
+        const dbId = existing.dbId || existing.id;
 
-        if (dbId) {
-          try {
-            await ProductService.updateProduct(dbId, {
-              name,
-              categorySlug: catObj.slug,
-              price,
-              sale_price: origPrice,
-              description: desc,
-              fabric,
-              status,
-              is_featured: status === 'published',
-              images: imagesToUse,
-              stock: stockObj
-            });
-          } catch (e) {
-            console.error('[Supabase] Erreur mise à jour produit :', e);
+        try {
+          const res = await ProductService.updateProduct(dbId, {
+            name,
+            categorySlug: catObj.slug,
+            price,
+            sale_price: origPrice,
+            description: desc,
+            fabric,
+            status,
+            is_featured: status === 'published',
+            images: imagesToUse,
+            stock: stockObj
+          });
+          if (res && res.id) {
+            existing.dbId = res.id;
           }
+        } catch (e) {
+          console.warn('[Supabase] Erreur mise à jour produit :', e);
         }
 
         this.state.products[index] = {
@@ -978,7 +979,7 @@ class AdminDashboard {
       });
       if (res && res.id) createdDbId = res.id;
     } catch (e) {
-      console.error('[Supabase] Erreur création produit :', e);
+      console.warn('[Supabase] Erreur création produit :', e);
     }
 
     const newProduct = {
@@ -1014,13 +1015,13 @@ class AdminDashboard {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette création ?')) return;
 
     const target = this.state.products.find(p => p.id === productId);
-    const dbId = target?.dbId || (productId && productId.length > 25 ? productId : null);
+    const dbId = target?.dbId || productId;
 
     if (dbId) {
       try {
         await ProductService.deleteProduct(dbId);
       } catch (e) {
-        console.error('[Supabase] Erreur suppression produit :', e);
+        console.warn('[Supabase] Erreur suppression produit :', e);
       }
     }
 
