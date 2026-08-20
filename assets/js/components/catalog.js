@@ -1,6 +1,8 @@
-import { getActiveCategories, formatPrice, getProductsByCategory } from '../products.js';
+import { getActiveCategories, formatPrice, getProductsByCategory, fetchLiveProductsFromSupabase } from '../products.js';
 import { openProductModal } from './product-modal.js';
 import { openCheckoutWithProduct } from './checkout-modal.js';
+
+let activeCategory = 'all';
 
 /**
  * Gestionnaire du catalogue de produits et des filtres
@@ -15,9 +17,9 @@ export function initCatalog() {
 
   // 1. Rendu des boutons de filtre de catégories
   if (filterContainer) {
-    filterContainer.innerHTML = categories.map((cat, index) => `
+    filterContainer.innerHTML = categories.map((cat) => `
       <button 
-        class="filter-pill ${index === 0 ? 'active' : ''}" 
+        class="filter-pill ${cat.id === activeCategory ? 'active' : ''}" 
         data-category="${cat.id}"
         aria-label="Filtrer par ${cat.label}"
       >
@@ -31,14 +33,30 @@ export function initCatalog() {
       btn.addEventListener('click', () => {
         filterContainer.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const categoryId = btn.dataset.category;
-        renderProducts(categoryId);
+        activeCategory = btn.dataset.category;
+        renderProducts(activeCategory);
       });
     });
   }
 
   // 2. Rendu initial des produits
-  renderProducts('all');
+  renderProducts(activeCategory);
+
+  // 3. Récupération en arrière-plan des produits Cloud Supabase
+  fetchLiveProductsFromSupabase().then(() => {
+    // Rafraîchir les compteurs et les cartes
+    const updatedCats = getActiveCategories();
+    if (filterContainer) {
+      filterContainer.querySelectorAll('.filter-pill').forEach(btn => {
+        const cat = updatedCats.find(c => c.id === btn.dataset.category);
+        if (cat) {
+          const countSpan = btn.querySelector('.filter-pill-count');
+          if (countSpan) countSpan.textContent = `(${cat.count})`;
+        }
+      });
+    }
+    renderProducts(activeCategory);
+  });
 
   function renderProducts(category) {
     const products = getProductsByCategory(category);

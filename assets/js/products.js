@@ -148,10 +148,16 @@ const DEFAULT_PRODUCTS = [
   }
 ];
 
+let memoryProducts = null;
+
 /**
- * Charge les produits dynamiques depuis le localStorage si modifié dans l'admin
+ * Charge les produits en temps réel depuis Supabase (Cloud) ou le cache local
  */
 export function getActiveProducts() {
+  if (memoryProducts && memoryProducts.length > 0) {
+    return memoryProducts;
+  }
+
   try {
     const saved = localStorage.getItem('frere_mixage_admin_state_v3') || 
                   localStorage.getItem('frere_mixage_admin_state_v2') || 
@@ -177,6 +183,7 @@ export function getActiveProducts() {
 
           return {
             id: p.id || p.code,
+            dbId: p.dbId || null,
             name: p.name,
             category: cat,
             categoryLabel: p.category || 'Haute Couture',
@@ -203,6 +210,24 @@ export function getActiveProducts() {
     console.warn('Erreur lecture dynamic products:', e);
   }
   return DEFAULT_PRODUCTS;
+}
+
+/**
+ * Récupère les produits en direct depuis Supabase et déclenche la mise à jour
+ */
+export async function fetchLiveProductsFromSupabase() {
+  try {
+    const { ProductService } = await import('./services/product-service.js');
+    const remote = await ProductService.getPublishedProducts();
+    if (remote && remote.length > 0) {
+      memoryProducts = remote;
+      window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: remote }));
+      return remote;
+    }
+  } catch (err) {
+    console.warn('[Products] Connexion Supabase en cours :', err.message);
+  }
+  return getActiveProducts();
 }
 
 export const PRODUCTS = getActiveProducts();
