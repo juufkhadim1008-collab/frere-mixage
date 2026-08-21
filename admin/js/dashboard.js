@@ -13,10 +13,10 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v7';
+    this.storageKey = 'frere_mixage_admin_state_v8';
     
-    // Purge immédiate de toutes les anciennes versions de cache
-    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6'].forEach(k => {
+    // Purge immédiate de TOUTES les anciennes versions de cache (v7 était infecté par les anciennes données Supabase)
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 
@@ -40,14 +40,7 @@ class AdminDashboard {
     try {
       const saved = localStorage.getItem(this.storageKey);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.products && Array.isArray(parsed.products)) {
-          parsed.products = parsed.products.filter(p => {
-            if (!p.images || p.images.length === 0) return true;
-            return !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash');
-          });
-        }
-        return parsed;
+        return JSON.parse(saved);
       }
     } catch (e) {
       console.warn('Impossible de charger le localStorage, utilisation des données initiales.');
@@ -62,7 +55,7 @@ class AdminDashboard {
   saveState() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
-      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
         try { localStorage.removeItem(k); } catch (e) {}
       });
       window.dispatchEvent(new Event('storage'));
@@ -73,7 +66,7 @@ class AdminDashboard {
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
-        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
           try { localStorage.removeItem(k); } catch (err) {}
         });
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));
