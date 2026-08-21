@@ -426,6 +426,12 @@ class AdminDashboard {
       case 'products':
         this.renderProducts();
         break;
+      case 'add-product':
+        const editIdInput = document.getElementById('edit-prod-id');
+        if (!editIdInput || !editIdInput.value) {
+          this.resetProductForm();
+        }
+        break;
       case 'stocks':
         this.renderStocks();
         break;
@@ -940,10 +946,15 @@ class AdminDashboard {
     const previewsBox = document.getElementById('upload-previews-container');
     if (!previewsBox) return;
 
+    if (!this.uploadedImages || this.uploadedImages.length === 0) {
+      previewsBox.innerHTML = '';
+      return;
+    }
+
     previewsBox.innerHTML = this.uploadedImages.map((src, idx) => `
       <div class="upload-preview-thumb">
-        <img src="${src}" alt="Miniature">
-        <button type="button" class="btn-remove-thumb" onclick="window.dashboard.removeUploadedImage(${idx})">×</button>
+        <img src="${src}" alt="Photo de la tenue">
+        <button type="button" class="btn-remove-thumb" onclick="window.dashboard.removeUploadedImage(${idx})" title="Supprimer cette photo">×</button>
       </div>
     `).join('');
   }
@@ -1013,9 +1024,9 @@ class AdminDashboard {
         slug: cat || 'traditionnel' 
       };
 
-      const imagesToUse = this.uploadedImages.length > 0 
+      const imagesToUse = (this.uploadedImages && this.uploadedImages.length > 0) 
         ? [...this.uploadedImages] 
-        : ['/assets/images/hero-frere-mixage.jpg'];
+        : [];
 
       if (editId) {
         const index = this.state.products.findIndex(p => p.id === editId);
