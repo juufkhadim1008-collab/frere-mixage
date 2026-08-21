@@ -159,12 +159,11 @@ class AdminDashboard {
       // 1. Charger les produits réels depuis Supabase
       const dbProducts = await ProductService.getAllProductsAdmin();
       if (Array.isArray(dbProducts) && dbProducts.length > 0) {
-        const seenNames = new Set();
+        const seenIds = new Set();
         const uniqueDbProducts = [];
         for (const p of dbProducts) {
-          const norm = (p.name || '').trim().toLowerCase();
-          if (norm && !seenNames.has(norm)) {
-            seenNames.add(norm);
+          if (p.id && !seenIds.has(p.id)) {
+            seenIds.add(p.id);
             uniqueDbProducts.push(p);
           }
         }
@@ -196,8 +195,8 @@ class AdminDashboard {
 
         // Conserver les produits locaux créés par l'utilisateur
         const currentLocal = this.state.products || [];
-        const dbNames = new Set(mappedDbProducts.map(p => p.name.trim().toLowerCase()));
-        const localOnly = currentLocal.filter(p => !dbNames.has((p.name || '').trim().toLowerCase()));
+        const dbIds = new Set(mappedDbProducts.map(p => p.dbId || p.id));
+        const localOnly = currentLocal.filter(p => !dbIds.has(p.dbId || p.id));
         
         this.state.products = [...mappedDbProducts, ...localOnly];
         this.saveState();

@@ -70,13 +70,12 @@ export class ProductService {
 
     if (!rawData || rawData.length === 0) return [];
 
-    // Déduplication intelligente par nom : conserve 1 seul exemplaire unique par création
-    const seenPublishedNames = new Set();
+    // Déduplication par ID unique
+    const seenPublishedIds = new Set();
     const uniquePublished = [];
     for (const p of rawData) {
-      const norm = (p.name || '').trim().toLowerCase();
-      if (norm && !seenPublishedNames.has(norm)) {
-        seenPublishedNames.add(norm);
+      if (p.id && !seenPublishedIds.has(p.id)) {
+        seenPublishedIds.add(p.id);
         uniquePublished.push(p);
       }
     }
@@ -191,13 +190,12 @@ export class ProductService {
 
     if (!Array.isArray(rawData)) return [];
 
-    // Déduplication stricte par nom pour le Dashboard
-    const seenAdminNames = new Set();
+    // Déduplication par ID unique
+    const seenAdminIds = new Set();
     const uniqueAdminProducts = [];
     for (const p of rawData) {
-      const norm = (p.name || '').trim().toLowerCase();
-      if (norm && !seenAdminNames.has(norm)) {
-        seenAdminNames.add(norm);
+      if (p.id && !seenAdminIds.has(p.id)) {
+        seenAdminIds.add(p.id);
         uniqueAdminProducts.push(p);
       }
     }
@@ -207,33 +205,9 @@ export class ProductService {
 
   /**
    * Crée un nouveau produit avec ses variantes de taille dans Supabase
-   * Protection anti-doublon et verrouillage d'idempotence inclus
    */
   static async createProduct(productData) {
     const supabase = await getSupabaseClient();
-    
-    // 1. Protection Anti-Doublon / Idempotence :
-    // Vérifie si un produit de même nom a été créé dans les 15 dernières secondes
-    if (productData.name) {
-      try {
-        const { data: recentMatches } = await supabase
-          .from('products')
-          .select('id, name, created_at')
-          .eq('name', productData.name.trim())
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (recentMatches && recentMatches.length > 0) {
-          const diffMs = Date.now() - new Date(recentMatches[0].created_at).getTime();
-          if (diffMs < 15000) { // 15 secondes : doublon bloqué
-            console.warn('[ProductService] Doublon bloqué avec succès pour :', productData.name);
-            return recentMatches[0];
-          }
-        }
-      } catch (checkErr) {
-        console.warn('[ProductService] Vérification anti-doublon :', checkErr);
-      }
-    }
 
     // 2. Récupérer la catégorie ID
     const { data: catData } = await supabase
