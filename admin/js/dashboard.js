@@ -13,10 +13,10 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v9';
+    this.storageKey = 'frere_mixage_admin_state_v10';
     
-    // Purge immédiate de TOUTES les anciennes versions de cache (v1 à v8)
-    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8'].forEach(k => {
+    // Purge immédiate de TOUTES les anciennes versions de cache (v1 à v9)
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 
@@ -55,7 +55,7 @@ class AdminDashboard {
   saveState() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
-      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
+      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
         try { localStorage.removeItem(k); } catch (e) {}
       });
       window.dispatchEvent(new Event('storage'));
@@ -66,7 +66,7 @@ class AdminDashboard {
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
-        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
+        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
           try { localStorage.removeItem(k); } catch (err) {}
         });
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));

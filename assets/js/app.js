@@ -70,7 +70,7 @@ export async function syncDynamicContent() {
   try {
     let state = {};
     try {
-      const raw = localStorage.getItem('frere_mixage_admin_state_v9');
+      const raw = localStorage.getItem('frere_mixage_admin_state_v10');
       if (raw) state = JSON.parse(raw);
     } catch (e) {}
 
