@@ -12,6 +12,7 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 
 class AdminDashboard {
   constructor() {
+    window.dashboard = this;
     this.storageKey = 'frere_mixage_admin_state_v4';
     this.state = this.loadState();
     this.currentView = 'overview';
@@ -106,6 +107,7 @@ class AdminDashboard {
   }
 
   async init() {
+    window.dashboard = this;
     // 1. Accès direct Administrateur (sans écran de connexion intermédiaire)
     this.currentUserRole = 'owner';
     this.currentProfile = {
@@ -116,24 +118,26 @@ class AdminDashboard {
       is_active: true
     };
 
-    if (!this.state.invoices) {
-      this.state.invoices = JSON.parse(JSON.stringify(INITIAL_DATA.invoices || []));
-    }
-    if (!this.state.testimonials) {
-      this.state.testimonials = JSON.parse(JSON.stringify(INITIAL_DATA.testimonials || []));
-    }
-    if (!this.state.about) {
-      this.state.about = JSON.parse(JSON.stringify(INITIAL_DATA.about || {}));
-    }
-    if (!this.state.accounting) {
-      this.state.accounting = JSON.parse(JSON.stringify(INITIAL_DATA.accounting || {}));
-    }
+    if (!this.state) this.state = {};
+    if (!Array.isArray(this.state.products)) this.state.products = [];
+    if (!Array.isArray(this.state.orders)) this.state.orders = JSON.parse(JSON.stringify(INITIAL_DATA.orders || []));
+    if (!Array.isArray(this.state.customers)) this.state.customers = JSON.parse(JSON.stringify(INITIAL_DATA.customers || []));
+    if (!Array.isArray(this.state.categories)) this.state.categories = JSON.parse(JSON.stringify(INITIAL_DATA.categories || []));
+    if (!Array.isArray(this.state.invoices)) this.state.invoices = JSON.parse(JSON.stringify(INITIAL_DATA.invoices || []));
+    if (!Array.isArray(this.state.testimonials)) this.state.testimonials = JSON.parse(JSON.stringify(INITIAL_DATA.testimonials || []));
+    if (!this.state.about) this.state.about = JSON.parse(JSON.stringify(INITIAL_DATA.about || {}));
+    if (!this.state.accounting) this.state.accounting = JSON.parse(JSON.stringify(INITIAL_DATA.accounting || {}));
+    if (!this.state.settings) this.state.settings = JSON.parse(JSON.stringify(INITIAL_DATA.settings || {}));
 
-    this.bindEvents();
-    this.setupHashRouting();
-    this.renderAll();
-    this.renderSalesChart();
-    this.renderUserHeader();
+    try {
+      this.bindEvents();
+      this.setupHashRouting();
+      this.renderAll();
+      this.renderSalesChart();
+      this.renderUserHeader();
+    } catch (err) {
+      console.error('[Dashboard Init Warning]', err);
+    }
     
     // Synchronisation en direct avec la base Supabase
     this.syncWithSupabase();
@@ -3660,7 +3664,15 @@ class AdminDashboard {
   }
 }
 
-// Initialisation globale
-document.addEventListener('DOMContentLoaded', () => {
-  window.dashboard = new AdminDashboard();
-});
+// Initialisation globale robuste
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!window.dashboard) {
+      window.dashboard = new AdminDashboard();
+    }
+  });
+} else {
+  if (!window.dashboard) {
+    window.dashboard = new AdminDashboard();
+  }
+}
