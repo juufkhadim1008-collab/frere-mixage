@@ -18,9 +18,8 @@ export function getActiveProducts() {
   }
 
   try {
-    const saved = localStorage.getItem('frere_mixage_admin_state_v5') ||
-                  localStorage.getItem('frere_mixage_admin_state_v4') ||
-                  localStorage.getItem('frere_mixage_admin_state_v3');
+    const saved = localStorage.getItem('frere_mixage_admin_state_v6') ||
+                  localStorage.getItem('frere_mixage_admin_state_v5');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.products && parsed.products.length > 0) {

@@ -3,131 +3,181 @@
  * Gère les interactions avec Supabase pour les produits, catégories et variantes.
  */
 
-import { getSupabaseClient } from './supabase-client.js';
+import { getSupabaseClient, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-client.js';
 
 export class ProductService {
   /**
    * Récupère tous les produits publiés pour la vitrine publique
    */
   static async getPublishedProducts() {
+    let rawData = null;
+
+    // 1. Essayer via le client Supabase
     try {
       const supabase = await getSupabaseClient();
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          id,
-          name,
-          slug,
-          description,
-          price,
-          sale_price,
-          fabric,
-          lead_time,
-          details,
-          images,
-          is_featured,
-          categories (
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
             id,
             name,
-            slug
-          ),
-          product_variants (
-            size,
-            stock
-          )
-        `)
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
+            slug,
+            description,
+            price,
+            sale_price,
+            fabric,
+            lead_time,
+            details,
+            images,
+            is_featured,
+            categories (
+              id,
+              name,
+              slug
+            ),
+            product_variants (
+              size,
+              stock
+            )
+          `)
+          .eq('status', 'published')
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      if (!data || data.length === 0) return [];
-
-      // Transformer en format unifié pour l'application
-      return data.map(p => {
-        const catSlug = p.categories ? p.categories.slug : 'traditionnel';
-        const catName = p.categories ? p.categories.name : 'Tenue Traditionnelle';
-
-        const stockMap = {};
-        const availableSizes = [];
-        if (p.product_variants && p.product_variants.length > 0) {
-          p.product_variants.forEach(v => {
-            stockMap[v.size] = v.stock;
-            if (v.stock > 0 || v.size === 'Sur Mesure') {
-              availableSizes.push(v.size);
-            }
-          });
-        }
-        if (availableSizes.length === 0) availableSizes.push('M', 'L', 'XL');
-
-        return {
-          id: p.slug || p.id,
-          dbId: p.id,
-          name: p.name,
-          category: catSlug,
-          categoryLabel: catName,
-          price: p.sale_price || p.price,
-          originalPrice: p.sale_price ? p.price : null,
-          badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
-          featured: p.is_featured,
-          leadTime: p.lead_time || 'Disponible sous 24-48h',
-          description: p.description || '',
-          fabric: p.fabric || '',
-          details: p.details || [
-            'Finitions haute couture soignées à l’atelier de Dakar',
-            'Broderies d’exception faites main'
-          ],
-          images: (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f')) ? p.images : [
-            './assets/images/hero-frere-mixage.jpg'
-          ],
-          availableSizes: availableSizes,
-          stock: stockMap
-        };
-      });
+        if (!error && Array.isArray(data)) rawData = data;
+      }
     } catch (err) {
-      console.warn('[ProductService] Échec récupération Supabase, utilisation du cache local :', err.message);
-      return null;
+      console.warn('[ProductService] Échec client SDK, bascule sur fetch REST :', err.message);
     }
+
+    // 2. Fallback direct HTTP Fetch REST (100% fiable en toute circonstance)
+    if (!rawData) {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/products?select=id,name,slug,description,price,sale_price,fabric,lead_time,details,images,is_featured,categories(id,name,slug),product_variants(size,stock)&status=eq.published&order=created_at.desc`;
+        const res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) rawData = json;
+        }
+      } catch (fetchErr) {
+        console.error('[ProductService] Erreur fetch REST direct :', fetchErr);
+      }
+    }
+
+    if (!rawData || rawData.length === 0) return null;
+
+    // Transformer en format unifié pour l'application
+    return rawData.map(p => {
+      const catSlug = p.categories ? p.categories.slug : 'traditionnel';
+      const catName = p.categories ? p.categories.name : 'Tenue Traditionnelle';
+
+      const stockMap = {};
+      const availableSizes = [];
+      if (p.product_variants && p.product_variants.length > 0) {
+        p.product_variants.forEach(v => {
+          stockMap[v.size] = v.stock;
+          if (v.stock > 0 || v.size === 'Sur Mesure') {
+            availableSizes.push(v.size);
+          }
+        });
+      }
+      if (availableSizes.length === 0) availableSizes.push('M', 'L', 'XL');
+
+      const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash'))
+        ? p.images
+        : ['/assets/images/hero-frere-mixage.jpg'];
+
+      return {
+        id: p.slug || p.id,
+        dbId: p.id,
+        name: p.name,
+        category: catSlug,
+        categoryLabel: catName,
+        price: p.sale_price || p.price,
+        originalPrice: p.sale_price ? p.price : null,
+        badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
+        featured: p.is_featured,
+        leadTime: p.lead_time || 'Disponible sous 24-48h',
+        description: p.description || '',
+        fabric: p.fabric || '',
+        details: p.details || [
+          'Finitions haute couture soignées à l’atelier de Dakar',
+          'Broderies d’exception faites main'
+        ],
+        images: validImages,
+        availableSizes: availableSizes,
+        stock: stockMap
+      };
+    });
   }
 
   /**
    * Récupère tous les produits (publiés et brouillons) pour le dashboard
    */
   static async getAllProductsAdmin() {
+    let rawData = null;
+
+    // 1. Essayer avec le client Supabase
     try {
       const supabase = await getSupabaseClient();
-      const { data, error } = await supabase
-        .from('products')
-        .select(`
-          id,
-          name,
-          slug,
-          description,
-          price,
-          sale_price,
-          fabric,
-          lead_time,
-          status,
-          is_featured,
-          images,
-          created_at,
-          categories (
+      if (supabase) {
+        const { data, error } = await supabase
+          .from('products')
+          .select(`
             id,
             name,
-            slug
-          ),
-          product_variants (
-            size,
-            stock
-          )
-        `)
-        .order('created_at', { ascending: false });
+            slug,
+            description,
+            price,
+            sale_price,
+            fabric,
+            lead_time,
+            status,
+            is_featured,
+            images,
+            created_at,
+            categories (
+              id,
+              name,
+              slug
+            ),
+            product_variants (
+              size,
+              stock
+            )
+          `)
+          .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+        if (!error && Array.isArray(data)) rawData = data;
+      }
     } catch (err) {
-      console.error('[ProductService.getAllProductsAdmin] Erreur :', err);
-      return null;
+      console.warn('[ProductService.getAllProductsAdmin] SDK error, fallback to REST fetch:', err);
     }
+
+    // 2. Fallback direct HTTP Fetch REST (100% fiable)
+    if (!rawData) {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/products?select=id,name,slug,description,price,sale_price,fabric,lead_time,status,is_featured,images,created_at,categories(id,name,slug),product_variants(size,stock)&order=created_at.desc`;
+        const res = await fetch(url, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (Array.isArray(json)) rawData = json;
+        }
+      } catch (fetchErr) {
+        console.error('[ProductService.getAllProductsAdmin] REST fetch error:', fetchErr);
+      }
+    }
+
+    return rawData;
   }
 
   /**

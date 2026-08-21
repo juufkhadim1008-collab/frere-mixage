@@ -283,7 +283,7 @@ export const INITIAL_DATA = {
       email: 'assistant@freremixage.com',
       role: 'assistant',
       roleLabel: 'Assistante Atelier & Commandes',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200',
+      avatar: '/assets/images/hero-frere-mixage.jpg',
       status: 'Actif',
       joinedDate: '01 Mars 2025'
     }
@@ -396,7 +396,7 @@ export const INITIAL_DATA = {
       role: 'Dakar, Sénégal • Client vérifié',
       rating: 5,
       quote: 'Une finition incroyable et une tenue qui correspond exactement à ce que je voulais pour mon mariage. Le tissu a un tombé royal.',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+      avatar: '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
       isActive: true
     },
     {
@@ -405,7 +405,7 @@ export const INITIAL_DATA = {
       role: 'Paris, France • Diaspora',
       rating: 5,
       quote: 'Le boubou Royal est magnifique. La qualité de la broderie et la finesse du fil d’or sont vraiment au rendez-vous. Livraison rapide à Paris.',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=150',
+      avatar: '/assets/images/hero-frere-mixage.jpg',
       isActive: true
     },
     {
@@ -414,7 +414,7 @@ export const INITIAL_DATA = {
       role: 'Abidjan, Côte d’Ivoire • Client vérifié',
       rating: 5,
       quote: 'Service sur mesure exceptionnel. J’ai envoyé mes mesures en ligne et le costume tombait parfaitement dès le premier essayage.',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150',
+      avatar: '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
       isActive: true
     }
   ],

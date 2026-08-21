@@ -60,9 +60,8 @@ export async function syncDynamicContent() {
   try {
     let state = {};
     try {
-      const raw = localStorage.getItem('frere_mixage_admin_state_v5') ||
-                  localStorage.getItem('frere_mixage_admin_state_v4') || 
-                  localStorage.getItem('frere_mixage_admin_state_v3');
+      const raw = localStorage.getItem('frere_mixage_admin_state_v6') ||
+                  localStorage.getItem('frere_mixage_admin_state_v5');
       if (raw) state = JSON.parse(raw);
     } catch (e) {}
 

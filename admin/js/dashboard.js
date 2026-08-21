@@ -13,7 +13,13 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v5';
+    this.storageKey = 'frere_mixage_admin_state_v6';
+    
+    // Purge immédiate de toutes les anciennes versions de cache contenant des résidus fictifs
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+
     this.state = this.loadState();
     this.currentView = 'overview';
     this.currentOrderFilter = 'all';
@@ -30,14 +36,13 @@ class AdminDashboard {
 
   loadState() {
     try {
-      const saved = localStorage.getItem(this.storageKey) || localStorage.getItem('frere_mixage_admin_state_v4') || localStorage.getItem('frere_mixage_admin_state_v3');
+      const saved = localStorage.getItem(this.storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.products && Array.isArray(parsed.products)) {
-          parsed.products.forEach(p => {
-            if (p.images && p.images.length > 0 && (p.images[0].includes('1617137984095') || p.images[0].includes('unsplash'))) {
-              p.images = ['/assets/images/hero-frere-mixage.jpg'];
-            }
+          parsed.products = parsed.products.filter(p => {
+            if (!p.images || p.images.length === 0) return true;
+            return !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash');
           });
         }
         return parsed;
@@ -55,18 +60,16 @@ class AdminDashboard {
   saveState() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
-      localStorage.removeItem('frere_mixage_admin_state_v1');
-      localStorage.removeItem('frere_mixage_admin_state_v2');
-      localStorage.removeItem('frere_mixage_admin_state_v3');
-      localStorage.removeItem('frere_mixage_admin_state_v4');
+      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+        try { localStorage.removeItem(k); } catch (e) {}
+      });
       window.dispatchEvent(new Event('storage'));
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
-        localStorage.removeItem('frere_mixage_admin_state_v1');
-        localStorage.removeItem('frere_mixage_admin_state_v2');
-        localStorage.removeItem('frere_mixage_admin_state_v3');
-        localStorage.removeItem('frere_mixage_admin_state_v4');
+        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+          try { localStorage.removeItem(k); } catch (err) {}
+        });
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));
         window.dispatchEvent(new Event('storage'));
       } catch (err2) {
@@ -221,7 +224,7 @@ class AdminDashboard {
           role: t.role,
           rating: t.rating,
           quote: t.quote,
-          avatar: t.avatar_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+          avatar: t.avatar_url || '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
           isActive: t.is_active
         }));
         this.saveState();
@@ -1351,7 +1354,7 @@ class AdminDashboard {
         <!-- Saisie Image URL -->
         <div class="form-group" style="margin-bottom: 1rem;">
           <label class="form-label">URL de l'image personnalisée</label>
-          <input type="text" id="input-cat-custom-image" class="form-input" placeholder="https://images.unsplash.com/..." value="${category.image || ''}" oninput="document.getElementById('cat-modal-preview-img').src = this.value || '${cover.url}'">
+          <input type="text" id="input-cat-custom-image" class="form-input" placeholder="https://..." value="${category.image || ''}" oninput="document.getElementById('cat-modal-preview-img').src = this.value || '${cover.url}'">
         </div>
 
         <!-- Option Upload fichier local -->
@@ -2266,7 +2269,7 @@ class AdminDashboard {
         totalSpent: grandTotal,
         lastOrderDate: new Date().toISOString().split('T')[0],
         status: 'Actif',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'
+        avatar: '/assets/images/ab8459f150d5d7db346654de338434e5.jpg'
       };
       this.state.customers.unshift(existingCust);
     } else {
@@ -2516,7 +2519,7 @@ class AdminDashboard {
       email,
       role,
       roleLabel: role === 'owner' ? 'Propriétaire' : 'Assistant',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200',
+      avatar: '/assets/images/hero-frere-mixage.jpg',
       status: 'Actif',
       joinedDate: 'Aujourd’hui'
     });
@@ -2601,7 +2604,7 @@ class AdminDashboard {
         <tr>
           <td>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <img src="${t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-border);" alt="${t.name}">
+              <img src="${t.avatar || '/assets/images/ab8459f150d5d7db346654de338434e5.jpg'}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-border);" alt="${t.name}">
               <div>
                 <strong>${t.name}</strong>
               </div>
@@ -2649,7 +2652,7 @@ class AdminDashboard {
       role: 'Dakar, Sénégal • Client vérifié',
       rating: 5,
       quote: '',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150',
+      avatar: '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
       isActive: true
     };
 
@@ -2713,7 +2716,7 @@ class AdminDashboard {
     const role = document.getElementById('modal-test-role')?.value.trim();
     const rating = parseInt(document.getElementById('modal-test-rating')?.value, 10) || 5;
     const isActive = document.getElementById('modal-test-active')?.value === 'true';
-    const avatar = document.getElementById('modal-test-avatar')?.value.trim() || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150';
+    const avatar = document.getElementById('modal-test-avatar')?.value.trim() || '/assets/images/ab8459f150d5d7db346654de338434e5.jpg';
     const quote = document.getElementById('modal-test-quote')?.value.trim();
 
     if (!name || !quote) {
