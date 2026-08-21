@@ -426,8 +426,8 @@ export const INITIAL_DATA = {
     quoteAuthor: '— Maison Frère Mixage',
     storyParagraph1: 'Dans notre atelier de Dakar, chaque vêtement naît d’un dialogue intime entre tradition ancestrale et silhouette contemporaine. Nos artisans découpent, assemblent et brodent à la main chaque pièce avec une rigueur absolue.',
     storyParagraph2: 'Du drapé majestueux du Bazin teinté artisanalement à la précision géométrique de nos boutonnières, rien n’est laissé au hasard. Porter Frère Mixage, c’est affirmer un statut, une fierté et un raffinement sans compromis.',
-    image1: 'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=80&w=800',
-    image2: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800',
+    image1: '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+    image2: '../assets/images/hero-frere-mixage.jpg',
     pillars: [
       { title: 'SAVOIR-FAIRE', desc: 'Des créations réalisées avec une attention chirurgicale et une précision millimétrée par nos maîtres couturiers.' },
       { title: 'QUALITÉ', desc: 'Des matières nobles d’exception (Bazin riche Getzner, lins peignés, soies) et des finitions choisies avec exigence.' },

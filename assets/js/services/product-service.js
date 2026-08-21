@@ -76,8 +76,8 @@ export class ProductService {
             'Finitions haute couture soignées à l’atelier de Dakar',
             'Broderies d’exception faites main'
           ],
-          images: p.images && p.images.length > 0 ? p.images : [
-            'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'
+          images: (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f')) ? p.images : [
+            './assets/images/hero-frere-mixage.jpg'
           ],
           availableSizes: availableSizes,
           stock: stockMap
@@ -108,6 +108,7 @@ export class ProductService {
           lead_time,
           status,
           is_featured,
+          images,
           created_at,
           categories (
             id,

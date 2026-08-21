@@ -29,8 +29,18 @@ class AdminDashboard {
 
   loadState() {
     try {
-      const saved = localStorage.getItem(this.storageKey);
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem(this.storageKey) || localStorage.getItem('frere_mixage_admin_state_v3');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.products && Array.isArray(parsed.products)) {
+          parsed.products.forEach(p => {
+            if (p.images && p.images.length > 0 && p.images[0].includes('1617137984095-74e4e5e3613f')) {
+              p.images = ['../assets/images/hero-frere-mixage.jpg'];
+            }
+          });
+        }
+        return parsed;
+      }
     } catch (e) {
       console.warn('Impossible de charger le localStorage, utilisation des données initiales.');
     }
@@ -139,6 +149,10 @@ class AdminDashboard {
           if (p.product_variants) {
             p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
           }
+          const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f'))
+            ? p.images
+            : ['../assets/images/hero-frere-mixage.jpg'];
+
           return {
             id: p.slug || p.id,
             dbId: p.id,
@@ -152,7 +166,7 @@ class AdminDashboard {
             badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
             description: p.description || '',
             fabric: p.fabric || '',
-            images: (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'],
+            images: validImages,
             stock: stockMap
           };
         });
@@ -939,7 +953,7 @@ class AdminDashboard {
 
     const imagesToUse = this.uploadedImages.length > 0 
       ? [...this.uploadedImages] 
-      : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=800'];
+      : ['../assets/images/hero-frere-mixage.jpg'];
 
     if (editId) {
       const index = this.state.products.findIndex(p => p.id === editId);
@@ -1215,15 +1229,20 @@ class AdminDashboard {
 
     // Image de repli standard
     const fallbackMap = {
-      'cat-boubous': 'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=80&w=1000',
-      'cat-costumes': 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1000',
-      'cat-ensembles': 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=1000'
+      'cat-traditionnel': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'cat-costumes': '../assets/images/hero-frere-mixage.jpg',
+      'cat-modernes': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'cat-evenementiel': '../assets/images/hero-frere-mixage.jpg',
+      'traditionnel': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'costumes': '../assets/images/hero-frere-mixage.jpg',
+      'modernes': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'evenementiel': '../assets/images/hero-frere-mixage.jpg'
     };
 
     return { 
-      url: fallbackMap[category.id] || 'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=80&w=1000', 
+      url: fallbackMap[category.id] || fallbackMap[category.slug] || '../assets/images/hero-frere-mixage.jpg', 
       isCustom: false, 
-      label: 'Photo par défaut' 
+      label: 'Photo officielle' 
     };
   }
 
@@ -2796,8 +2815,8 @@ class AdminDashboard {
     setVal('about-badge-3', badges[2]);
 
     // Images
-    const img1 = a.image1 || 'https://images.unsplash.com/photo-1598808503746-f34c53b9323e?auto=format&fit=crop&q=80&w=800';
-    const img2 = a.image2 || 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&q=80&w=800';
+    const img1 = a.image1 || '../assets/images/ab8459f150d5d7db346654de338434e5.jpg';
+    const img2 = a.image2 || '../assets/images/hero-frere-mixage.jpg';
 
     setVal('about-image-1', a.image1 || '');
     setVal('about-image-2', a.image2 || '');

@@ -58,7 +58,9 @@ export function getActiveProducts() {
               'Broderies de précision',
               'Coupe élégante et confortable'
             ],
-            images: p.images && p.images.length > 0 ? p.images : ['https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&q=85&w=1200'],
+            images: (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f')) 
+              ? p.images 
+              : ['./assets/images/hero-frere-mixage.jpg'],
             availableSizes: availableSizes,
             stock: p.stock || { 'M': 5, 'L': 5, 'XL': 5 }
           };
