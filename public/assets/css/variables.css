@@ -1,0 +1,113 @@
+:root {
+  /* Palette de couleurs principale — Luxe & Savoir-faire */
+  --bg-primary: #0A0A0C;
+  --bg-secondary: #121216;
+  --bg-tertiary: #18181E;
+  --bg-card: #15151A;
+  --bg-card-hover: #1E1E26;
+  --bg-elevated: #22222B;
+  
+  --surface-light: #FAF8F5;
+  --surface-light-secondary: #F3EFEA;
+  --surface-cream: #EDE6DC;
+
+  /* Typographie & Contraste */
+  --text-primary: #F7F5F0;
+  --text-secondary: #BBB4A8;
+  --text-muted: #837B70;
+  --text-inverse: #0A0A0C;
+  --text-inverse-muted: #5C564D;
+
+  /* Accents Or & Cuivre Haute Couture */
+  --gold: #C5A059;
+  --gold-light: #DFC288;
+  --gold-dark: #9B7B3B;
+  --gold-glow: rgba(197, 160, 89, 0.22);
+  --gold-glow-strong: rgba(197, 160, 89, 0.45);
+  --gold-gradient: linear-gradient(135deg, #DFBF7D 0%, #C5A059 50%, #9B7B3B 100%);
+  --gold-border: rgba(197, 160, 89, 0.35);
+
+  /* Bordures et Séparateurs */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-gold: rgba(197, 160, 89, 0.4);
+  --border-light-mode: rgba(0, 0, 0, 0.08);
+
+  /* États & Badges */
+  --success: #22C55E;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --warning: #F59E0B;
+  --error: #EF4444;
+  --error-bg: rgba(239, 68, 68, 0.12);
+  --whatsapp: #25D366;
+  --whatsapp-hover: #20BA5A;
+  --wave: #1DC4FF;
+  --orange-money: #FF7900;
+
+  /* Typographies */
+  --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Échelle Typographique */
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+  --text-6xl: 3.75rem;   /* 60px */
+  --text-7xl: 4.5rem;    /* 72px */
+
+  /* Espacements */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* Rayons de bordure */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Ombres portées */
+  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 8px 30px rgba(197, 160, 89, 0.25);
+  --shadow-gold-lg: 0 15px 40px rgba(197, 160, 89, 0.35);
+
+  /* Transitions fluides */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-luxury: 0.7s cubic-bezier(0.19, 1, 0.22, 1);
+
+  /* Tailles de conteneur */
+  --container-max: 1320px;
+  --container-narrow: 1040px;
+  --header-height: 80px;
+
+  /* Z-Index */
+  --z-base: 1;
+  --z-sticky: 100;
+  --z-header: 500;
+  --z-floating: 600;
+  --z-modal-backdrop: 1000;
+  --z-modal: 1050;
+  --z-toast: 1200;
+}

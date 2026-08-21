@@ -1,0 +1,221 @@
+import { getActiveCategories, formatPrice, getProductsByCategory, fetchLiveProductsFromSupabase, isProductsLoaded } from '../products.js';
+import { openProductModal } from './product-modal.js';
+import { openCheckoutWithProduct } from './checkout-modal.js';
+
+let activeCategory = 'all';
+
+/**
+ * Gestionnaire du catalogue de produits et des filtres
+ */
+export function initCatalog() {
+  const filterContainer = document.getElementById('catalog-filter-bar');
+  const productsGrid = document.getElementById('products-grid');
+
+  if (!productsGrid) return;
+
+  function renderSkeleton() {
+    productsGrid.innerHTML = `
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+    `;
+  }
+
+  function updateFilterButtons() {
+    const categories = getActiveCategories();
+    if (filterContainer) {
+      filterContainer.innerHTML = categories.map((cat) => `
+        <button 
+          class="filter-pill ${cat.id === activeCategory ? 'active' : ''}" 
+          data-category="${cat.id}"
+          aria-label="Filtrer par ${cat.label}"
+        >
+          ${cat.label}
+          <span class="filter-pill-count">(${cat.count})</span>
+        </button>
+      `).join('');
+
+      // Réattacher les écouteurs de clic
+      filterContainer.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterContainer.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeCategory = btn.dataset.category;
+          renderProducts(activeCategory);
+        });
+      });
+    }
+  }
+
+  // 1. Initialisation des filtres
+  updateFilterButtons();
+
+  // 2. Écoute de l'événement de synchronisation en direct
+  window.addEventListener('supabase-products-synced', () => {
+    updateFilterButtons();
+    renderProducts(activeCategory);
+  });
+
+  // 3. État initial : Si les produits ne sont pas encore en mémoire, afficher le skeleton
+  if (!isProductsLoaded()) {
+    renderSkeleton();
+  } else {
+    renderProducts(activeCategory);
+  }
+
+  // 4. Récupération des produits Cloud Supabase
+  fetchLiveProductsFromSupabase().then(() => {
+    updateFilterButtons();
+    renderProducts(activeCategory);
+  });
+
+  function renderProducts(category) {
+    const products = getProductsByCategory(category);
+    
+    if (products.length === 0) {
+      productsGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-secondary);">
+          <p style="font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 1rem;">Aucune pièce dans cette catégorie pour le moment.</p>
+          <button class="btn btn-secondary btn-sm" onclick="document.querySelector('.filter-pill[data-category=all]').click()">Voir toutes les créations</button>
+        </div>
+      `;
+      return;
+    }
+
+    productsGrid.innerHTML = products.map((product, idx) => {
+      const badgeHtml = product.badge ? `
+        <div class="product-badge-container">
+          <span class="badge ${product.badge === 'Bestseller' ? 'badge-gold' : 'badge-exclusive'}">
+            ${product.badge}
+          </span>
+        </div>
+      ` : '';
+
+      const originalPriceHtml = product.originalPrice ? `
+        <span class="product-original-price">${formatPrice(product.originalPrice)}</span>
+      ` : '';
+
+      const sizesPreviewHtml = product.availableSizes.map(s => `
+        <span class="size-pill-mini">${s}</span>
+      `).join('');
+
+      const displayImg = (product.images && product.images.length > 0 && product.images[0]) 
+        ? product.images[0] 
+        : '/assets/images/logo-frere-mixage.png';
+
+      return `
+        <article class="product-card reveal-on-scroll stagger-${(idx % 3) + 1}" data-product-id="${product.id}">
+          <div class="product-media">
+            ${badgeHtml}
+            <img 
+              src="${displayImg}" 
+              alt="${product.name} — Frère Mixage Haute Couture" 
+              class="product-image"
+              loading="lazy"
+            />
+            <div class="product-quick-view-overlay">
+              <button class="btn-quick-preview" data-action="view" data-id="${product.id}">
+                Voir la tenue
+              </button>
+            </div>
+          </div>
+          
+          <div class="product-info">
+            <div class="product-meta-row">
+              <span class="product-category-tag">${product.categoryLabel}</span>
+              <span class="product-availability">En stock</span>
+            </div>
+            
+            <h3 class="product-title">${product.name}</h3>
+            
+            <div class="product-price-row">
+              <span class="product-price">${formatPrice(product.price)}</span>
+              ${originalPriceHtml}
+            </div>
+
+            <div class="product-sizes-preview">
+              <span>Tailles :</span>
+              ${sizesPreviewHtml}
+            </div>
+
+            <div class="product-card-actions">
+              <button class="btn btn-secondary btn-card-view" data-action="view" data-id="${product.id}">
+                Détails
+              </button>
+              <button class="btn btn-primary btn-card-order" data-action="order" data-id="${product.id}">
+                Commander
+              </button>
+            </div>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // Attacher les écouteurs sur les boutons produits
+    attachProductEventListeners();
+
+    // Réinitialiser les animations d'apparition
+    initScrollObserverForElements(productsGrid.querySelectorAll('.reveal-on-scroll'));
+  }
+
+  function attachProductEventListeners() {
+    productsGrid.querySelectorAll('[data-action="view"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        openProductModal(id);
+      });
+    });
+
+    productsGrid.querySelectorAll('[data-action="order"]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        openProductModal(id); // Ouvre la fiche pour sélection taille garantie avant commande
+      });
+    });
+
+    productsGrid.querySelectorAll('.product-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.dataset.productId;
+        openProductModal(id);
+      });
+    });
+  }
+}
+
+/**
+ * Fonction utilitaire pour observer les éléments révélés au défilement
+ */
+function initScrollObserverForElements(elements) {
+  if (!('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('revealed'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  elements.forEach(el => observer.observe(el));
+}
