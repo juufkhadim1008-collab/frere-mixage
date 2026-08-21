@@ -387,9 +387,6 @@ class AdminDashboard {
       }
     });
 
-    const sidebar = document.getElementById('admin-sidebar');
-    if (sidebar) sidebar.classList.remove('mobile-open');
-
     this.renderActiveView(viewId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -577,8 +574,11 @@ class AdminDashboard {
     canvas.height = height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    const history = this.state.salesHistory;
-    const maxVal = Math.max(...history.map(h => h.revenue)) * 1.15;
+    const history = (this.state.salesHistory && this.state.salesHistory.length > 0) 
+      ? this.state.salesHistory 
+      : [{ month: 'Jan', revenue: 0 }, { month: 'Fév', revenue: 0 }, { month: 'Mar', revenue: 0 }, { month: 'Avr', revenue: 0 }, { month: 'Mai', revenue: 0 }, { month: 'Juin', revenue: 0 }, { month: 'Juil', revenue: 0 }, { month: 'Août', revenue: 0 }, { month: 'Sep', revenue: 0 }, { month: 'Oct', revenue: 0 }, { month: 'Nov', revenue: 0 }, { month: 'Déc', revenue: 0 }];
+    
+    const maxVal = Math.max(100000, ...history.map(h => h.revenue || 0)) * 1.15;
     const paddingLeft = 60;
     const paddingBottom = 40;
     const paddingTop = 20;
