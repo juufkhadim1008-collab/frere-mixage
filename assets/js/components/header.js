@@ -20,27 +20,48 @@ export function initHeader() {
   handleScroll();
 
   // Menu Mobile Drawer Toggle
-  if (mobileToggle && mobileDrawer) {
-    const toggleMenu = () => {
-      const isOpen = mobileDrawer.classList.contains('open');
-      if (isOpen) {
-        mobileDrawer.classList.remove('open');
-        mobileToggle.classList.remove('active');
-        document.body.style.overflow = '';
-      } else {
-        mobileDrawer.classList.add('open');
-        mobileToggle.classList.add('active');
-        document.body.style.overflow = 'hidden';
-      }
+  if (mobileDrawer) {
+    const closeBtn = document.getElementById('mobile-drawer-close');
+
+    const openMenu = () => {
+      mobileDrawer.classList.add('open');
+      mobileToggle?.classList.add('active');
+      document.body.style.overflow = 'hidden';
     };
 
-    mobileToggle.addEventListener('click', toggleMenu);
+    const closeMenu = () => {
+      mobileDrawer.classList.remove('open');
+      mobileToggle?.classList.remove('active');
+      document.body.style.overflow = '';
+    };
 
-    mobileLinks.forEach(link => {
-      link.addEventListener('click', () => {
-        mobileDrawer.classList.remove('open');
-        mobileToggle.classList.remove('active');
-        document.body.style.overflow = '';
+    mobileToggle?.addEventListener('click', () => {
+      if (mobileDrawer.classList.contains('open')) {
+        closeMenu();
+      } else {
+        openMenu();
+      }
+    });
+
+    closeBtn?.addEventListener('click', closeMenu);
+
+    document.querySelectorAll('.mobile-nav-item, .drawer-cta-btn').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+        if (link.classList.contains('mobile-nav-item')) link.classList.add('active');
+        
+        closeMenu();
+
+        if (href && href.startsWith('#')) {
+          const target = document.querySelector(href);
+          if (target) {
+            e.preventDefault();
+            setTimeout(() => {
+              target.scrollIntoView({ behavior: 'smooth' });
+            }, 150);
+          }
+        }
       });
     });
   }

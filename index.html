@@ -119,20 +119,93 @@
       </div>
     </div>
 
-    <!-- Mobile Drawer Overlay -->
+    <!-- Mobile Drawer Navigation Ultra-Luxe (Inspirée Maquette Sombre) -->
     <div class="mobile-nav-drawer" id="mobile-drawer">
-      <ul class="mobile-nav-list">
-        <li><a href="#collections" class="mobile-nav-link">Collections</a></li>
-        <li><a href="#pieces" class="mobile-nav-link">Nos Pièces</a></li>
-        <li><a href="#pourquoi" class="mobile-nav-link">À propos</a></li>
-        <li><a href="#atelier" class="mobile-nav-link">L'Atelier</a></li>
-        <li><a href="#galerie" class="mobile-nav-link">Galerie</a></li>
-        <li><a href="#temoignages" class="mobile-nav-link">Témoignages</a></li>
-      </ul>
-      <div class="mobile-nav-footer">
-        <a href="#pieces" class="btn btn-primary btn-block btn-shimmer" data-cta="order-now">
-          Commander ma tenue
-        </a>
+      <div class="mobile-drawer-inner">
+        
+        <!-- En-tête Drawer -->
+        <div class="mobile-drawer-header">
+          <div class="drawer-brand">
+            <img src="./assets/images/Favicon.png" alt="Frère Mixage" class="drawer-logo-img" />
+            <div class="drawer-brand-text">
+              <span class="drawer-brand-name">FRÈRE MIXAGE</span>
+              <span class="drawer-brand-sub">Maison de Haute Couture</span>
+            </div>
+          </div>
+          <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Fermer le menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Navigation Pill Capsules -->
+        <nav class="mobile-nav-pills">
+          <a href="#hero" class="mobile-nav-item active" style="--stagger: 1">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </div>
+            <span class="item-label">Accueil</span>
+            <span class="item-chevron">›</span>
+          </a>
+
+          <a href="#collections" class="mobile-nav-item" style="--stagger: 2">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </div>
+            <span class="item-label">Les 4 Collections</span>
+            <span class="item-chevron">›</span>
+          </a>
+
+          <a href="#pieces" class="mobile-nav-item" style="--stagger: 3">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <span class="item-label">Vestiaire & Catalogue</span>
+            <span class="item-chevron">›</span>
+          </a>
+
+          <a href="#atelier" class="mobile-nav-item" style="--stagger: 4">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+            </div>
+            <span class="item-label">L'Atelier & Savoir-Faire</span>
+            <span class="item-chevron">›</span>
+          </a>
+
+          <a href="#temoignages" class="mobile-nav-item" style="--stagger: 5">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <span class="item-label">Avis & Témoignages</span>
+            <span class="item-chevron">›</span>
+          </a>
+
+          <a href="./admin/" class="mobile-nav-item" style="--stagger: 6">
+            <div class="item-icon-box">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <span class="item-label">Espace Administrateur</span>
+            <span class="item-chevron">›</span>
+          </a>
+        </nav>
+
+        <!-- Carte Inférieure d'Apparat (Inspirée de la maquette) -->
+        <div class="mobile-drawer-featured">
+          <div class="featured-header">
+            <span class="featured-spark">⚡</span>
+            <span class="featured-title">Haute Couture Sur-Mesure</span>
+          </div>
+          <p class="featured-desc">
+            📍 Dakar &bull; Expédition express nationale & internationale.<br/>
+            Confection d'exception taillée à vos mesures.
+          </p>
+          <a href="#pieces" class="btn btn-primary drawer-cta-btn" data-cta="order-now">
+            COMMANDER MA TENUE →
+          </a>
+        </div>
+
       </div>
     </div>
   </header>
