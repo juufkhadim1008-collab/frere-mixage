@@ -31,6 +31,15 @@
 }
 
 /* Shimmer Highlight & Pulse Effects for CTA */
+@keyframes shimmerSkeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 @keyframes shimmerSweep {
   0% {
     transform: translateX(-150%) skewX(-25deg);

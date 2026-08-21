@@ -27,6 +27,7 @@ class AdminDashboard {
     this.currentInvoiceFilter = 'all';
     this.currentMeasurementFilter = 'all';
     this.selectedOrderId = 'FM-00125';
+    this.isSubmittingProduct = false;
     this.uploadedImages = [];
     this.invoiceLines = [
       { description: 'Grand Boubou Royal Getzner (Broderies Or)', quantity: 1, unitPrice: 150000 }
@@ -154,10 +155,20 @@ class AdminDashboard {
 
   async syncWithSupabase() {
     try {
-      // 1. Charger les produits réels depuis Supabase
+      // 1. Charger les produits réels depuis Supabase avec déduplication stricte
       const dbProducts = await ProductService.getAllProductsAdmin();
       if (Array.isArray(dbProducts)) {
-        this.state.products = dbProducts.map(p => {
+        const seenNames = new Set();
+        const uniqueDbProducts = [];
+        for (const p of dbProducts) {
+          const norm = (p.name || '').trim().toLowerCase();
+          if (norm && !seenNames.has(norm)) {
+            seenNames.add(norm);
+            uniqueDbProducts.push(p);
+          }
+        }
+
+        this.state.products = uniqueDbProducts.map(p => {
           const stockMap = {};
           if (p.product_variants) {
             p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
@@ -935,6 +946,11 @@ class AdminDashboard {
   }
 
   async saveProduct(statusOverride = null) {
+    if (this.isSubmittingProduct) {
+      console.warn('[saveProduct] Soumission déjà en cours, clic ignoré.');
+      return;
+    }
+
     const editId = document.getElementById('edit-prod-id')?.value;
     const name = document.getElementById('input-prod-name')?.value.trim();
     const cat = document.getElementById('select-prod-category')?.value || 'traditionnel';
@@ -949,134 +965,162 @@ class AdminDashboard {
       return;
     }
 
-    const stockObj = {
-      XS: parseInt(document.getElementById('stock-xs')?.value || 0, 10),
-      S: parseInt(document.getElementById('stock-s')?.value || 0, 10),
-      M: parseInt(document.getElementById('stock-m')?.value || 0, 10),
-      L: parseInt(document.getElementById('stock-l')?.value || 0, 10),
-      XL: parseInt(document.getElementById('stock-xl')?.value || 0, 10),
-      XXL: parseInt(document.getElementById('stock-xxl')?.value || 0, 10),
-      XXXL: parseInt(document.getElementById('stock-xxxl')?.value || 0, 10)
-    };
+    const submitBtn = document.querySelector('#form-add-product button[type="submit"]');
+    const draftBtn = document.getElementById('btn-save-draft');
+    const origSubmitHtml = submitBtn ? submitBtn.innerHTML : 'Publier la tenue';
 
-    const status = statusOverride || document.querySelector('input[name="prod_status"]:checked')?.value || 'published';
-    
-    const catMap = {
-      'traditionnel': 'Tenues Traditionnelles',
-      'costumes': 'Costumes Africains',
-      'modernes': 'Tenues Modernes',
-      'evenementiel': 'Collection Événementielle'
-    };
+    // Verrouillage immédiat
+    this.isSubmittingProduct = true;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `
+        <span style="display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:8px;vertical-align:middle;"></span>
+        Publication en cours...
+      `;
+    }
+    if (draftBtn) draftBtn.disabled = true;
 
-    const catObj = this.state.categories?.find(c => c.slug === cat) || { 
-      name: catMap[cat] || 'Tenues Traditionnelles', 
-      slug: cat || 'traditionnel' 
-    };
+    try {
+      const stockObj = {
+        XS: parseInt(document.getElementById('stock-xs')?.value || 0, 10),
+        S: parseInt(document.getElementById('stock-s')?.value || 0, 10),
+        M: parseInt(document.getElementById('stock-m')?.value || 0, 10),
+        L: parseInt(document.getElementById('stock-l')?.value || 0, 10),
+        XL: parseInt(document.getElementById('stock-xl')?.value || 0, 10),
+        XXL: parseInt(document.getElementById('stock-xxl')?.value || 0, 10),
+        XXXL: parseInt(document.getElementById('stock-xxxl')?.value || 0, 10)
+      };
 
-    const imagesToUse = this.uploadedImages.length > 0 
-      ? [...this.uploadedImages] 
-      : ['/assets/images/hero-frere-mixage.jpg'];
+      const status = statusOverride || document.querySelector('input[name="prod_status"]:checked')?.value || 'published';
+      
+      const catMap = {
+        'traditionnel': 'Tenues Traditionnelles',
+        'costumes': 'Costumes Africains',
+        'modernes': 'Tenues Modernes',
+        'evenementiel': 'Collection Événementielle'
+      };
 
-    if (editId) {
-      const index = this.state.products.findIndex(p => p.id === editId);
-      if (index !== -1) {
-        const existing = this.state.products[index];
-        const dbId = existing.dbId || existing.id;
+      const catObj = this.state.categories?.find(c => c.slug === cat) || { 
+        name: catMap[cat] || 'Tenues Traditionnelles', 
+        slug: cat || 'traditionnel' 
+      };
 
-        try {
-          const res = await ProductService.updateProduct(dbId, {
+      const imagesToUse = this.uploadedImages.length > 0 
+        ? [...this.uploadedImages] 
+        : ['/assets/images/hero-frere-mixage.jpg'];
+
+      if (editId) {
+        const index = this.state.products.findIndex(p => p.id === editId);
+        if (index !== -1) {
+          const existing = this.state.products[index];
+          const dbId = existing.dbId || existing.id;
+
+          try {
+            const res = await ProductService.updateProduct(dbId, {
+              name,
+              categorySlug: catObj.slug,
+              price,
+              sale_price: origPrice,
+              description: desc,
+              fabric,
+              status,
+              is_featured: status === 'published',
+              images: imagesToUse,
+              stock: stockObj
+            });
+            if (res && res.id) {
+              existing.dbId = res.id;
+            }
+          } catch (e) {
+            console.warn('[Supabase] Erreur mise à jour produit :', e);
+          }
+
+          this.state.products[index] = {
+            ...this.state.products[index],
             name,
+            category: catObj.name,
             categorySlug: catObj.slug,
             price,
-            sale_price: origPrice,
-            description: desc,
-            fabric,
+            originalPrice: origPrice,
+            badge: badge || '',
             status,
-            is_featured: status === 'published',
+            fabric: fabric || 'Bazin / Laine d’exception',
+            description: desc || 'Création haute couture sur mesure.',
             images: imagesToUse,
             stock: stockObj
-          });
-          if (res && res.id) {
-            existing.dbId = res.id;
-          }
-        } catch (e) {
-          console.warn('[Supabase] Erreur mise à jour produit :', e);
-        }
+          };
 
-        this.state.products[index] = {
-          ...this.state.products[index],
+          this.saveState();
+          this.resetProductForm();
+          this.renderProducts();
+          this.renderStocks();
+          this.renderCategories();
+          this.renderOverview();
+          this.showToast(`La tenue « ${name} » a été modifiée et synchronisée !`, 'success');
+          this.navigateTo('products');
+          return;
+        }
+      }
+
+      // Création d'un nouveau produit sur Supabase Cloud avec protection anti-doublon
+      let createdDbId = null;
+      try {
+        const res = await ProductService.createProduct({
           name,
-          category: catObj.name,
           categorySlug: catObj.slug,
           price,
-          originalPrice: origPrice,
-          badge: badge || '',
+          sale_price: origPrice,
+          description: desc,
+          fabric,
           status,
-          fabric: fabric || 'Bazin / Laine d’exception',
-          description: desc || 'Création haute couture sur mesure.',
+          is_featured: status === 'published',
           images: imagesToUse,
           stock: stockObj
-        };
-
-        this.saveState();
-        this.resetProductForm();
-        this.renderProducts();
-        this.renderStocks();
-        this.renderCategories();
-        this.renderOverview();
-        this.showToast(`La tenue « ${name} » a été modifiée et synchronisée !`, 'success');
-        this.navigateTo('products');
-        return;
+        });
+        if (res && res.id) createdDbId = res.id;
+      } catch (e) {
+        console.warn('[Supabase] Erreur création produit :', e);
       }
-    }
 
-    // Création d'un nouveau produit sur Supabase Cloud
-    let createdDbId = null;
-    try {
-      const res = await ProductService.createProduct({
+      const newProduct = {
+        id: createdDbId || `prod-${Date.now()}`,
+        dbId: createdDbId,
+        code: `FM-${Math.floor(100 + Math.random() * 900)}`,
         name,
+        category: catObj.name,
         categorySlug: catObj.slug,
         price,
-        sale_price: origPrice,
-        description: desc,
-        fabric,
+        originalPrice: origPrice,
+        badge: badge || 'Nouveau',
         status,
-        is_featured: status === 'published',
+        fabric: fabric || 'Tissu haute couture sélectionné',
+        description: desc || 'Création d’exception taillée sur mesure.',
         images: imagesToUse,
-        stock: stockObj
-      });
-      if (res && res.id) createdDbId = res.id;
-    } catch (e) {
-      console.warn('[Supabase] Erreur création produit :', e);
+        stock: stockObj,
+        salesCount: 0
+      };
+
+      // Éviter tout doublon local avec le même nom
+      this.state.products = this.state.products.filter(p => (p.name || '').trim().toLowerCase() !== name.toLowerCase());
+      this.state.products.unshift(newProduct);
+      
+      this.saveState();
+      this.resetProductForm();
+      this.renderProducts();
+      this.renderStocks();
+      this.renderCategories();
+      this.renderOverview();
+      this.showToast(`La tenue « ${name} » a été enregistrée avec succès !`, 'success');
+      this.navigateTo('products');
+    } finally {
+      // Déverrouillage dans tous les cas
+      this.isSubmittingProduct = false;
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origSubmitHtml;
+      }
+      if (draftBtn) draftBtn.disabled = false;
     }
-
-    const newProduct = {
-      id: createdDbId || `prod-${Date.now()}`,
-      dbId: createdDbId,
-      code: `FM-${Math.floor(100 + Math.random() * 900)}`,
-      name,
-      category: catObj.name,
-      categorySlug: catObj.slug,
-      price,
-      originalPrice: origPrice,
-      badge: badge || 'Nouveau',
-      status,
-      fabric: fabric || 'Tissu haute couture sélectionné',
-      description: desc || 'Création d’exception taillée sur mesure.',
-      images: imagesToUse,
-      stock: stockObj,
-      salesCount: 0
-    };
-
-    this.state.products.unshift(newProduct);
-    this.saveState();
-    this.resetProductForm();
-    this.renderProducts();
-    this.renderStocks();
-    this.renderCategories();
-    this.renderOverview();
-    this.showToast(`La tenue « ${name} » a été enregistrée et synchronisée !`, 'success');
-    this.navigateTo('products');
   }
 
   async deleteProduct(productId) {

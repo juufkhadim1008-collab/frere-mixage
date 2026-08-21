@@ -1,4 +1,4 @@
-import { getActiveCategories, formatPrice, getProductsByCategory, fetchLiveProductsFromSupabase } from '../products.js';
+import { getActiveCategories, formatPrice, getProductsByCategory, fetchLiveProductsFromSupabase, isProductsLoaded } from '../products.js';
 import { openProductModal } from './product-modal.js';
 import { openCheckoutWithProduct } from './checkout-modal.js';
 
@@ -13,57 +13,74 @@ export function initCatalog() {
 
   if (!productsGrid) return;
 
-  const categories = getActiveCategories();
-
-  // 1. Rendu des boutons de filtre de catégories
-  if (filterContainer) {
-    filterContainer.innerHTML = categories.map((cat) => `
-      <button 
-        class="filter-pill ${cat.id === activeCategory ? 'active' : ''}" 
-        data-category="${cat.id}"
-        aria-label="Filtrer par ${cat.label}"
-      >
-        ${cat.label}
-        <span class="filter-pill-count">(${cat.count})</span>
-      </button>
-    `).join('');
-
-    // Écouteurs de clic sur les filtres
-    filterContainer.querySelectorAll('.filter-pill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterContainer.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        activeCategory = btn.dataset.category;
-        renderProducts(activeCategory);
-      });
-    });
+  function renderSkeleton() {
+    productsGrid.innerHTML = `
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+      <div class="product-skeleton-card" style="background: rgba(22, 22, 28, 0.6); border: 1px solid rgba(198, 168, 104, 0.15); border-radius: 8px; overflow: hidden; padding: 1rem;">
+        <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(90deg, #121216 25%, #1e1e26 50%, #121216 75%); background-size: 200% 100%; animation: shimmerSkeleton 1.6s infinite; border-radius: 6px;"></div>
+        <div style="margin-top: 1rem; height: 12px; width: 40%; background: #1a1a22; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 18px; width: 75%; background: #22222c; border-radius: 4px;"></div>
+        <div style="margin-top: 0.5rem; height: 14px; width: 30%; background: #1a1a22; border-radius: 4px;"></div>
+      </div>
+    `;
   }
 
-  function updateFilterCounts() {
-    const updatedCats = getActiveCategories();
+  function updateFilterButtons() {
+    const categories = getActiveCategories();
     if (filterContainer) {
+      filterContainer.innerHTML = categories.map((cat) => `
+        <button 
+          class="filter-pill ${cat.id === activeCategory ? 'active' : ''}" 
+          data-category="${cat.id}"
+          aria-label="Filtrer par ${cat.label}"
+        >
+          ${cat.label}
+          <span class="filter-pill-count">(${cat.count})</span>
+        </button>
+      `).join('');
+
+      // Réattacher les écouteurs de clic
       filterContainer.querySelectorAll('.filter-pill').forEach(btn => {
-        const cat = updatedCats.find(c => c.id === btn.dataset.category);
-        if (cat) {
-          const countSpan = btn.querySelector('.filter-pill-count');
-          if (countSpan) countSpan.textContent = `(${cat.count})`;
-        }
+        btn.addEventListener('click', () => {
+          filterContainer.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeCategory = btn.dataset.category;
+          renderProducts(activeCategory);
+        });
       });
     }
   }
 
+  // 1. Initialisation des filtres
+  updateFilterButtons();
+
   // 2. Écoute de l'événement de synchronisation en direct
   window.addEventListener('supabase-products-synced', () => {
-    updateFilterCounts();
+    updateFilterButtons();
     renderProducts(activeCategory);
   });
 
-  // 3. Rendu initial des produits
-  renderProducts(activeCategory);
+  // 3. État initial : Si les produits ne sont pas encore en mémoire, afficher le skeleton
+  if (!isProductsLoaded()) {
+    renderSkeleton();
+  } else {
+    renderProducts(activeCategory);
+  }
 
-  // 4. Récupération en arrière-plan des produits Cloud Supabase
+  // 4. Récupération des produits Cloud Supabase
   fetchLiveProductsFromSupabase().then(() => {
-    updateFilterCounts();
+    updateFilterButtons();
     renderProducts(activeCategory);
   });
 

@@ -182,11 +182,35 @@ export class ProductService {
 
   /**
    * Crée un nouveau produit avec ses variantes de taille dans Supabase
+   * Protection anti-doublon et verrouillage d'idempotence inclus
    */
   static async createProduct(productData) {
     const supabase = await getSupabaseClient();
     
-    // 1. Récupérer la catégorie ID
+    // 1. Protection Anti-Doublon / Idempotence :
+    // Vérifie si un produit de même nom a été créé dans les 15 dernières secondes
+    if (productData.name) {
+      try {
+        const { data: recentMatches } = await supabase
+          .from('products')
+          .select('id, name, created_at')
+          .eq('name', productData.name.trim())
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (recentMatches && recentMatches.length > 0) {
+          const diffMs = Date.now() - new Date(recentMatches[0].created_at).getTime();
+          if (diffMs < 15000) { // 15 secondes : doublon bloqué
+            console.warn('[ProductService] Doublon bloqué avec succès pour :', productData.name);
+            return recentMatches[0];
+          }
+        }
+      } catch (checkErr) {
+        console.warn('[ProductService] Vérification anti-doublon :', checkErr);
+      }
+    }
+
+    // 2. Récupérer la catégorie ID
     const { data: catData } = await supabase
       .from('categories')
       .select('id')
@@ -195,13 +219,13 @@ export class ProductService {
 
     const categoryId = catData ? catData.id : null;
 
-    // 2. Insérer le produit
+    // 3. Insérer le produit
     const slug = (productData.name || 'tenue').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now().toString().slice(-4);
     
     const { data: newProd, error: prodError } = await supabase
       .from('products')
       .insert({
-        name: productData.name,
+        name: productData.name.trim(),
         slug: slug,
         category_id: categoryId,
         description: productData.description,
@@ -218,7 +242,7 @@ export class ProductService {
 
     if (prodError) throw prodError;
 
-    // 3. Insérer les variantes de stock
+    // 4. Insérer les variantes de stock
     if (productData.stock && Object.keys(productData.stock).length > 0) {
       const variantRows = Object.entries(productData.stock).map(([size, qty]) => ({
         product_id: newProd.id,
