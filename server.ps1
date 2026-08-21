@@ -38,10 +38,15 @@ try {
     while ($listener.IsListening) {
         $context = $listener.GetContext()
         try {
-            $request = $context.Request
-            $response = $context.Response
+            $rawPath = $request.Url.AbsolutePath
+            if ($rawPath -eq "/admin") {
+                $response.StatusCode = 301
+                $response.RedirectLocation = "/admin/"
+                $response.Close()
+                continue
+            }
 
-            $urlPath = [System.Uri]::UnescapeDataString($request.Url.AbsolutePath.TrimStart('/'))
+            $urlPath = [System.Uri]::UnescapeDataString($rawPath.TrimStart('/'))
             if ([string]::IsNullOrWhiteSpace($urlPath)) {
                 $urlPath = "index.html"
             }

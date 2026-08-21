@@ -4,11 +4,11 @@
  */
 
 import { INITIAL_DATA } from './mock-data.js';
-import { ProductService } from '../../assets/js/services/product-service.js';
-import { OrderService } from '../../assets/js/services/order-service.js';
-import { ContentService } from '../../assets/js/services/content-service.js';
-import { StockService } from '../../assets/js/services/stock-service.js';
-import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
+import { ProductService } from '/assets/js/services/product-service.js';
+import { OrderService } from '/assets/js/services/order-service.js';
+import { ContentService } from '/assets/js/services/content-service.js';
+import { StockService } from '/assets/js/services/stock-service.js';
+import { getSupabaseClient } from '/assets/js/services/supabase-client.js';
 
 class AdminDashboard {
   constructor() {
