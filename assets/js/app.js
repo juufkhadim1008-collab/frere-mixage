@@ -8,6 +8,18 @@ import { WhatsAppService } from './services/whatsapp.js';
 import { ContentService } from './services/content-service.js';
 import { getActiveProducts } from './products.js';
 
+// Nettoyage immédiat et définitif de tout ancien cache contenant des images fictives Unsplash
+try {
+  localStorage.removeItem('fm_covers_cache_v1');
+  localStorage.removeItem('fm_covers_cache_v2');
+  ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4'].forEach(k => {
+    const val = localStorage.getItem(k);
+    if (val && (val.includes('unsplash') || val.includes('1617137984095-74e4e5e3613f'))) {
+      localStorage.removeItem(k);
+    }
+  });
+} catch (e) {}
+
 /**
  * Initialisation principale de l'application FRÈRE MIXAGE
  */
@@ -48,10 +60,9 @@ export async function syncDynamicContent() {
   try {
     let state = {};
     try {
-      const raw = localStorage.getItem('frere_mixage_admin_state_v4') || 
-                  localStorage.getItem('frere_mixage_admin_state_v3') || 
-                  localStorage.getItem('frere_mixage_admin_state_v2') || 
-                  localStorage.getItem('frere_mixage_admin_state_v1');
+      const raw = localStorage.getItem('frere_mixage_admin_state_v5') ||
+                  localStorage.getItem('frere_mixage_admin_state_v4') || 
+                  localStorage.getItem('frere_mixage_admin_state_v3');
       if (raw) state = JSON.parse(raw);
     } catch (e) {}
 
@@ -71,7 +82,7 @@ export async function syncDynamicContent() {
                 </p>
               </div>
               <div class="testimonial-author-box">
-                <img src="${t.avatar_url || t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
+                <img src="${t.avatar_url || t.avatar || './assets/images/hero-frere-mixage.jpg'}"
                   alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
                 <div>
                   <div class="testimonial-name">${t.name}</div>
@@ -94,7 +105,7 @@ export async function syncDynamicContent() {
                 </p>
               </div>
               <div class="testimonial-author-box">
-                <img src="${t.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150'}"
+                <img src="${t.avatar || './assets/images/hero-frere-mixage.jpg'}"
                   alt="Client ${t.name}" class="testimonial-avatar" loading="lazy" />
                 <div>
                   <div class="testimonial-name">${t.name}</div>
@@ -199,8 +210,16 @@ export function updateCollectionCovers(products = null) {
 
   let cachedCovers = {};
   try {
-    const rawCache = localStorage.getItem('fm_covers_cache_v1');
-    if (rawCache) cachedCovers = JSON.parse(rawCache);
+    const rawCache = localStorage.getItem('fm_covers_cache_v2');
+    if (rawCache) {
+      const parsed = JSON.parse(rawCache);
+      // Supprimer les vieilles images Unsplash
+      Object.keys(parsed).forEach(k => {
+        if (parsed[k] && !parsed[k].includes('unsplash') && !parsed[k].includes('1617137984095')) {
+          cachedCovers[k] = parsed[k];
+        }
+      });
+    }
   } catch (e) {}
 
   const updatedCache = { ...cachedCovers };
@@ -223,13 +242,14 @@ export function updateCollectionCovers(products = null) {
       return pCat.includes(catKey);
     });
 
-    if (latestProd && latestProd.images && latestProd.images.length > 0 && latestProd.images[0]) {
+    if (latestProd && latestProd.images && latestProd.images.length > 0 && latestProd.images[0] && !latestProd.images[0].includes('unsplash') && !latestProd.images[0].includes('1617137984095')) {
       targetSrc = latestProd.images[0];
       updatedCache[catKey] = targetSrc;
     } else if (cachedCovers[catKey]) {
       targetSrc = cachedCovers[catKey];
-    } else if (defaultImages[catKey]) {
-      targetSrc = defaultImages[catKey];
+    } else {
+      targetSrc = defaultImages[catKey] || './assets/images/hero-frere-mixage.jpg';
+      updatedCache[catKey] = targetSrc;
     }
 
     if (targetSrc && imgEl.src !== targetSrc && !imgEl.src.endsWith(targetSrc.replace(/^\.?\//, ''))) {
@@ -238,7 +258,7 @@ export function updateCollectionCovers(products = null) {
   });
 
   try {
-    localStorage.setItem('fm_covers_cache_v1', JSON.stringify(updatedCache));
+    localStorage.setItem('fm_covers_cache_v2', JSON.stringify(updatedCache));
   } catch (e) {}
 }
 

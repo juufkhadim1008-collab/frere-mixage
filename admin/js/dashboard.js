@@ -13,7 +13,7 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v4';
+    this.storageKey = 'frere_mixage_admin_state_v5';
     this.state = this.loadState();
     this.currentView = 'overview';
     this.currentOrderFilter = 'all';
@@ -30,12 +30,12 @@ class AdminDashboard {
 
   loadState() {
     try {
-      const saved = localStorage.getItem(this.storageKey) || localStorage.getItem('frere_mixage_admin_state_v3');
+      const saved = localStorage.getItem(this.storageKey) || localStorage.getItem('frere_mixage_admin_state_v4') || localStorage.getItem('frere_mixage_admin_state_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.products && Array.isArray(parsed.products)) {
           parsed.products.forEach(p => {
-            if (p.images && p.images.length > 0 && p.images[0].includes('1617137984095-74e4e5e3613f')) {
+            if (p.images && p.images.length > 0 && (p.images[0].includes('1617137984095') || p.images[0].includes('unsplash'))) {
               p.images = ['../assets/images/hero-frere-mixage.jpg'];
             }
           });
@@ -57,12 +57,16 @@ class AdminDashboard {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
       localStorage.removeItem('frere_mixage_admin_state_v1');
       localStorage.removeItem('frere_mixage_admin_state_v2');
+      localStorage.removeItem('frere_mixage_admin_state_v3');
+      localStorage.removeItem('frere_mixage_admin_state_v4');
       window.dispatchEvent(new Event('storage'));
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
         localStorage.removeItem('frere_mixage_admin_state_v1');
         localStorage.removeItem('frere_mixage_admin_state_v2');
+        localStorage.removeItem('frere_mixage_admin_state_v3');
+        localStorage.removeItem('frere_mixage_admin_state_v4');
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));
         window.dispatchEvent(new Event('storage'));
       } catch (err2) {
@@ -627,9 +631,11 @@ class AdminDashboard {
   // 2. PRODUITS & FILTRES
   // ===================================================================
   formatImageUrl(url) {
-    if (!url || typeof url !== 'string') return '../assets/images/logo-frere-mixage.png';
+    if (!url || typeof url !== 'string' || url.includes('unsplash') || url.includes('1617137984095')) {
+      return '../assets/images/hero-frere-mixage.jpg';
+    }
     const trimmed = url.trim();
-    if (!trimmed) return '../assets/images/logo-frere-mixage.png';
+    if (!trimmed) return '../assets/images/hero-frere-mixage.jpg';
     if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;
     }

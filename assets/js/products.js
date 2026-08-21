@@ -18,9 +18,9 @@ export function getActiveProducts() {
   }
 
   try {
-    const saved = localStorage.getItem('frere_mixage_admin_state_v3') || 
-                  localStorage.getItem('frere_mixage_admin_state_v2') || 
-                  localStorage.getItem('frere_mixage_admin_state_v1');
+    const saved = localStorage.getItem('frere_mixage_admin_state_v5') ||
+                  localStorage.getItem('frere_mixage_admin_state_v4') ||
+                  localStorage.getItem('frere_mixage_admin_state_v3');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.products && parsed.products.length > 0) {
@@ -40,6 +40,10 @@ export function getActiveProducts() {
           else if (catStr.includes('evenement') || catStr.includes('magal') || catStr.includes('gamou') || catStr.includes('korite') || catStr.includes('fete')) cat = 'evenementiel';
           else if (catStr.includes('tradition') || catStr.includes('boubou')) cat = 'traditionnel';
 
+          const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('unsplash') && !p.images[0].includes('1617137984095')) 
+            ? p.images 
+            : ['./assets/images/hero-frere-mixage.jpg'];
+
           return {
             id: p.id || p.code,
             dbId: p.dbId || null,
@@ -58,9 +62,7 @@ export function getActiveProducts() {
               'Broderies de précision',
               'Coupe élégante et confortable'
             ],
-            images: (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f')) 
-              ? p.images 
-              : ['./assets/images/hero-frere-mixage.jpg'],
+            images: validImages,
             availableSizes: availableSizes,
             stock: p.stock || { 'M': 5, 'L': 5, 'XL': 5 }
           };
