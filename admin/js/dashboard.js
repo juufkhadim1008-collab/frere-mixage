@@ -233,13 +233,23 @@ class AdminDashboard {
     // Mobile Sidebar Toggle
     const mobileToggle = document.getElementById('mobile-toggle-btn');
     const sidebar = document.getElementById('admin-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
     if (mobileToggle && sidebar) {
-      mobileToggle.addEventListener('click', () => {
-        sidebar.classList.toggle('mobile-open');
+      mobileToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = sidebar.classList.toggle('mobile-open');
+        if (backdrop) backdrop.classList.toggle('active', isOpen);
       });
+      if (backdrop) {
+        backdrop.addEventListener('click', () => {
+          sidebar.classList.remove('mobile-open');
+          backdrop.classList.remove('active');
+        });
+      }
       document.addEventListener('click', (e) => {
         if (!sidebar.contains(e.target) && !mobileToggle.contains(e.target)) {
           sidebar.classList.remove('mobile-open');
+          if (backdrop) backdrop.classList.remove('active');
         }
       });
     }
@@ -303,6 +313,12 @@ class AdminDashboard {
 
     const targetSection = document.getElementById(`view-${viewId}`);
     if (!targetSection) return;
+
+    // Fermeture automatique du tiroir mobile lors de la navigation
+    const sidebar = document.getElementById('admin-sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (sidebar) sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
 
     this.currentView = viewId;
     if (updateHash) {
