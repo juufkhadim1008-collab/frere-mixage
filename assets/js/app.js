@@ -12,8 +12,9 @@ import { getActiveProducts } from './products.js';
  * Initialisation principale de l'application FRÈRE MIXAGE
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialisation des composants interactifs
+  // 1. Initialisation des composants interactifs & Couvertures instantanées 0ms
   initHeader();
+  updateCollectionCovers(getActiveProducts());
   initCatalog();
   initProductModal();
   initCheckoutModal();
@@ -185,7 +186,7 @@ export async function syncDynamicContent() {
 }
 
 /**
- * Met à jour les 4 cartes de collections avec la toute dernière photo publiée de cette catégorie
+ * Met à jour les 4 cartes de collections instantanément avec cache ultra-rapide
  */
 export function updateCollectionCovers(products = null) {
   const currentProds = products || getActiveProducts();
@@ -196,10 +197,20 @@ export function updateCollectionCovers(products = null) {
     evenementiel: './assets/images/hero-frere-mixage.jpg'
   };
 
+  let cachedCovers = {};
+  try {
+    const rawCache = localStorage.getItem('fm_covers_cache_v1');
+    if (rawCache) cachedCovers = JSON.parse(rawCache);
+  } catch (e) {}
+
+  const updatedCache = { ...cachedCovers };
+
   document.querySelectorAll('.collection-card').forEach(card => {
-    const catKey = card.dataset.category; // 'traditionnel', 'costumes', 'modernes', 'evenementiel'
+    const catKey = card.dataset.category;
     const imgEl = card.querySelector('img.collection-image');
     if (!imgEl || !catKey) return;
+
+    let targetSrc = '';
 
     // Trouver la dernière création publiée de cette catégorie
     const latestProd = (currentProds || []).find(p => {
@@ -213,11 +224,22 @@ export function updateCollectionCovers(products = null) {
     });
 
     if (latestProd && latestProd.images && latestProd.images.length > 0 && latestProd.images[0]) {
-      imgEl.src = latestProd.images[0];
+      targetSrc = latestProd.images[0];
+      updatedCache[catKey] = targetSrc;
+    } else if (cachedCovers[catKey]) {
+      targetSrc = cachedCovers[catKey];
     } else if (defaultImages[catKey]) {
-      imgEl.src = defaultImages[catKey];
+      targetSrc = defaultImages[catKey];
+    }
+
+    if (targetSrc && imgEl.src !== targetSrc && !imgEl.src.endsWith(targetSrc.replace(/^\.?\//, ''))) {
+      imgEl.src = targetSrc;
     }
   });
+
+  try {
+    localStorage.setItem('fm_covers_cache_v1', JSON.stringify(updatedCache));
+  } catch (e) {}
 }
 
 /**
