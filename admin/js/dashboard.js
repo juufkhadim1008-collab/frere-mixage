@@ -13,10 +13,10 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v6';
+    this.storageKey = 'frere_mixage_admin_state_v7';
     
-    // Purge immédiate de toutes les anciennes versions de cache contenant des résidus fictifs
-    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5'].forEach(k => {
+    // Purge immédiate de toutes les anciennes versions de cache
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 

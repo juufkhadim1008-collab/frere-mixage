@@ -68,7 +68,7 @@ export class ProductService {
       }
     }
 
-    if (!rawData || rawData.length === 0) return null;
+    if (!rawData || rawData.length === 0) return [];
 
     // Déduplication intelligente par nom : conserve 1 seul exemplaire unique par création
     const seenPublishedNames = new Set();
@@ -100,7 +100,7 @@ export class ProductService {
 
       const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash'))
         ? p.images
-        : ['/assets/images/ab8459f150d5d7db346654de338434e5.jpg'];
+        : [];
 
       return {
         id: p.slug || p.id,
@@ -127,7 +127,7 @@ export class ProductService {
   }
 
   /**
-   * Récupère tous les produits (publiés et brouillons) pour le dashboard
+   * Récupère tous les produits publiés pour le dashboard
    */
   static async getAllProductsAdmin() {
     let rawData = null;
@@ -161,6 +161,7 @@ export class ProductService {
               stock
             )
           `)
+          .eq('status', 'published')
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data)) rawData = data;
@@ -172,7 +173,7 @@ export class ProductService {
     // 2. Fallback direct HTTP Fetch REST (100% fiable)
     if (!rawData) {
       try {
-        const url = `${SUPABASE_URL}/rest/v1/products?select=id,name,slug,description,price,sale_price,fabric,lead_time,status,is_featured,images,created_at,categories(id,name,slug),product_variants(size,stock)&order=created_at.desc`;
+        const url = `${SUPABASE_URL}/rest/v1/products?select=id,name,slug,description,price,sale_price,fabric,lead_time,status,is_featured,images,created_at,categories(id,name,slug),product_variants(size,stock)&status=eq.published&order=created_at.desc`;
         const res = await fetch(url, {
           headers: {
             'apikey': SUPABASE_ANON_KEY,
