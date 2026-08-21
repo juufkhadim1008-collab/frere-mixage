@@ -62,10 +62,10 @@ export function getActiveProducts() {
             }
             if (availableSizes.length === 0) availableSizes.push('M', 'L', 'XL');
 
-            let cat = 'traditionnel';
+            let cat = p.categorySlug || 'traditionnel';
             const catStr = (p.categorySlug || p.category || '').toLowerCase();
             if (catStr.includes('costume')) cat = 'costumes';
-            else if (catStr.includes('ensemble') || catStr.includes('moderne') || catStr.includes('chemise') || catStr.includes('pantalon')) cat = 'modernes';
+            else if (catStr.includes('moderne') || catStr.includes('ensemble') || catStr.includes('chemise') || catStr.includes('pantalon')) cat = 'modernes';
             else if (catStr.includes('evenement') || catStr.includes('magal') || catStr.includes('gamou') || catStr.includes('korite') || catStr.includes('fete')) cat = 'evenementiel';
             else if (catStr.includes('tradition') || catStr.includes('boubou')) cat = 'traditionnel';
 
@@ -87,7 +87,7 @@ export function getActiveProducts() {
                 'Broderies de précision faites main',
                 'Coupe élégante et confortable'
               ],
-              images: (p.images && p.images.length > 0) ? p.images : ['/assets/images/hero-frere-mixage.jpg'],
+              images: (p.images && p.images.length > 0) ? p.images : [],
               availableSizes: availableSizes,
               stock: p.stock || { 'M': 5, 'L': 5, 'XL': 5 }
             };
@@ -115,7 +115,7 @@ export async function fetchLiveProductsFromSupabase() {
 
   try {
     const remote = await ProductService.getPublishedProducts();
-    if (Array.isArray(remote)) {
+    if (Array.isArray(remote) && remote.length > 0) {
       memoryProducts = remote;
       window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: remote }));
       return remote;
@@ -126,7 +126,10 @@ export async function fetchLiveProductsFromSupabase() {
     isFetchingLive = false;
   }
 
-  return getActiveProducts();
+  const local = getActiveProducts();
+  memoryProducts = local;
+  window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: local }));
+  return local;
 }
 
 export const PRODUCTS = getActiveProducts();

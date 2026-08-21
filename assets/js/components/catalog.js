@@ -114,12 +114,16 @@ export function initCatalog() {
         <span class="size-pill-mini">${s}</span>
       `).join('');
 
+      const displayImg = (product.images && product.images.length > 0 && product.images[0]) 
+        ? product.images[0] 
+        : '/assets/images/logo-frere-mixage.png';
+
       return `
         <article class="product-card reveal-on-scroll stagger-${(idx % 3) + 1}" data-product-id="${product.id}">
           <div class="product-media">
             ${badgeHtml}
             <img 
-              src="${product.images[0]}" 
+              src="${displayImg}" 
               alt="${product.name} — Frère Mixage Haute Couture" 
               class="product-image"
               loading="lazy"

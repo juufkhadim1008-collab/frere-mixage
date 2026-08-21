@@ -1116,8 +1116,8 @@ class AdminDashboard {
         salesCount: 0
       };
 
-      // Éviter tout doublon local avec le même nom
-      this.state.products = this.state.products.filter(p => (p.name || '').trim().toLowerCase() !== name.toLowerCase());
+      // Conserver tous les produits, remplacer uniquement si même ID
+      this.state.products = this.state.products.filter(p => p.id !== newProduct.id);
       this.state.products.unshift(newProduct);
       
       this.saveState();
