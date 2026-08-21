@@ -13,10 +13,10 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v10';
+    this.storageKey = 'frere_mixage_admin_state_v11';
     
-    // Purge immédiate de TOUTES les anciennes versions de cache (v1 à v9)
-    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
+    // Purge immédiate de TOUTES les anciennes versions de cache (v1 à v10)
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9', 'frere_mixage_admin_state_v10'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 
@@ -55,7 +55,7 @@ class AdminDashboard {
   saveState() {
     try {
       localStorage.setItem(this.storageKey, JSON.stringify(this.state));
-      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
+      ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9', 'frere_mixage_admin_state_v10'].forEach(k => {
         try { localStorage.removeItem(k); } catch (e) {}
       });
       window.dispatchEvent(new Event('storage'));
@@ -66,7 +66,7 @@ class AdminDashboard {
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
-        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9'].forEach(k => {
+        ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8', 'frere_mixage_admin_state_v9', 'frere_mixage_admin_state_v10'].forEach(k => {
           try { localStorage.removeItem(k); } catch (err) {}
         });
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));
@@ -3831,16 +3831,20 @@ class AdminDashboard {
       this.state.accounting = JSON.parse(JSON.stringify(INITIAL_DATA.accounting || {}));
     }
 
-    const acc = this.state.accounting;
+    const acc = this.state.accounting || {};
     const expenses = acc.expensesList || [];
 
-    // Recalcul des dépenses totales
-    const totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0) || acc.totalExpenses || 378000;
-    const totalRevenue = acc.totalRevenue || 600000;
+    // Recalcul des dépenses totales réelles (0 si aucune dépense)
+    const totalExpenses = expenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+    
+    // Recalcul des recettes totales réelles à partir des commandes et factures payées
+    const paidOrdersRevenue = (this.state.orders || []).filter(o => o.paymentStatus === 'payé' || o.status === 'delivered').reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
+    const paidInvoicesRevenue = (this.state.invoices || []).filter(i => i.status === 'paid').reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
+    const totalRevenue = Math.max(paidOrdersRevenue, paidInvoicesRevenue, acc.totalRevenue || 0);
     const netProfit = totalRevenue - totalExpenses;
     const netMargin = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) + '%' : '0.0%';
 
-    // Calcul factures impayées
+    // Calcul factures impayées réelles
     const unpaidInvoices = (this.state.invoices || []).filter(i => i.status === 'pending' || i.status === 'unpaid');
     const unpaidTotal = unpaidInvoices.reduce((sum, i) => sum + (Number(i.totalAmount) || 0), 0);
 
@@ -3851,9 +3855,9 @@ class AdminDashboard {
     };
 
     setElem('acc-total-revenue', `${totalRevenue.toLocaleString('fr-FR')} FCFA`);
-    setElem('acc-month-revenue', `Ce mois: ${(acc.monthRevenue || 20000).toLocaleString('fr-FR')} FCFA`);
+    setElem('acc-month-revenue', `Ce mois: ${(acc.monthRevenue || 0).toLocaleString('fr-FR')} FCFA`);
     setElem('acc-total-expenses', `${totalExpenses.toLocaleString('fr-FR')} FCFA`);
-    setElem('acc-month-expenses', `Ce mois: ${(acc.monthExpenses || 3000).toLocaleString('fr-FR')} FCFA`);
+    setElem('acc-month-expenses', `Ce mois: ${(acc.monthExpenses || 0).toLocaleString('fr-FR')} FCFA`);
     setElem('acc-net-profit', `${netProfit.toLocaleString('fr-FR')} FCFA`);
     setElem('acc-net-margin', `Marge: ${netMargin}`);
     setElem('acc-unpaid-invoices', `${unpaidTotal.toLocaleString('fr-FR')} FCFA`);
@@ -3946,16 +3950,16 @@ class AdminDashboard {
         { month: 'Mar', revenue: 0, expenses: 0, profit: 0 },
         { month: 'Avr', revenue: 0, expenses: 0, profit: 0 },
         { month: 'Mai', revenue: 0, expenses: 0, profit: 0 },
-        { month: 'Juin', revenue: 220000, expenses: 0, profit: 220000 },
-        { month: 'Juil', revenue: 360000, expenses: 375000, profit: -15000 },
-        { month: 'Août', revenue: 20000, expenses: 3000, profit: 17000 }
+        { month: 'Juin', revenue: 0, expenses: 0, profit: 0 },
+        { month: 'Juil', revenue: 0, expenses: 0, profit: 0 },
+        { month: 'Août', revenue: 0, expenses: 0, profit: 0 }
       ];
 
-      const maxVal = 375000;
-      const minVal = -125000;
-      const range = maxVal - minVal;
+      const maxVal = 100000;
+      const minVal = 0;
+      const range = 100000;
       const chartHeight = h - paddingTop - paddingBottom;
-      const zeroY = paddingTop + (maxVal / range) * chartHeight;
+      const zeroY = h - paddingBottom;
 
       // Lignes de repère
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
@@ -3964,14 +3968,14 @@ class AdminDashboard {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
       ctx.textAlign = 'right';
 
-      [375000, 250000, 125000, 0, -125000].forEach(val => {
+      [100000, 50000, 0].forEach(val => {
         const y = paddingTop + ((maxVal - val) / range) * chartHeight;
         ctx.beginPath();
         ctx.moveTo(paddingLeft, y);
         ctx.lineTo(w - paddingRight, y);
         ctx.stroke();
 
-        ctx.fillText(val === 0 ? '0' : val >= 1000 ? `${val / 1000}K` : `${val}`, paddingLeft - 8, y + 3);
+        ctx.fillText(val === 0 ? '0' : `${val / 1000}K`, paddingLeft - 8, y + 3);
       });
 
       // Barres par mois
@@ -3988,7 +3992,6 @@ class AdminDashboard {
         ctx.textAlign = 'center';
         ctx.fillText(d.month, centerX, h - 10);
 
-        // Barre 1 : Bénéfice (Vert Émeraude #10B981)
         if (d.profit !== 0) {
           const profitY = paddingTop + ((maxVal - Math.max(0, d.profit)) / range) * chartHeight;
           const profitH = (Math.abs(d.profit) / range) * chartHeight;
@@ -3996,7 +3999,6 @@ class AdminDashboard {
           ctx.fillRect(centerX - 10, d.profit >= 0 ? profitY : zeroY, barWidth, profitH);
         }
 
-        // Barre 2 : Dépenses (Bronze Noble #8C7853)
         if (d.expenses > 0) {
           const expY = paddingTop + ((maxVal - d.expenses) / range) * chartHeight;
           const expH = (d.expenses / range) * chartHeight;
@@ -4004,7 +4006,6 @@ class AdminDashboard {
           ctx.fillRect(centerX - 3, expY, barWidth, expH);
         }
 
-        // Barre 3 : Recettes (Or Royal #D4AF37)
         if (d.revenue > 0) {
           const revY = paddingTop + ((maxVal - d.revenue) / range) * chartHeight;
           const revH = (d.revenue / range) * chartHeight;
@@ -4033,47 +4034,63 @@ class AdminDashboard {
 
       ctx.clearRect(0, 0, w, h);
 
-      const categories = acc.expensesByCategory || [
-        { category: 'Tissus & Bazin', amount: 150000, percentage: 40, color: '#D4AF37' },
-        { category: 'Équipement & Atelier', amount: 210000, percentage: 40, color: '#E57373' },
-        { category: 'Transport & Logistique', amount: 38000, percentage: 10, color: '#F59E0B' },
-        { category: 'Divers & Fournitures', amount: 130000, percentage: 25, color: '#71717A' }
-      ];
+      const categories = acc.expensesByCategory || [];
+      const total = categories.reduce((sum, c) => sum + (c.amount || 0), 0);
 
-      const total = categories.reduce((sum, c) => sum + c.amount, 0) || 1;
-      let startAngle = -Math.PI / 2;
-
-      categories.forEach(cat => {
-        const sliceAngle = (cat.amount / total) * 2 * Math.PI;
+      if (total === 0) {
+        // Cercle vide élégant
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-        ctx.arc(centerX, centerY, innerRadius, startAngle + sliceAngle, startAngle, true);
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(centerX, centerY, innerRadius, 2 * Math.PI, 0, true);
         ctx.closePath();
-        ctx.fillStyle = cat.color;
+        ctx.fillStyle = 'rgba(212, 175, 55, 0.15)';
         ctx.fill();
 
-        startAngle += sliceAngle;
-      });
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('DÉPENSES', centerX, centerY - 8);
 
-      // Texte au centre du Donut
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-      ctx.font = '10px Inter, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('DÉPENSES', centerX, centerY - 8);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.fillText('0 FCFA', centerX, centerY + 10);
+      } else {
+        let startAngle = -Math.PI / 2;
+        categories.forEach(cat => {
+          const sliceAngle = (cat.amount / total) * 2 * Math.PI;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+          ctx.arc(centerX, centerY, innerRadius, startAngle + sliceAngle, startAngle, true);
+          ctx.closePath();
+          ctx.fillStyle = cat.color;
+          ctx.fill();
 
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 12px Inter, sans-serif';
-      ctx.fillText(`${total.toLocaleString('fr-FR')} FCFA`, centerX, centerY + 10);
+          startAngle += sliceAngle;
+        });
+
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('DÉPENSES', centerX, centerY - 8);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 12px Inter, sans-serif';
+        ctx.fillText(`${total.toLocaleString('fr-FR')} FCFA`, centerX, centerY + 10);
+      }
 
       // Légende
       const legendEl = document.getElementById('acc-expenses-legend');
       if (legendEl) {
-        legendEl.innerHTML = categories.map(cat => `
-          <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted);">
-            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${cat.color};"></span>
-            ${cat.category} (${cat.percentage}%)
-          </span>
-        `).join('');
+        if (categories.length === 0) {
+          legendEl.innerHTML = '<span style="color: var(--text-dim); font-size: 0.8rem;">Aucune dépense enregistrée</span>';
+        } else {
+          legendEl.innerHTML = categories.map(cat => `
+            <span style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted);">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: ${cat.color};"></span>
+              ${cat.category} (${cat.percentage}%)
+            </span>
+          `).join('');
+        }
       }
     }
   }
