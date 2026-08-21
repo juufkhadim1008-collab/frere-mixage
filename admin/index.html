@@ -265,7 +265,10 @@
               <h1 class="page-title">Bonjour, bienvenue dans votre espace Frère Mixage.</h1>
               <p class="page-subtitle">Voici un aperçu de votre activité et des performances de l'atelier.</p>
             </div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-secondary btn-sm" onclick="window.dashboard.syncAllLocalProductsToSupabaseCloud()" style="background: linear-gradient(135deg, rgba(197, 160, 89, 0.2), rgba(197, 160, 89, 0.05)); border: 1px solid var(--gold); color: var(--gold-light);">
+                ☁️ Synchroniser vers Vercel / Cloud
+              </button>
               <button class="btn btn-primary btn-sm" onclick="window.dashboard.navigateTo('add-product')">
                 + Ajouter une tenue
               </button>

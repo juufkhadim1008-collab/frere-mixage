@@ -248,17 +248,40 @@ class AdminDashboard {
         this.saveState();
         this.renderTestimonials();
       }
-
-      // 4. Charger le contenu À Propos / Atelier depuis Supabase
-      const dbAbout = await ContentService.getAboutContent();
-      if (dbAbout) {
-        this.state.about = dbAbout;
-        this.saveState();
-        this.renderAboutForm();
-      }
     } catch (err) {
-      console.warn('[Dashboard.syncWithSupabase] Mode local actif :', err.message);
+      console.warn('[Dashboard.syncWithSupabase] Sync notice:', err.message);
     }
+  }
+
+  async syncAllLocalProductsToSupabaseCloud() {
+    this.showToast('Synchronisation des tenues vers Supabase Cloud et Vercel en cours...', 'info');
+    let count = 0;
+    for (const p of this.state.products) {
+      try {
+        const catSlug = p.categorySlug || (p.category && p.category.toLowerCase().includes('costume') ? 'costumes' : p.category && p.category.toLowerCase().includes('moderne') ? 'modernes' : p.category && p.category.toLowerCase().includes('evenement') ? 'evenementiel' : 'traditionnel');
+
+        const res = await ProductService.createProduct({
+          name: p.name,
+          categorySlug: catSlug,
+          price: p.price,
+          sale_price: p.originalPrice || null,
+          description: p.description,
+          fabric: p.fabric,
+          status: p.status || 'published',
+          is_featured: Boolean(p.is_featured || p.badge === 'Prestige'),
+          images: p.images || [],
+          stock: p.stock || { 'M': 5, 'L': 5, 'XL': 5 }
+        });
+        if (res && res.id) {
+          p.dbId = res.id;
+          count++;
+        }
+      } catch (err) {
+        console.warn('[Sync Error]', err);
+      }
+    }
+    this.saveState();
+    this.showToast(`✅ ${count} créations synchronisées avec succès vers Supabase Cloud & Vercel !`, 'success');
   }
 
   bindEvents() {

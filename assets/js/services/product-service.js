@@ -3,7 +3,7 @@
  * Gère les interactions avec Supabase pour les produits, catégories et variantes.
  */
 
-import { getSupabaseClient, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-client.js';
+import { getSupabaseClient, getSupabaseAdminClient, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-client.js';
 
 export class ProductService {
   /**
@@ -207,7 +207,7 @@ export class ProductService {
    * Crée un nouveau produit avec ses variantes de taille dans Supabase
    */
   static async createProduct(productData) {
-    const supabase = await getSupabaseClient();
+    const supabase = await getSupabaseAdminClient();
 
     // 2. Récupérer la catégorie ID
     const { data: catData } = await supabase
@@ -263,7 +263,7 @@ export class ProductService {
    * Met à jour un produit existant dans Supabase
    */
   static async updateProduct(productId, productData) {
-    const supabase = await getSupabaseClient();
+    const supabase = await getSupabaseAdminClient();
 
     // 1. Récupérer la catégorie ID
     const { data: catData } = await supabase
@@ -349,7 +349,7 @@ export class ProductService {
    * Supprime un produit et ses variantes de Supabase
    */
   static async deleteProduct(productId) {
-    const supabase = await getSupabaseClient();
+    const supabase = await getSupabaseAdminClient();
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
     
     let targetId = isUuid ? productId : null;
