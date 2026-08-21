@@ -777,7 +777,7 @@ class AdminDashboard {
                  alt="${p.name}" 
                  class="product-admin-image"
                  loading="lazy"
-                 onerror="this.onerror=null; this.src='../assets/images/logo-frere-mixage.png'">
+                 onerror="this.onerror=null; this.src='/assets/images/hero-frere-mixage.jpg'">
             <div class="product-admin-status-badge">
               ${this.getProductStatusBadge(p.status)}
             </div>

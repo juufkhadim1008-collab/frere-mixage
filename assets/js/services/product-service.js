@@ -70,8 +70,19 @@ export class ProductService {
 
     if (!rawData || rawData.length === 0) return null;
 
+    // Déduplication intelligente par nom : conserve 1 seul exemplaire unique par création
+    const seenPublishedNames = new Set();
+    const uniquePublished = [];
+    for (const p of rawData) {
+      const norm = (p.name || '').trim().toLowerCase();
+      if (norm && !seenPublishedNames.has(norm)) {
+        seenPublishedNames.add(norm);
+        uniquePublished.push(p);
+      }
+    }
+
     // Transformer en format unifié pour l'application
-    return rawData.map(p => {
+    return uniquePublished.map(p => {
       const catSlug = p.categories ? p.categories.slug : 'traditionnel';
       const catName = p.categories ? p.categories.name : 'Tenue Traditionnelle';
 
@@ -89,7 +100,7 @@ export class ProductService {
 
       const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash'))
         ? p.images
-        : ['/assets/images/hero-frere-mixage.jpg'];
+        : ['/assets/images/ab8459f150d5d7db346654de338434e5.jpg'];
 
       return {
         id: p.slug || p.id,
@@ -177,7 +188,20 @@ export class ProductService {
       }
     }
 
-    return rawData;
+    if (!Array.isArray(rawData)) return [];
+
+    // Déduplication stricte par nom pour le Dashboard
+    const seenAdminNames = new Set();
+    const uniqueAdminProducts = [];
+    for (const p of rawData) {
+      const norm = (p.name || '').trim().toLowerCase();
+      if (norm && !seenAdminNames.has(norm)) {
+        seenAdminNames.add(norm);
+        uniqueAdminProducts.push(p);
+      }
+    }
+
+    return uniqueAdminProducts;
   }
 
   /**
