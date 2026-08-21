@@ -156,47 +156,50 @@ class AdminDashboard {
 
   async syncWithSupabase() {
     try {
-      // 1. Charger les produits réels depuis Supabase (uniquement publiés)
+      // 1. Charger les produits réels depuis Supabase
       const dbProducts = await ProductService.getAllProductsAdmin();
-      if (Array.isArray(dbProducts)) {
-        if (dbProducts.length === 0) {
-          this.state.products = [];
-        } else {
-          const seenNames = new Set();
-          const uniqueDbProducts = [];
-          for (const p of dbProducts) {
-            const norm = (p.name || '').trim().toLowerCase();
-            if (norm && !seenNames.has(norm)) {
-              seenNames.add(norm);
-              uniqueDbProducts.push(p);
-            }
+      if (Array.isArray(dbProducts) && dbProducts.length > 0) {
+        const seenNames = new Set();
+        const uniqueDbProducts = [];
+        for (const p of dbProducts) {
+          const norm = (p.name || '').trim().toLowerCase();
+          if (norm && !seenNames.has(norm)) {
+            seenNames.add(norm);
+            uniqueDbProducts.push(p);
           }
-
-          this.state.products = uniqueDbProducts.map(p => {
-            const stockMap = {};
-            if (p.product_variants) {
-              p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
-            }
-            const realImages = (p.images && p.images.length > 0) ? p.images : [];
-
-            return {
-              id: p.slug || p.id,
-              dbId: p.id,
-              name: p.name,
-              code: (p.slug || 'FM-REF').toUpperCase(),
-              category: p.categories ? p.categories.name : 'Tenue Traditionnelle',
-              categorySlug: p.categories ? p.categories.slug : 'traditionnel',
-              price: p.sale_price || p.price,
-              originalPrice: p.sale_price ? p.price : null,
-              status: p.status,
-              badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
-              description: p.description || '',
-              fabric: p.fabric || '',
-              images: realImages,
-              stock: stockMap
-            };
-          });
         }
+
+        const mappedDbProducts = uniqueDbProducts.map(p => {
+          const stockMap = {};
+          if (p.product_variants) {
+            p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
+          }
+          const realImages = (p.images && p.images.length > 0) ? p.images : [];
+
+          return {
+            id: p.slug || p.id,
+            dbId: p.id,
+            name: p.name,
+            code: (p.slug || 'FM-REF').toUpperCase(),
+            category: p.categories ? p.categories.name : 'Tenue Traditionnelle',
+            categorySlug: p.categories ? p.categories.slug : 'traditionnel',
+            price: p.sale_price || p.price,
+            originalPrice: p.sale_price ? p.price : null,
+            status: p.status,
+            badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
+            description: p.description || '',
+            fabric: p.fabric || '',
+            images: realImages,
+            stock: stockMap
+          };
+        });
+
+        // Conserver les produits locaux créés par l'utilisateur
+        const currentLocal = this.state.products || [];
+        const dbNames = new Set(mappedDbProducts.map(p => p.name.trim().toLowerCase()));
+        const localOnly = currentLocal.filter(p => !dbNames.has((p.name || '').trim().toLowerCase()));
+        
+        this.state.products = [...mappedDbProducts, ...localOnly];
         this.saveState();
         this.renderProducts();
         this.renderStocks();
