@@ -36,7 +36,7 @@ class AdminDashboard {
         if (parsed.products && Array.isArray(parsed.products)) {
           parsed.products.forEach(p => {
             if (p.images && p.images.length > 0 && (p.images[0].includes('1617137984095') || p.images[0].includes('unsplash'))) {
-              p.images = ['../assets/images/hero-frere-mixage.jpg'];
+              p.images = ['/assets/images/hero-frere-mixage.jpg'];
             }
           });
         }
@@ -157,9 +157,9 @@ class AdminDashboard {
           if (p.product_variants) {
             p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
           }
-          const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095-74e4e5e3613f'))
+          const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash'))
             ? p.images
-            : ['../assets/images/hero-frere-mixage.jpg'];
+            : ['/assets/images/hero-frere-mixage.jpg'];
 
           return {
             id: p.slug || p.id,
@@ -632,17 +632,17 @@ class AdminDashboard {
   // ===================================================================
   formatImageUrl(url) {
     if (!url || typeof url !== 'string' || url.includes('unsplash') || url.includes('1617137984095')) {
-      return '../assets/images/hero-frere-mixage.jpg';
+      return '/assets/images/hero-frere-mixage.jpg';
     }
     const trimmed = url.trim();
-    if (!trimmed) return '../assets/images/hero-frere-mixage.jpg';
+    if (!trimmed) return '/assets/images/hero-frere-mixage.jpg';
     if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;
     }
-    if (trimmed.startsWith('../')) return trimmed;
-    if (trimmed.startsWith('./')) return '../' + trimmed.slice(2);
-    if (trimmed.startsWith('/')) return '..' + trimmed;
-    return '../' + trimmed;
+    if (trimmed.startsWith('/')) return trimmed;
+    if (trimmed.startsWith('./')) return '/' + trimmed.slice(2);
+    if (trimmed.startsWith('../')) return '/' + trimmed.slice(3);
+    return '/' + trimmed;
   }
 
   setProductFilter(filterId, btnEl = null) {
@@ -963,7 +963,7 @@ class AdminDashboard {
 
     const imagesToUse = this.uploadedImages.length > 0 
       ? [...this.uploadedImages] 
-      : ['../assets/images/hero-frere-mixage.jpg'];
+      : ['/assets/images/hero-frere-mixage.jpg'];
 
     if (editId) {
       const index = this.state.products.findIndex(p => p.id === editId);
@@ -1239,18 +1239,18 @@ class AdminDashboard {
 
     // Image de repli standard
     const fallbackMap = {
-      'cat-traditionnel': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
-      'cat-costumes': '../assets/images/hero-frere-mixage.jpg',
-      'cat-modernes': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
-      'cat-evenementiel': '../assets/images/hero-frere-mixage.jpg',
-      'traditionnel': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
-      'costumes': '../assets/images/hero-frere-mixage.jpg',
-      'modernes': '../assets/images/ab8459f150d5d7db346654de338434e5.jpg',
-      'evenementiel': '../assets/images/hero-frere-mixage.jpg'
+      'cat-traditionnel': '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'cat-costumes': '/assets/images/hero-frere-mixage.jpg',
+      'cat-modernes': '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'cat-evenementiel': '/assets/images/hero-frere-mixage.jpg',
+      'traditionnel': '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'costumes': '/assets/images/hero-frere-mixage.jpg',
+      'modernes': '/assets/images/ab8459f150d5d7db346654de338434e5.jpg',
+      'evenementiel': '/assets/images/hero-frere-mixage.jpg'
     };
 
     return { 
-      url: fallbackMap[category.id] || fallbackMap[category.slug] || '../assets/images/hero-frere-mixage.jpg', 
+      url: fallbackMap[category.id] || fallbackMap[category.slug] || '/assets/images/hero-frere-mixage.jpg', 
       isCustom: false, 
       label: 'Photo officielle' 
     };
@@ -2825,8 +2825,8 @@ class AdminDashboard {
     setVal('about-badge-3', badges[2]);
 
     // Images
-    const img1 = a.image1 || '../assets/images/ab8459f150d5d7db346654de338434e5.jpg';
-    const img2 = a.image2 || '../assets/images/hero-frere-mixage.jpg';
+    const img1 = a.image1 || '/assets/images/ab8459f150d5d7db346654de338434e5.jpg';
+    const img2 = a.image2 || '/assets/images/hero-frere-mixage.jpg';
 
     setVal('about-image-1', a.image1 || '');
     setVal('about-image-2', a.image2 || '');
