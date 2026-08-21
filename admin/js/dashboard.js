@@ -163,9 +163,9 @@ class AdminDashboard {
 
   async syncWithSupabase() {
     try {
-      // 1. Charger les produits réels depuis Supabase avec déduplication stricte
+      // 1. Charger les produits réels depuis Supabase (uniquement publiés)
       const dbProducts = await ProductService.getAllProductsAdmin();
-      if (Array.isArray(dbProducts)) {
+      if (Array.isArray(dbProducts) && dbProducts.length > 0) {
         const seenNames = new Set();
         const uniqueDbProducts = [];
         for (const p of dbProducts) {
@@ -181,9 +181,8 @@ class AdminDashboard {
           if (p.product_variants) {
             p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
           }
-          const validImages = (p.images && p.images.length > 0 && !p.images[0].includes('1617137984095') && !p.images[0].includes('unsplash'))
-            ? p.images
-            : ['/assets/images/hero-frere-mixage.jpg'];
+          // Utiliser uniquement les vraies images uploadées, jamais de fallback
+          const realImages = (p.images && p.images.length > 0) ? p.images : [];
 
           return {
             id: p.slug || p.id,
@@ -198,7 +197,7 @@ class AdminDashboard {
             badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
             description: p.description || '',
             fabric: p.fabric || '',
-            images: validImages,
+            images: realImages,
             stock: stockMap
           };
         });
@@ -668,11 +667,11 @@ class AdminDashboard {
   // 2. PRODUITS & FILTRES
   // ===================================================================
   formatImageUrl(url) {
-    if (!url || typeof url !== 'string' || url.includes('unsplash') || url.includes('1617137984095')) {
-      return '/assets/images/hero-frere-mixage.jpg';
+    if (!url || typeof url !== 'string') {
+      return '';
     }
     const trimmed = url.trim();
-    if (!trimmed) return '/assets/images/hero-frere-mixage.jpg';
+    if (!trimmed) return '';
     if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       return trimmed;
     }
@@ -775,15 +774,14 @@ class AdminDashboard {
 
       const firstImage = (p.images && p.images.length > 0) ? p.images[0] : '';
       const displayImage = this.formatImageUrl(firstImage);
+      const imageHtml = displayImage
+        ? `<img src="${displayImage}" alt="${p.name}" class="product-admin-image" loading="lazy" onerror="this.style.display='none'">`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#16161C;color:#4a4a5a;font-size:3rem;">👔</div>`;
 
       return `
         <div class="product-admin-card">
           <div class="product-admin-image-box">
-            <img src="${displayImage}" 
-                 alt="${p.name}" 
-                 class="product-admin-image"
-                 loading="lazy"
-                 onerror="this.onerror=null; this.src='/assets/images/hero-frere-mixage.jpg'">
+            ${imageHtml}
             <div class="product-admin-status-badge">
               ${this.getProductStatusBadge(p.status)}
             </div>
