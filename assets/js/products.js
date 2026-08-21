@@ -14,6 +14,28 @@ export function isProductsLoaded() {
   return memoryProducts !== null;
 }
 
+export function invalidateProductsCache() {
+  memoryProducts = null;
+}
+
+// Synchronisation instantanée temps réel inter-onglets (Dashboard <-> Vitrine)
+try {
+  const channel = new BroadcastChannel('frere_mixage_sync');
+  channel.onmessage = (event) => {
+    if (event.data?.type === 'STATE_UPDATED') {
+      memoryProducts = null;
+      window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: getActiveProducts() }));
+    }
+  };
+} catch (e) {}
+
+window.addEventListener('storage', (e) => {
+  if (!e.key || e.key === 'frere_mixage_admin_state_v6') {
+    memoryProducts = null;
+    window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: getActiveProducts() }));
+  }
+});
+
 /**
  * Charge les produits en temps réel depuis Supabase (Cloud) ou le cache local validé
  */

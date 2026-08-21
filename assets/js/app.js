@@ -42,7 +42,17 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. Initialisation des observateurs de défilement pour les animations fluides
   initScrollReveals();
 
-  // 5. Écoute des mises à jour en direct depuis Supabase et l'admin
+  // 5. Écoute des mises à jour en direct depuis Supabase et l'admin (BroadcastChannel & Storage)
+  try {
+    const channel = new BroadcastChannel('frere_mixage_sync');
+    channel.onmessage = (event) => {
+      if (event.data?.type === 'STATE_UPDATED') {
+        initCatalog();
+        syncDynamicContent();
+      }
+    };
+  } catch (e) {}
+
   window.addEventListener('storage', () => {
     initCatalog();
     syncDynamicContent();

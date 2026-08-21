@@ -66,6 +66,10 @@ class AdminDashboard {
         try { localStorage.removeItem(k); } catch (e) {}
       });
       window.dispatchEvent(new Event('storage'));
+      try {
+        const channel = new BroadcastChannel('frere_mixage_sync');
+        channel.postMessage({ type: 'STATE_UPDATED', timestamp: Date.now() });
+      } catch (e) {}
     } catch (e) {
       console.warn('Erreur localStorage (quota), tentative de nettoyage...', e);
       try {
@@ -74,6 +78,10 @@ class AdminDashboard {
         });
         localStorage.setItem(this.storageKey, JSON.stringify(this.state));
         window.dispatchEvent(new Event('storage'));
+        try {
+          const channel = new BroadcastChannel('frere_mixage_sync');
+          channel.postMessage({ type: 'STATE_UPDATED', timestamp: Date.now() });
+        } catch (e) {}
       } catch (err2) {
         console.error('Erreur critique de sauvegarde locale :', err2);
       }
