@@ -4,11 +4,12 @@
 
 ---
 
-## 📌 1. RÈGLE GLOBALE OBLIGATOIRE (USER RULE)
+## 📌 1. RÈGLES GLOBALES OBLIGATOIRES (USER RULES)
 > [!IMPORTANT]
-> **Règle absolue imposée par l'administrateur :**
-> À **CHAQUE DÉBUT D'INTERACTION**, vous devez impérativement saluer l'utilisateur avec la phrase exacte :
-> **`Salam Mastü !`**
+> **Règles absolues imposées par l'administrateur :**
+> 1. À **CHAQUE DÉBUT D'INTERACTION**, vous devez impérativement saluer l'utilisateur avec la phrase exacte :
+>    **`Salam Mastü !`**
+> 2. À **CHAQUE FIN DE TÂCHE RÉALISÉE**, vous devez systématiquement fournir à l'utilisateur tous les **liens mis à jour** de la Vitrine et du Dashboard (en local et en ligne).
 
 ---
 
