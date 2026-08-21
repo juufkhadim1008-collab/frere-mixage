@@ -13,10 +13,10 @@ import { getSupabaseClient } from '../../assets/js/services/supabase-client.js';
 class AdminDashboard {
   constructor() {
     window.dashboard = this;
-    this.storageKey = 'frere_mixage_admin_state_v8';
+    this.storageKey = 'frere_mixage_admin_state_v9';
     
-    // Purge immédiate de TOUTES les anciennes versions de cache (v7 était infecté par les anciennes données Supabase)
-    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7'].forEach(k => {
+    // Purge immédiate de TOUTES les anciennes versions de cache (v1 à v8)
+    ['frere_mixage_admin_state_v1', 'frere_mixage_admin_state_v2', 'frere_mixage_admin_state_v3', 'frere_mixage_admin_state_v4', 'frere_mixage_admin_state_v5', 'frere_mixage_admin_state_v6', 'frere_mixage_admin_state_v7', 'frere_mixage_admin_state_v8'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 
@@ -158,42 +158,45 @@ class AdminDashboard {
     try {
       // 1. Charger les produits réels depuis Supabase (uniquement publiés)
       const dbProducts = await ProductService.getAllProductsAdmin();
-      if (Array.isArray(dbProducts) && dbProducts.length > 0) {
-        const seenNames = new Set();
-        const uniqueDbProducts = [];
-        for (const p of dbProducts) {
-          const norm = (p.name || '').trim().toLowerCase();
-          if (norm && !seenNames.has(norm)) {
-            seenNames.add(norm);
-            uniqueDbProducts.push(p);
+      if (Array.isArray(dbProducts)) {
+        if (dbProducts.length === 0) {
+          this.state.products = [];
+        } else {
+          const seenNames = new Set();
+          const uniqueDbProducts = [];
+          for (const p of dbProducts) {
+            const norm = (p.name || '').trim().toLowerCase();
+            if (norm && !seenNames.has(norm)) {
+              seenNames.add(norm);
+              uniqueDbProducts.push(p);
+            }
           }
+
+          this.state.products = uniqueDbProducts.map(p => {
+            const stockMap = {};
+            if (p.product_variants) {
+              p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
+            }
+            const realImages = (p.images && p.images.length > 0) ? p.images : [];
+
+            return {
+              id: p.slug || p.id,
+              dbId: p.id,
+              name: p.name,
+              code: (p.slug || 'FM-REF').toUpperCase(),
+              category: p.categories ? p.categories.name : 'Tenue Traditionnelle',
+              categorySlug: p.categories ? p.categories.slug : 'traditionnel',
+              price: p.sale_price || p.price,
+              originalPrice: p.sale_price ? p.price : null,
+              status: p.status,
+              badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
+              description: p.description || '',
+              fabric: p.fabric || '',
+              images: realImages,
+              stock: stockMap
+            };
+          });
         }
-
-        this.state.products = uniqueDbProducts.map(p => {
-          const stockMap = {};
-          if (p.product_variants) {
-            p.product_variants.forEach(v => { stockMap[v.size] = v.stock; });
-          }
-          // Utiliser uniquement les vraies images uploadées, jamais de fallback
-          const realImages = (p.images && p.images.length > 0) ? p.images : [];
-
-          return {
-            id: p.slug || p.id,
-            dbId: p.id,
-            name: p.name,
-            code: (p.slug || 'FM-REF').toUpperCase(),
-            category: p.categories ? p.categories.name : 'Tenue Traditionnelle',
-            categorySlug: p.categories ? p.categories.slug : 'traditionnel',
-            price: p.sale_price || p.price,
-            originalPrice: p.sale_price ? p.price : null,
-            status: p.status,
-            badge: p.sale_price ? 'Promotion' : (p.is_featured ? 'Prestige' : ''),
-            description: p.description || '',
-            fabric: p.fabric || '',
-            images: realImages,
-            stock: stockMap
-          };
-        });
         this.saveState();
         this.renderProducts();
         this.renderStocks();

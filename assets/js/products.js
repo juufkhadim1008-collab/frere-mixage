@@ -30,7 +30,7 @@ try {
 } catch (e) {}
 
 window.addEventListener('storage', (e) => {
-  if (!e.key || e.key === 'frere_mixage_admin_state_v8') {
+  if (!e.key || e.key === 'frere_mixage_admin_state_v9') {
     memoryProducts = null;
     window.dispatchEvent(new CustomEvent('supabase-products-synced', { detail: getActiveProducts() }));
   }
@@ -45,7 +45,7 @@ export function getActiveProducts() {
   }
 
   try {
-    const saved = localStorage.getItem('frere_mixage_admin_state_v8');
+    const saved = localStorage.getItem('frere_mixage_admin_state_v9');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed.products && Array.isArray(parsed.products) && parsed.products.length > 0) {
