@@ -2106,3 +2106,252 @@ input:checked + .slider-round:before {
     overflow-x: auto;
   }
 }
+
+/* ==========================================================================
+   MODULE MENSURATIONS & FICHES D'ATELIER SUR-MESURE
+   ========================================================================== */
+.measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .measurements-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.measurement-card {
+  background: var(--admin-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.measurement-card:hover {
+  border-color: var(--gold-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 15px rgba(198, 168, 104, 0.12);
+  transform: translateY(-2px);
+}
+
+.measurement-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.measurement-client-title {
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.measurement-client-meta {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.measurement-badge-garment {
+  background: rgba(198, 168, 104, 0.12);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.measurement-metrics-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+
+.measurement-metrics-box {
+  background: var(--admin-card-inner, #16161C);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+}
+
+.measurement-metrics-box-title {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.measurement-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+}
+
+.measurement-metrics-item {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+
+.measurement-metrics-item strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.measurement-notes-preview {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--gold);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-bottom: 1.25rem;
+  font-style: italic;
+}
+
+.measurement-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Formulaire de Prise de Mesures */
+.measurement-form-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .measurement-form-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.measurements-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.measurement-input-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-with-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-unit .form-input {
+  padding-right: 2.2rem;
+  font-weight: 600;
+  color: var(--gold-light, #f0d69e);
+}
+
+.input-unit {
+  position: absolute;
+  right: 10px;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  pointer-events: none;
+  font-weight: 600;
+}
+
+.measurement-hint {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin-top: 3px;
+  line-height: 1.2;
+}
+
+/* Fiche d'Atelier Imprimable Noir & Or A4 */
+.atelier-sheet-modal-box {
+  background: #0A0A0C;
+  color: #FFFFFF;
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 2.5rem;
+  max-width: 750px;
+  margin: 0 auto;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+}
+
+.atelier-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--gold);
+  margin-bottom: 1.5rem;
+}
+
+.atelier-sheet-logo {
+  height: 48px;
+}
+
+.atelier-sheet-badge {
+  background: rgba(198, 168, 104, 0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.atelier-sheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.atelier-sheet-table th,
+.atelier-sheet-table td {
+  padding: 10px 14px;
+  border: 1px solid rgba(198, 168, 104, 0.25);
+  text-align: left;
+}
+
+.atelier-sheet-table th {
+  background: rgba(198, 168, 104, 0.1);
+  color: var(--gold);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.atelier-sheet-table td {
+  font-size: 0.88rem;
+}
+

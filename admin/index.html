@@ -124,13 +124,26 @@
           </ul>
         </div>
 
-        <!-- Section CLIENTS -->
+        <!-- Section SUR-MESURE & CLIENTS -->
         <div>
-          <div class="nav-section-title">CLIENTS</div>
+          <div class="nav-section-title">SUR-MESURE & CLIENTS</div>
           <ul class="nav-list">
             <li>
+              <a href="#measurements" class="nav-item-link" data-view="measurements">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 8.7 8.7 21.3c-.4.4-1 .4-1.4 0l-4.6-4.6c-.4-.4-.4-1 0-1.4L15.3 2.7c.4-.4 1-.4 1.4 0l4.6 4.6c.4.4.4 1 0 1.4z"/><path d="m7.5 13.5 2 2"/><path d="m10.5 10.5 2 2"/><path d="m13.5 7.5 2 2"/><path d="m16.5 4.5 2 2"/></svg>
+                <span>Mensurations</span>
+                <span class="nav-badge-count" id="nav-measurements-count">2</span>
+              </a>
+            </li>
+            <li>
+              <a href="#add-measurement" class="nav-item-link" data-view="add-measurement">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Prendre Mesures</span>
+              </a>
+            </li>
+            <li>
               <a href="#customers" class="nav-item-link" data-view="customers">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <span>Clients</span>
               </a>
             </li>
@@ -969,6 +982,290 @@
             </div>
 
           </div>
+
+        </section>
+
+        <!-- ====================================================
+             7. VUE : MENSURATIONS CLIENTS (#measurements)
+             ==================================================== -->
+        <section id="view-measurements" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title">Mensurations & Fiches d'Atelier</h1>
+              <p class="page-subtitle">Prenez, enregistrez et consultez les mesures sur-mesure de vos clients pour la confection de vos pièces d'exception.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="btn btn-primary" onclick="window.dashboard.navigateTo('add-measurement')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                + Nouvelle Fiche Mesure
+              </button>
+            </div>
+          </div>
+
+          <!-- Barre de Recherche & Filtres -->
+          <div class="filter-bar" style="margin-bottom: 1.5rem;">
+            <div class="filter-pills" id="measurements-filter-pills">
+              <button class="filter-pill-btn active" data-mfilter="all" onclick="window.dashboard.setMeasurementFilter('all', this)">Toutes les fiches</button>
+              <button class="filter-pill-btn" data-mfilter="boubou" onclick="window.dashboard.setMeasurementFilter('boubou', this)">Boubous Traditionnels</button>
+              <button class="filter-pill-btn" data-mfilter="costume" onclick="window.dashboard.setMeasurementFilter('costume', this)">Costumes Sahéliens</button>
+              <button class="filter-pill-btn" data-mfilter="moderne" onclick="window.dashboard.setMeasurementFilter('moderne', this)">Ensembles Modernes</button>
+            </div>
+
+            <div class="table-search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="measurements-search-input" placeholder="Rechercher un client, téléphone, occasion..." oninput="window.dashboard.renderMeasurements()" />
+            </div>
+          </div>
+
+          <!-- Grille des Fiches de Mensurations -->
+          <div id="measurements-grid" class="measurements-grid">
+            <!-- Injecté par JavaScript -->
+          </div>
+
+        </section>
+
+        <!-- ====================================================
+             7.1 VUE : PRISE DE MESURES CLIENT (#add-measurement)
+             ==================================================== -->
+        <section id="view-add-measurement" class="view-section">
+          
+          <div class="page-header">
+            <div>
+              <h1 class="page-title" id="add-measurement-title">Prise de Mesures — Haute Couture</h1>
+              <p class="page-subtitle">Saisie guidée et rapide des mensurations d'atelier pour boubous, costumes et pantalons.</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="window.dashboard.navigateTo('measurements')">
+              ← Retour aux fiches
+            </button>
+          </div>
+
+          <form id="form-add-measurement" onsubmit="window.dashboard.handleSaveMeasurement(event)">
+            <input type="hidden" id="edit-measurement-id" value="" />
+
+            <div class="measurement-form-layout">
+
+              <!-- Colonne Gauche : Identité & Haut -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Bloc 1 : Client & Projet -->
+                <div class="admin-card">
+                  <div class="form-section-title" style="margin-bottom: 1rem; color: var(--gold); display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    1. Informations Client & Événement
+                  </div>
+
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label class="form-label">Nom complet du client *</label>
+                      <input type="text" id="mes-client-name" class="form-input" placeholder="Ex: Ousmane Ba" required list="mes-clients-datalist" />
+                      <datalist id="mes-clients-datalist">
+                        <!-- Rempli dynamiquement -->
+                      </datalist>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Téléphone WhatsApp (Sénégal / Diaspora) *</label>
+                      <input type="text" id="mes-client-phone" class="form-input" placeholder="Ex: +221 77 123 45 67" required />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2" style="margin-top: 1rem;">
+                    <div class="form-group">
+                      <label class="form-label">Ville / Quartier</label>
+                      <input type="text" id="mes-client-city" class="form-input" placeholder="Ex: Dakar (Almadies), Paris, Abidjan..." />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Occasion / Événement</label>
+                      <input type="text" id="mes-occasion" class="form-input" placeholder="Ex: Mariage Royal, Tabaski, Magal, Quotidien..." />
+                    </div>
+                  </div>
+
+                  <div class="form-row-2" style="margin-top: 1rem;">
+                    <div class="form-group">
+                      <label class="form-label">Type de création visée</label>
+                      <select id="mes-garment-type" class="form-select">
+                        <option value="Grand Boubou 3 Pièces Bazin">Grand Boubou 3 Pièces (Bazin Getzner)</option>
+                        <option value="Boubou 2 Pièces Traditionnel">Boubou 2 Pièces Traditionnel</option>
+                        <option value="Costume Sahélien Col Officier">Costume Sahélien (Col Officier)</option>
+                        <option value="Ensemble Lin Peigné Moderne">Ensemble Lin Peigné Moderne</option>
+                        <option value="Chemise & Pantalon d’Apparat">Chemise & Pantalon d’Apparat</option>
+                        <option value="Autre Tenue Sur-Mesure">Autre Tenue Sur-Mesure</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Coupe souhaitée</label>
+                      <select id="mes-fit-preference" class="form-select">
+                        <option value="Ample Traditionnelle Royale">Ample Traditionnelle Royale (Grand Boubou)</option>
+                        <option value="Ajustée / Moderne (Slim Chic)">Ajustée / Moderne (Slim Chic)</option>
+                        <option value="Coupe Confort Équilibrée">Coupe Confort Équilibrée</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bloc 2 : Mesures du Haut -->
+                <div class="admin-card">
+                  <div class="form-section-title" style="margin-bottom: 1rem; color: var(--gold); display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                    2. Mesures du Haut (Boubou / Veste / Chemise)
+                  </div>
+
+                  <div class="measurements-inputs-grid">
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Longueur Boubou / Veste</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-boubou-length" class="form-input" placeholder="150" min="40" max="200" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">De l'épaule jusqu'aux chevilles / genoux</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Carrure / Épaules</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-shoulder-width" class="form-input" placeholder="48" min="30" max="80" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">D'une pointe d'épaule à l'autre</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Poitrine</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-chest-circ" class="form-input" placeholder="108" min="50" max="170" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Au plus fort de la poitrine</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Longueur Manches</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-sleeve-length" class="form-input" placeholder="65" min="20" max="100" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">De l'épaule jusqu'au poignet</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Cou</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-neck-circ" class="form-input" placeholder="42" min="30" max="60" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Base du cou (col officier)</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Bras (Biceps)</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-bicep-circ" class="form-input" placeholder="36" min="20" max="65" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Au plus large du bras</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Poignet</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-wrist-circ" class="form-input" placeholder="20" min="12" max="35" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Finition bas de manche</small>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Colonne Droite : Bas & Notes Atelier -->
+              <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <!-- Bloc 3 : Mesures du Bas (Pantalon) -->
+                <div class="admin-card">
+                  <div class="form-section-title" style="margin-bottom: 1rem; color: var(--gold); display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l4-2 4 2V2z"/><path d="M12 2v20l4-2 4 2V2z"/></svg>
+                    3. Mesures du Bas (Pantalon)
+                  </div>
+
+                  <div class="measurements-inputs-grid">
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Longueur Pantalon</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-pants-length" class="form-input" placeholder="104" min="60" max="140" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">De la ceinture au talon</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Ceinture / Taille</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-waist-circ" class="form-input" placeholder="92" min="50" max="160" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Ligne naturelle de la ceinture</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Bassin / Hanches</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-hips-circ" class="form-input" placeholder="106" min="60" max="170" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Endroit le plus large des hanches</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Tour de Cuisse</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-thigh-circ" class="form-input" placeholder="60" min="30" max="100" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Haut de cuisse confortable</small>
+                    </div>
+
+                    <div class="form-group measurement-input-item">
+                      <label class="form-label">Bas de Pantalon (Cheville)</label>
+                      <div class="input-with-unit">
+                        <input type="number" id="mes-ankle-width" class="form-input" placeholder="19" min="12" max="35" step="0.5" />
+                        <span class="input-unit">cm</span>
+                      </div>
+                      <small class="measurement-hint">Ouverture bas de jambe</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Bloc 4 : Remarques Atelier & Actions -->
+                <div class="admin-card">
+                  <div class="form-section-title" style="margin-bottom: 1rem; color: var(--gold); display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    4. Instructions de Coupe & Notes Tailleur
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label">Notes particulières pour l'atelier</label>
+                    <textarea id="mes-notes" class="form-textarea" rows="4" placeholder="Ex: Épaule droite 1cm plus basse, fentes latérales 20cm, broderie fil d'or mat, doublure soie légère..."></textarea>
+                  </div>
+
+                  <!-- Boutons d'action -->
+                  <div style="display: flex; gap: 12px; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                      Enregistrer la Fiche
+                    </button>
+                    
+                    <button type="button" class="btn" style="background: #25D366; color: #fff; border: none; font-weight: 600; padding: 0.75rem 1.25rem; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px;" onclick="window.dashboard.saveAndShareMeasurementWhatsApp()">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.276-.1-.476-.15-.677.15-.2.301-.777.979-.953 1.18-.175.2-.351.226-.652.076-.301-.15-1.272-.469-2.424-1.496-.897-.799-1.503-1.786-1.68-2.087-.175-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.15-.175.2-.301.301-.501.1-.2.05-.376-.025-.527-.076-.15-.677-1.633-.928-2.235-.245-.586-.494-.506-.677-.516h-.577c-.2 0-.527.075-.803.376s-1.054 1.029-1.054 2.508c0 1.48 1.079 2.909 1.229 3.11.151.2 2.124 3.243 5.145 4.549.719.311 1.28.497 1.718.636.723.23 1.38.197 1.9.12.58-.087 1.78-.727 2.03-1.429.251-.702.251-1.304.176-1.43-.075-.125-.276-.201-.577-.351z"/></svg>
+                      Enregistrer & WhatsApp
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </form>
 
         </section>
 

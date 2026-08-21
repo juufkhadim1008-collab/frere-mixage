@@ -473,5 +473,60 @@ export const INITIAL_DATA = {
       { id: 'exp-4', date: '2026-07-28', category: 'Divers & Fournitures', description: 'Housses de costumes siglées Frère Mixage & cintres bois', amount: 80000, paymentMethod: 'Virement' },
       { id: 'exp-5', date: '2026-07-15', category: 'Divers & Fournitures', description: 'Fournitures mercerie haute couture et boutons ébène', amount: 50000, paymentMethod: 'Wave' }
     ]
-  }
+  },
+
+  measurements: [
+    {
+      id: 'MES-001',
+      clientName: 'El Hadj Mansour Cissé',
+      clientPhone: '+221 77 550 12 34',
+      clientCity: 'Dakar (Fann Résidence)',
+      occasion: 'Mariage Royal & Tabaski',
+      garmentType: 'Grand Boubou 3 Pièces Bazin Riche',
+      fitPreference: 'Ample Traditionnelle Royale',
+      date: '2026-08-20',
+      // Haut (cm)
+      boubouLength: 152,
+      shoulderWidth: 49,
+      chestCircumference: 112,
+      sleeveLength: 66,
+      neckCircumference: 43,
+      bicepCircumference: 38,
+      wristCircumference: 22,
+      // Bas (cm)
+      pantsLength: 106,
+      waistCircumference: 96,
+      hipsCircumference: 108,
+      thighCircumference: 62,
+      ankleWidth: 21,
+      // Notes
+      notes: 'Col officier brodé fil d’or mat. Fente côté droit 22cm. Préférence pour grand tombé noble.'
+    },
+    {
+      id: 'MES-002',
+      clientName: 'Cheikh Tidiane Sy',
+      clientPhone: '+221 78 120 34 56',
+      clientCity: 'Dakar (Point E)',
+      occasion: 'Cérémonie Officielle & Magal',
+      garmentType: 'Costume Sahélien & Ensemble Lin',
+      fitPreference: 'Ajustée / Moderne',
+      date: '2026-08-15',
+      // Haut (cm)
+      boubouLength: 82,
+      shoulderWidth: 47,
+      chestCircumference: 104,
+      sleeveLength: 64,
+      neckCircumference: 41,
+      bicepCircumference: 35,
+      wristCircumference: 19,
+      // Bas (cm)
+      pantsLength: 102,
+      waistCircumference: 88,
+      hipsCircumference: 102,
+      thighCircumference: 58,
+      ankleWidth: 18,
+      // Notes
+      notes: 'Coupe veste cintrée avec pinces italiennes. Poches passepoilées dorées.'
+    }
+  ]
 };

@@ -25,6 +25,7 @@ class AdminDashboard {
     this.currentOrderFilter = 'all';
     this.currentProductFilter = 'all';
     this.currentInvoiceFilter = 'all';
+    this.currentMeasurementFilter = 'all';
     this.selectedOrderId = 'FM-00125';
     this.uploadedImages = [];
     this.invoiceLines = [
@@ -131,6 +132,7 @@ class AdminDashboard {
     if (!Array.isArray(this.state.customers)) this.state.customers = JSON.parse(JSON.stringify(INITIAL_DATA.customers || []));
     if (!Array.isArray(this.state.categories)) this.state.categories = JSON.parse(JSON.stringify(INITIAL_DATA.categories || []));
     if (!Array.isArray(this.state.invoices)) this.state.invoices = JSON.parse(JSON.stringify(INITIAL_DATA.invoices || []));
+    if (!Array.isArray(this.state.measurements)) this.state.measurements = JSON.parse(JSON.stringify(INITIAL_DATA.measurements || []));
     if (!Array.isArray(this.state.testimonials)) this.state.testimonials = JSON.parse(JSON.stringify(INITIAL_DATA.testimonials || []));
     if (!this.state.about) this.state.about = JSON.parse(JSON.stringify(INITIAL_DATA.about || {}));
     if (!this.state.accounting) this.state.accounting = JSON.parse(JSON.stringify(INITIAL_DATA.accounting || {}));
@@ -386,6 +388,7 @@ class AdminDashboard {
     this.renderOrders();
     this.renderOrderDetail();
     this.renderCustomers();
+    this.renderMeasurements();
     this.renderInvoices();
     this.renderTestimonials();
     this.renderAboutForm();
@@ -418,6 +421,12 @@ class AdminDashboard {
         break;
       case 'customers':
         this.renderCustomers();
+        break;
+      case 'measurements':
+        this.renderMeasurements();
+        break;
+      case 'add-measurement':
+        this.populateMeasurementDatalist();
         break;
       case 'invoices':
         this.renderInvoices();
@@ -1943,6 +1952,489 @@ class AdminDashboard {
       <div style="display: flex; justify-content: flex-end; gap: 10px;">
         <a href="https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-secondary btn-sm" style="background: #25D366; color: #FFF; border: none;">Contacter sur WhatsApp</a>
         <button class="btn btn-primary btn-sm" onclick="window.dashboard.closeModals()">Fermer</button>
+      </div>
+    `;
+
+    document.getElementById('admin-generic-modal')?.classList.add('active');
+  }
+
+  // ===================================================================
+  // 8.1 MENSURATIONS CLIENTS & FICHES D'ATELIER
+  // ===================================================================
+  renderMeasurements() {
+    const grid = document.getElementById('measurements-grid');
+    if (!grid) return;
+
+    // Mise à jour du badge de comptage dans le menu
+    const badge = document.getElementById('nav-measurements-count');
+    if (badge) badge.textContent = (this.state.measurements || []).length;
+
+    const list = this.state.measurements || [];
+    const searchInput = document.getElementById('measurements-search-input');
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+    let filtered = list.filter(m => {
+      // Filtre par catégorie
+      if (this.currentMeasurementFilter === 'boubou') {
+        const type = (m.garmentType || '').toLowerCase();
+        if (!type.includes('boubou')) return false;
+      } else if (this.currentMeasurementFilter === 'costume') {
+        const type = (m.garmentType || '').toLowerCase();
+        if (!type.includes('costume')) return false;
+      } else if (this.currentMeasurementFilter === 'moderne') {
+        const type = (m.garmentType || '').toLowerCase();
+        if (!type.includes('lin') && !type.includes('moderne') && !type.includes('chemise')) return false;
+      }
+
+      // Filtre par recherche textuelle
+      if (query) {
+        const matchName = (m.clientName || '').toLowerCase().includes(query);
+        const matchPhone = (m.clientPhone || '').toLowerCase().includes(query);
+        const matchCity = (m.clientCity || '').toLowerCase().includes(query);
+        const matchOccasion = (m.occasion || '').toLowerCase().includes(query);
+        const matchGarment = (m.garmentType || '').toLowerCase().includes(query);
+        return matchName || matchPhone || matchCity || matchOccasion || matchGarment;
+      }
+
+      return true;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem; background: var(--admin-card); border: 1px dashed var(--gold-border); border-radius: var(--radius-md);">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" style="margin-bottom: 1rem;"><path d="M21.3 8.7 8.7 21.3c-.4.4-1 .4-1.4 0l-4.6-4.6c-.4-.4-.4-1 0-1.4L15.3 2.7c.4-.4 1-.4 1.4 0l4.6 4.6c.4.4.4 1 0 1.4z"/><path d="m7.5 13.5 2 2"/><path d="m10.5 10.5 2 2"/><path d="m13.5 7.5 2 2"/><path d="m16.5 4.5 2 2"/></svg>
+          <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 0.5rem;">Aucune fiche de mensuration trouvée</h3>
+          <p style="color: var(--text-dim); max-width: 420px; margin: 0 auto 1.5rem auto; font-size: 0.9rem;">
+            Enregistrez les mensurations de vos clients pour confectionner leurs tenues et imprimer leur fiche d'atelier en 1 clic.
+          </p>
+          <button class="btn btn-primary" onclick="window.dashboard.navigateTo('add-measurement')">
+            + Prendre les premières mesures
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(m => `
+      <div class="measurement-card">
+        <div>
+          <div class="measurement-card-header">
+            <div>
+              <div class="measurement-client-title">${m.clientName}</div>
+              <div class="measurement-client-meta">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                <span>${m.clientPhone}</span>
+                ${m.clientCity ? `• <span>${m.clientCity}</span>` : ''}
+              </div>
+            </div>
+            <span class="measurement-badge-garment">${m.occasion || 'Sur-Mesure'}</span>
+          </div>
+
+          <div style="font-size: 0.82rem; color: var(--gold-light); margin-bottom: 0.75rem; font-weight: 600;">
+            👔 ${m.garmentType} • <span style="color: var(--text-dim);">${m.fitPreference || 'Coupe Royale'}</span>
+          </div>
+
+          <div class="measurement-metrics-section">
+            <!-- Haut -->
+            <div class="measurement-metrics-box">
+              <div class="measurement-metrics-box-title">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+                Haut / Boubou
+              </div>
+              <div class="measurement-metrics-list">
+                <div class="measurement-metrics-item"><span>Longueur :</span> <strong>${m.boubouLength ? m.boubouLength + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Épaules :</span> <strong>${m.shoulderWidth ? m.shoulderWidth + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Poitrine :</span> <strong>${m.chestCircumference ? m.chestCircumference + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Manches :</span> <strong>${m.sleeveLength ? m.sleeveLength + ' cm' : '—'}</strong></div>
+              </div>
+            </div>
+
+            <!-- Bas -->
+            <div class="measurement-metrics-box">
+              <div class="measurement-metrics-box-title">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 2v20l4-2 4 2V2z"/><path d="M12 2v20l4-2 4 2V2z"/></svg>
+                Bas / Pantalon
+              </div>
+              <div class="measurement-metrics-list">
+                <div class="measurement-metrics-item"><span>Longueur :</span> <strong>${m.pantsLength ? m.pantsLength + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Ceinture :</span> <strong>${m.waistCircumference ? m.waistCircumference + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Bassin :</span> <strong>${m.hipsCircumference ? m.hipsCircumference + ' cm' : '—'}</strong></div>
+                <div class="measurement-metrics-item"><span>Cuisse :</span> <strong>${m.thighCircumference ? m.thighCircumference + ' cm' : '—'}</strong></div>
+              </div>
+            </div>
+          </div>
+
+          ${m.notes ? `
+            <div class="measurement-notes-preview">
+              « ${m.notes} »
+            </div>
+          ` : ''}
+        </div>
+
+        <div class="measurement-card-actions">
+          <div style="font-size: 0.72rem; color: var(--text-dim);">
+            ${m.date || 'Août 2026'}
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="btn btn-secondary btn-sm" title="Envoyer par WhatsApp" style="background: rgba(37, 211, 102, 0.15); color: #25D366; border-color: rgba(37, 211, 102, 0.3); padding: 4px 8px;" onclick="window.dashboard.sendMeasurementWhatsApp('${m.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.276-.1-.476-.15-.677.15-.2.301-.777.979-.953 1.18-.175.2-.351.226-.652.076-.301-.15-1.272-.469-2.424-1.496-.897-.799-1.503-1.786-1.68-2.087-.175-.301-.019-.464.132-.614.136-.135.301-.351.452-.527.15-.175.2-.301.301-.501.1-.2.05-.376-.025-.527-.076-.15-.677-1.633-.928-2.235-.245-.586-.494-.506-.677-.516h-.577c-.2 0-.527.075-.803.376s-1.054 1.029-1.054 2.508c0 1.48 1.079 2.909 1.229 3.11.151.2 2.124 3.243 5.145 4.549.719.311 1.28.497 1.718.636.723.23 1.38.197 1.9.12.58-.087 1.78-.727 2.03-1.429.251-.702.251-1.304.176-1.43-.075-.125-.276-.201-.577-.351z"/></svg>
+            </button>
+            <button class="btn btn-secondary btn-sm" title="Imprimer la Fiche d'Atelier A4" style="padding: 4px 8px;" onclick="window.dashboard.openMeasurementSheetModal('${m.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            </button>
+            <button class="btn btn-secondary btn-sm" title="Modifier" style="padding: 4px 8px;" onclick="window.dashboard.editMeasurement('${m.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+            <button class="btn btn-secondary btn-sm" title="Supprimer" style="color: #EF4444; border-color: rgba(239, 68, 68, 0.3); padding: 4px 8px;" onclick="window.dashboard.deleteMeasurement('${m.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  setMeasurementFilter(filter, btn) {
+    this.currentMeasurementFilter = filter;
+    const container = document.getElementById('measurements-filter-pills');
+    if (container) {
+      container.querySelectorAll('.filter-pill-btn').forEach(b => b.classList.remove('active'));
+    }
+    if (btn) btn.classList.add('active');
+    this.renderMeasurements();
+  }
+
+  populateMeasurementDatalist() {
+    const datalist = document.getElementById('mes-clients-datalist');
+    if (!datalist) return;
+
+    const customers = this.state.customers || [];
+    datalist.innerHTML = customers.map(c => `
+      <option value="${c.name}">Tél: ${c.phone} • ${c.city || 'Dakar'}</option>
+    `).join('');
+
+    // Remplissage automatique lors du choix du nom
+    const nameInput = document.getElementById('mes-client-name');
+    if (nameInput) {
+      nameInput.onchange = () => {
+        const found = customers.find(c => c.name.toLowerCase() === nameInput.value.toLowerCase());
+        if (found) {
+          const phoneInput = document.getElementById('mes-client-phone');
+          const cityInput = document.getElementById('mes-client-city');
+          if (phoneInput && !phoneInput.value) phoneInput.value = found.phone || '';
+          if (cityInput && !cityInput.value) cityInput.value = found.city || '';
+        }
+      };
+    }
+  }
+
+  resetMeasurementForm() {
+    const form = document.getElementById('form-add-measurement');
+    if (form) form.reset();
+    const editId = document.getElementById('edit-measurement-id');
+    if (editId) editId.value = '';
+    const title = document.getElementById('add-measurement-title');
+    if (title) title.textContent = "Prise de Mesures — Haute Couture";
+    this.populateMeasurementDatalist();
+  }
+
+  handleSaveMeasurement(event, andWhatsApp = false) {
+    if (event) event.preventDefault();
+
+    const editId = document.getElementById('edit-measurement-id')?.value;
+    const clientName = document.getElementById('mes-client-name')?.value.trim();
+    const clientPhone = document.getElementById('mes-client-phone')?.value.trim();
+    const clientCity = document.getElementById('mes-client-city')?.value.trim();
+    const occasion = document.getElementById('mes-occasion')?.value.trim() || 'Haute Couture';
+    const garmentType = document.getElementById('mes-garment-type')?.value;
+    const fitPreference = document.getElementById('mes-fit-preference')?.value;
+
+    const parseNum = (id) => {
+      const val = parseFloat(document.getElementById(id)?.value);
+      return isNaN(val) ? null : val;
+    };
+
+    const measurementData = {
+      id: editId || `MES-${Math.floor(1000 + Math.random() * 9000)}`,
+      clientName,
+      clientPhone,
+      clientCity,
+      occasion,
+      garmentType,
+      fitPreference,
+      date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      // Haut
+      boubouLength: parseNum('mes-boubou-length'),
+      shoulderWidth: parseNum('mes-shoulder-width'),
+      chestCircumference: parseNum('mes-chest-circ'),
+      sleeveLength: parseNum('mes-sleeve-length'),
+      neckCircumference: parseNum('mes-neck-circ'),
+      bicepCircumference: parseNum('mes-bicep-circ'),
+      wristCircumference: parseNum('mes-wrist-circ'),
+      // Bas
+      pantsLength: parseNum('mes-pants-length'),
+      waistCircumference: parseNum('mes-waist-circ'),
+      hipsCircumference: parseNum('mes-hips-circ'),
+      thighCircumference: parseNum('mes-thigh-circ'),
+      ankleWidth: parseNum('mes-ankle-width'),
+      // Notes
+      notes: document.getElementById('mes-notes')?.value.trim()
+    };
+
+    if (!this.state.measurements) this.state.measurements = [];
+
+    if (editId) {
+      const idx = this.state.measurements.findIndex(m => m.id === editId);
+      if (idx !== -1) {
+        this.state.measurements[idx] = measurementData;
+      }
+      this.showToast(`Fiche de mesures de ${clientName} mise à jour avec succès !`, 'success');
+    } else {
+      this.state.measurements.unshift(measurementData);
+      
+      // Synchroniser avec le fichier client s'il n'existe pas encore
+      if (!this.state.customers) this.state.customers = [];
+      const existingCustomer = this.state.customers.find(c => c.phone === clientPhone || c.name.toLowerCase() === clientName.toLowerCase());
+      if (!existingCustomer) {
+        this.state.customers.unshift({
+          id: `cust-${Date.now()}`,
+          name: clientName,
+          phone: clientPhone,
+          email: `${clientName.toLowerCase().replace(/\s+/g, '.')}@client.sn`,
+          city: clientCity || 'Dakar',
+          status: 'Actif',
+          ordersCount: 1,
+          totalSpent: 0,
+          lastOrder: 'Fiche Mesure'
+        });
+      }
+
+      this.showToast(`Nouvelle fiche de mesures enregistrée pour ${clientName} !`, 'success');
+    }
+
+    this.saveState();
+    this.renderMeasurements();
+    this.renderCustomers();
+
+    if (andWhatsApp) {
+      this.sendMeasurementWhatsApp(measurementData.id);
+    }
+
+    this.navigateTo('measurements');
+  }
+
+  saveAndShareMeasurementWhatsApp() {
+    const form = document.getElementById('form-add-measurement');
+    if (form && !form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    this.handleSaveMeasurement(null, true);
+  }
+
+  editMeasurement(id) {
+    const item = (this.state.measurements || []).find(m => m.id === id);
+    if (!item) return;
+
+    this.navigateTo('add-measurement');
+
+    const setVal = (fieldId, val) => {
+      const el = document.getElementById(fieldId);
+      if (el) el.value = val !== null && val !== undefined ? val : '';
+    };
+
+    const title = document.getElementById('add-measurement-title');
+    if (title) title.textContent = `Modifier les Mesures de ${item.clientName}`;
+
+    setVal('edit-measurement-id', item.id);
+    setVal('mes-client-name', item.clientName);
+    setVal('mes-client-phone', item.clientPhone);
+    setVal('mes-client-city', item.clientCity);
+    setVal('mes-occasion', item.occasion);
+    setVal('mes-garment-type', item.garmentType);
+    setVal('mes-fit-preference', item.fitPreference);
+
+    // Haut
+    setVal('mes-boubou-length', item.boubouLength);
+    setVal('mes-shoulder-width', item.shoulderWidth);
+    setVal('mes-chest-circ', item.chestCircumference);
+    setVal('mes-sleeve-length', item.sleeveLength);
+    setVal('mes-neck-circ', item.neckCircumference);
+    setVal('mes-bicep-circ', item.bicepCircumference);
+    setVal('mes-wrist-circ', item.wristCircumference);
+
+    // Bas
+    setVal('mes-pants-length', item.pantsLength);
+    setVal('mes-waist-circ', item.waistCircumference);
+    setVal('mes-hips-circ', item.hipsCircumference);
+    setVal('mes-thigh-circ', item.thighCircumference);
+    setVal('mes-ankle-width', item.ankleWidth);
+
+    // Notes
+    setVal('mes-notes', item.notes);
+  }
+
+  deleteMeasurement(id) {
+    const item = (this.state.measurements || []).find(m => m.id === id);
+    if (!item) return;
+
+    if (!confirm(`Confirmez-vous la suppression de la fiche de mesures de ${item.clientName} ?`)) return;
+
+    this.state.measurements = this.state.measurements.filter(m => m.id !== id);
+    this.saveState();
+    this.renderMeasurements();
+    this.showToast(`Fiche de mesures de ${item.clientName} supprimée.`, 'info');
+  }
+
+  sendMeasurementWhatsApp(id) {
+    const m = (this.state.measurements || []).find(it => it.id === id);
+    if (!m) return;
+
+    const phoneClean = (m.clientPhone || '').replace(/[^0-9]/g, '');
+    if (!phoneClean) {
+      this.showToast('Numéro WhatsApp manquant pour ce client.', 'error');
+      return;
+    }
+
+    const hautLines = [];
+    if (m.boubouLength) hautLines.push(`• Longueur Boubou / Veste : ${m.boubouLength} cm`);
+    if (m.shoulderWidth) hautLines.push(`• Carrure (Épaules) : ${m.shoulderWidth} cm`);
+    if (m.chestCircumference) hautLines.push(`• Tour de Poitrine : ${m.chestCircumference} cm`);
+    if (m.sleeveLength) hautLines.push(`• Longueur Manches : ${m.sleeveLength} cm`);
+    if (m.neckCircumference) hautLines.push(`• Tour de Cou : ${m.neckCircumference} cm`);
+    if (m.bicepCircumference) hautLines.push(`• Tour de Bras : ${m.bicepCircumference} cm`);
+    if (m.wristCircumference) hautLines.push(`• Poignet : ${m.wristCircumference} cm`);
+
+    const basLines = [];
+    if (m.pantsLength) basLines.push(`• Longueur Pantalon : ${m.pantsLength} cm`);
+    if (m.waistCircumference) basLines.push(`• Tour de Taille / Ceinture : ${m.waistCircumference} cm`);
+    if (m.hipsCircumference) basLines.push(`• Bassin / Hanches : ${m.hipsCircumference} cm`);
+    if (m.thighCircumference) basLines.push(`• Cuisse : ${m.thighCircumference} cm`);
+    if (m.ankleWidth) basLines.push(`• Bas Pantalon : ${m.ankleWidth} cm`);
+
+    const msg = `⚜️ *MAISON FRÈRE MIXAGE — DAKAR* ⚜️\n_Haute Couture Masculine Sénégalaise_\n\n` +
+      `Bonjour *${m.clientName}*,\n` +
+      `Voici votre fiche de mensurations officielle enregistrée à l'Atelier :\n\n` +
+      `📌 *Détails Commande :*\n` +
+      `• Tenue : ${m.garmentType || 'Création Sur-Mesure'}\n` +
+      `• Coupe : ${m.fitPreference || 'Coupe Royale'}\n` +
+      `• Événement : ${m.occasion || 'Cérémonie'}\n\n` +
+      `📐 *Mesures du Haut :*\n` + (hautLines.length > 0 ? hautLines.join('\n') : '• Standard atelier') + '\n\n' +
+      `📏 *Mesures du Bas (Pantalon) :*\n` + (basLines.length > 0 ? basLines.join('\n') : '• Standard atelier') + '\n\n' +
+      (m.notes ? `💡 *Remarques Atelier :* _« ${m.notes} »_\n\n` : '') +
+      `Vos mesures sont conservées pour toutes vos prochaines créations chez Frère Mixage.\n` +
+      `Merci pour votre confiance ! ✨`;
+
+    window.open(`https://wa.me/${phoneClean}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+
+  openMeasurementSheetModal(id) {
+    const m = (this.state.measurements || []).find(it => it.id === id);
+    if (!m) return;
+
+    const modalBox = document.getElementById('modal-generic-body');
+    const modalTitle = document.getElementById('modal-generic-title');
+    if (!modalBox || !modalTitle) return;
+
+    modalTitle.textContent = `Fiche d'Atelier Sur-Mesure — ${m.clientName}`;
+
+    modalBox.innerHTML = `
+      <div class="atelier-sheet-modal-box" id="printable-atelier-sheet">
+        <div class="atelier-sheet-header">
+          <div>
+            <img src="/assets/images/logo-frere-mixage.png" alt="Frère Mixage" class="atelier-sheet-logo" />
+            <div style="font-size: 0.75rem; color: var(--gold); margin-top: 4px; letter-spacing: 1px;">HAUTE COUTURE DAKAR</div>
+          </div>
+          <div style="text-align: right;">
+            <span class="atelier-sheet-badge">FICHE ATELIER #${m.id}</span>
+            <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 6px;">Date : ${m.date || 'Août 2026'}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; background: rgba(255,255,255,0.03); padding: 1.25rem; border-radius: 6px; border: 1px solid var(--gold-border); margin-bottom: 1.5rem;">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--gold); text-transform: uppercase; margin-bottom: 3px;">CLIENT PRIVILÈGE</div>
+            <strong style="font-size: 1.15rem; color: #fff;">${m.clientName}</strong>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 3px;">📞 ${m.clientPhone}</div>
+            ${m.clientCity ? `<div style="font-size: 0.85rem; color: var(--text-dim);">📍 ${m.clientCity}</div>` : ''}
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: var(--gold); text-transform: uppercase; margin-bottom: 3px;">CONFECTION & COUPE</div>
+            <strong style="font-size: 1rem; color: var(--gold-light);">${m.garmentType || 'Sur-Mesure'}</strong>
+            <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 3px;">Coupe : ${m.fitPreference || 'Royale'}</div>
+            <div style="font-size: 0.85rem; color: var(--text-dim);">Événement : ${m.occasion || 'Cérémonie'}</div>
+          </div>
+        </div>
+
+        <table class="atelier-sheet-table">
+          <thead>
+            <tr>
+              <th colspan="2" style="width: 50%;">MESURES DU HAUT (BOUBOU / VESTE)</th>
+              <th colspan="2" style="width: 50%;">MESURES DU BAS (PANTALON)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Longueur Boubou / Veste</td>
+              <td><strong>${m.boubouLength ? m.boubouLength + ' cm' : '—'}</strong></td>
+              <td>Longueur Pantalon</td>
+              <td><strong>${m.pantsLength ? m.pantsLength + ' cm' : '—'}</strong></td>
+            </tr>
+            <tr>
+              <td>Carrure (Épaules)</td>
+              <td><strong>${m.shoulderWidth ? m.shoulderWidth + ' cm' : '—'}</strong></td>
+              <td>Tour de Ceinture / Taille</td>
+              <td><strong>${m.waistCircumference ? m.waistCircumference + ' cm' : '—'}</strong></td>
+            </tr>
+            <tr>
+              <td>Tour de Poitrine</td>
+              <td><strong>${m.chestCircumference ? m.chestCircumference + ' cm' : '—'}</strong></td>
+              <td>Tour de Bassin / Hanches</td>
+              <td><strong>${m.hipsCircumference ? m.hipsCircumference + ' cm' : '—'}</strong></td>
+            </tr>
+            <tr>
+              <td>Longueur Manches</td>
+              <td><strong>${m.sleeveLength ? m.sleeveLength + ' cm' : '—'}</strong></td>
+              <td>Tour de Cuisse</td>
+              <td><strong>${m.thighCircumference ? m.thighCircumference + ' cm' : '—'}</strong></td>
+            </tr>
+            <tr>
+              <td>Tour de Cou (Col)</td>
+              <td><strong>${m.neckCircumference ? m.neckCircumference + ' cm' : '—'}</strong></td>
+              <td>Bas de Pantalon (Cheville)</td>
+              <td><strong>${m.ankleWidth ? m.ankleWidth + ' cm' : '—'}</strong></td>
+            </tr>
+            <tr>
+              <td>Tour de Bras (Biceps)</td>
+              <td><strong>${m.bicepCircumference ? m.bicepCircumference + ' cm' : '—'}</strong></td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+            <tr>
+              <td>Tour de Poignet</td>
+              <td><strong>${m.wristCircumference ? m.wristCircumference + ' cm' : '—'}</strong></td>
+              <td>—</td>
+              <td>—</td>
+            </tr>
+          </tbody>
+        </table>
+
+        ${m.notes ? `
+          <div style="background: rgba(198, 168, 104, 0.08); border-left: 3px solid var(--gold); padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem;">
+            <div style="font-size: 0.75rem; color: var(--gold); font-weight: 700; text-transform: uppercase; margin-bottom: 4px;">NOTES TECHNIQUES POUR LES MAÎTRES TAILLEURS :</div>
+            <div style="font-size: 0.9rem; color: #fff; font-style: italic;">« ${m.notes} »</div>
+          </div>
+        ` : ''}
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 2rem;">
+          <button class="btn btn-secondary btn-sm" onclick="window.dashboard.closeModals()">Fermer</button>
+          <button class="btn btn-secondary btn-sm" style="background: #25D366; color: #fff; border: none;" onclick="window.dashboard.sendMeasurementWhatsApp('${m.id}')">
+            Envoyer sur WhatsApp
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="window.print()">
+            🖨️ Imprimer la Fiche Atelier
+          </button>
+        </div>
       </div>
     `;
 
