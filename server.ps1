@@ -38,6 +38,9 @@ try {
     while ($listener.IsListening) {
         $context = $listener.GetContext()
         try {
+            $request = $context.Request
+            $response = $context.Response
+
             $rawPath = $request.Url.AbsolutePath
             if ($rawPath -eq "/admin") {
                 $response.StatusCode = 301
