@@ -368,21 +368,29 @@ export function initCheckoutModal() {
         }
       } catch(e) {}
 
-      // Appel au backend Serverless pour créer la session officielle
-      const endpoint = isWave
-        ? '/api/payments/wave/create-checkout'
-        : '/api/payments/orange-money/create-checkout';
+      // Déterminer l'URL de base API (si en local, appeler l'endpoint Serverless Vercel en direct)
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiBase = isLocalhost ? 'https://frere-mixage.vercel.app' : '';
+      const endpoint = `${apiBase}${isWave ? '/api/payments/wave/create-checkout' : '/api/payments/orange-money/create-checkout'}`;
 
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderPayload,
-          hostOrigin: window.location.origin
+          hostOrigin: isLocalhost ? 'https://frere-mixage.vercel.app' : window.location.origin
         })
       });
 
-      const result = await response.json();
+      const rawText = await response.text();
+      let result = null;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error('[CheckoutModal] Réponse non-JSON :', rawText);
+        throw new Error(`Erreur de communication avec le serveur de paiement (${response.status}).`);
+      }
 
       if (!response.ok || !result.checkoutUrl) {
         throw new Error(result.error || `Impossible de créer la session de paiement ${providerName}.`);
