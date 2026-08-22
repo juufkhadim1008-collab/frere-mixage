@@ -1,0 +1,24 @@
+{
+  "name": "Frère Mixage — Dashboard Administrateur",
+  "short_name": "FM Admin",
+  "description": "Panneau de gestion officiel de la Maison Frère Mixage",
+  "start_url": "/admin/",
+  "display": "standalone",
+  "background_color": "#F7F4EE",
+  "theme_color": "#0A0A0C",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/images/admin-app-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/admin-app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
