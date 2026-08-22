@@ -667,6 +667,13 @@
   transition: transform var(--transition-fast);
 }
 
+.payment-brand-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .payment-method-card:hover .payment-logo-wrap,
 .payment-method-card.selected .payment-logo-wrap {
   transform: scale(1.05);

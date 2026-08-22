@@ -131,7 +131,11 @@ function updatePaymentDetailsPanel() {
   const omUssdBox = document.getElementById('om-ussd-info');
   const omUssdCode = document.getElementById('om-ussd-code');
 
-  if (iconEl) iconEl.textContent = method === 'wave' ? '⚡' : '🟠';
+  if (iconEl) {
+    iconEl.innerHTML = method === 'wave'
+      ? `<img src="./assets/images/wave-logo.jpg" alt="Wave" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`
+      : `<img src="./assets/images/orange-money-logo.png" alt="Orange Money" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`;
+  }
   if (labelEl) labelEl.textContent = `Numéro ${gateway.name} officiel :`;
   if (phoneEl) phoneEl.textContent = gateway.accountNumber || '+221 78 634 76 66';
 
