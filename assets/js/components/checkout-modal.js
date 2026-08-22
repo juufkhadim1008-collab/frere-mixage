@@ -140,13 +140,8 @@ function updatePaymentDetailsPanel() {
   if (phoneEl) phoneEl.textContent = gateway.accountNumber || '+221 78 634 76 66';
 
   if (method === 'wave') {
-    if (waveDirectBtn) {
-      waveDirectBtn.style.display = 'flex';
-      waveDirectBtn.href = PaymentService.getWaveDirectPaymentUrl(grandTotal);
-    }
     if (omUssdBox) omUssdBox.style.display = 'none';
   } else {
-    if (waveDirectBtn) waveDirectBtn.style.display = 'none';
     if (omUssdBox) {
       omUssdBox.style.display = 'block';
       if (omUssdCode) omUssdCode.textContent = PaymentService.getOrangeMoneyUSSD(grandTotal);
@@ -316,43 +311,6 @@ export function initCheckoutModal() {
     });
   }
 
-  // Bouton Wave direct (copie numéro + ouverture Wave)
-  const btnWaveDirect = document.getElementById('btn-wave-direct-action');
-  if (btnWaveDirect) {
-    btnWaveDirect.addEventListener('click', () => {
-      const phoneText = '786347666';
-      navigator.clipboard.writeText(phoneText).then(() => {
-        const origText = btnWaveDirect.innerHTML;
-        btnWaveDirect.innerHTML = '✓ Numéro Wave copié (78 634 76 66) !';
-        setTimeout(() => {
-          btnWaveDirect.innerHTML = origText;
-        }, 3000);
-      });
-
-      // Si appareil mobile, tenter de lancer directement l'application Wave
-      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (isMobile) {
-        window.location.href = 'wave://';
-      }
-    });
-  }
-
-  // Bouton copie syntaxe USSD Orange Money
-  const btnOmUssd = document.getElementById('btn-om-copy-ussd');
-  if (btnOmUssd) {
-    btnOmUssd.addEventListener('click', () => {
-      const codeText = document.getElementById('om-ussd-code')?.textContent || '#144#391*786347666#';
-      navigator.clipboard.writeText(codeText.trim()).then(() => {
-        const strongEl = document.getElementById('om-ussd-code');
-        if (strongEl) {
-          const orig = strongEl.textContent;
-          strongEl.textContent = '✓ Code USSD copié !';
-          setTimeout(() => { strongEl.textContent = orig; }, 2500);
-        }
-      });
-    });
-  }
-
   if (!modal) return;
 
   const closeModal = () => {
@@ -406,7 +364,7 @@ export function initCheckoutModal() {
 
     btnSubmitOrder.disabled = true;
     const originalText = btnSubmitOrder.innerHTML;
-    btnSubmitOrder.innerHTML = `<span class="spinner"></span> Validation & Enregistrement...`;
+    btnSubmitOrder.innerHTML = `<span class="spinner"></span> Confirmation en cours...`;
 
     try {
       const grandTotal = getGrandTotal();
@@ -452,14 +410,22 @@ export function initCheckoutModal() {
         }
       };
 
-      // 3. Envoi automatique du message WhatsApp avec TOUTES les informations de commande
+      // 3. Si Wave : redirection / ouverture directe de l'application Wave
+      if (orderState.paymentMethod === 'wave') {
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = 'wave://';
+        }
+      }
+
+      // 4. Envoi automatique du message WhatsApp avec TOUTES les informations de commande
       try {
         WhatsAppService.openPaymentConfirmationChat(order);
       } catch (waErr) {
         console.warn('[CheckoutModal] Envoi WhatsApp auto :', waErr);
       }
 
-      // 4. Fermeture du tunnel & Affichage de la confirmation de commande et du reçu
+      // 5. Fermeture du tunnel & Affichage de la confirmation de commande et du reçu
       closeModal();
       showConfirmationModal(order);
     } catch (error) {
