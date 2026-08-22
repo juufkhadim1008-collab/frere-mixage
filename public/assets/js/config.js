@@ -22,38 +22,29 @@ export const CONFIG = {
     { id: 'international', name: 'International / Diaspora (DHL Express 3-5 jours)', price: 25000, freeAbove: null }
   ],
 
-  // Moyens de paiement configurés
+  // Moyens de paiement officiels configurés
   paymentGateways: {
     wave: {
       name: 'Wave Sénégal',
-      tagline: 'Paiement instantané sans frais via votre app Wave',
+      tagline: 'Paiement instantané sans frais via votre application Wave',
       icon: 'wave',
       badge: 'Recommandé ⚡',
       color: '#1dc4ff',
-      isLive: false // Mettre à true lors de la connexion de l'API Wave Checkout
+      accountNumber: '+221 78 634 76 66',
+      accountClean: '221786347666',
+      accountName: 'MAISON FRÈRE MIXAGE',
+      isLive: true
     },
     orangeMoney: {
-      name: 'Orange Money',
-      tagline: 'Paiement sécurisé avec validation par code OTP (#144#)',
+      name: 'Orange Money Sénégal',
+      tagline: 'Paiement direct sécurisé via Orange Money Sénégal',
       icon: 'orange-money',
-      badge: 'Populaire',
+      badge: 'Orange Money 🟠',
       color: '#ff7900',
-      isLive: false // Mettre à true lors de la connexion de l'API Orange Money
-    },
-    card: {
-      name: 'Carte Bancaire (Visa / Mastercard)',
-      tagline: 'Paiement sécurisé 3D Secure pour le Sénégal et l’international',
-      icon: 'card',
-      badge: 'International',
-      color: '#c5a059',
-      isLive: false
-    },
-    cashOnDelivery: {
-      name: 'Paiement à la livraison',
-      tagline: 'Payez en espèces ou Wave à la réception (Dakar uniquement)',
-      icon: 'hand-coins',
-      badge: 'Dakar',
-      color: '#4ade80',
+      accountNumber: '+221 78 634 76 66',
+      accountClean: '221786347666',
+      accountName: 'MAISON FRÈRE MIXAGE',
+      ussdCode: '#144#391*786347666*',
       isLive: true
     }
   },

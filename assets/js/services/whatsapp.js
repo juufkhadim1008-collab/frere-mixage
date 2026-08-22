@@ -109,6 +109,78 @@ export const WhatsAppService = {
   },
 
   /**
+   * Message complet avec toutes les informations de commande et preuve de paiement Wave / OM
+   */
+  generatePaymentConfirmedMessage(order) {
+    const isWave = order.payment?.method === 'wave';
+    const methodTitle = isWave ? 'Wave Sénégal ⚡' : 'Orange Money Sénégal 🟠';
+    const imageUrl = this.getProductImageUrl(order.product);
+    const dateFormatted = new Date().toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    let msg = `⚜️ *MAISON FRÈRE MIXAGE — NOUVELLE COMMANDE PAYÉE* ⚜️\n\n`;
+    msg += `Bonjour Frère Mixage 👋🏽\n`;
+    msg += `Je viens d'effectuer le paiement de ma commande sur votre numéro officiel *+221 78 634 76 66*.\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    msg += `🔖 *N° COMMANDE :* ${order.orderNumber}\n`;
+    msg += `📅 *Date :* ${dateFormatted}\n`;
+    msg += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+    msg += `👔 *DÉTAILS DE LA CRÉATION :*\n`;
+    msg += `• *Modèle :* ${order.product?.name || 'Création Frère Mixage'}\n`;
+    msg += `• *Collection :* ${order.product?.categoryLabel || order.product?.category || 'Haute Couture Masculine'}\n`;
+    msg += `• *Taille :* ${order.size || 'Sur-Mesure'}\n`;
+    msg += `• *Quantité :* ${order.quantity || 1}\n`;
+    msg += `• *Prix unitaire :* ${formatPrice(order.product?.price || 0)}\n\n`;
+
+    msg += `💳 *PAIEMENT VALIDÉ :*\n`;
+    msg += `• *Moyen :* ${methodTitle}\n`;
+    msg += `• *Montant Total :* *${formatPrice(order.totalAmount)}*\n`;
+    msg += `• *Numéro émetteur :* ${order.payment?.senderPhone || order.customer?.phone || 'Non précisé'}\n`;
+    if (order.payment?.txRef) {
+      msg += `• *Réf. Transaction / SMS :* ${order.payment.txRef}\n`;
+    }
+    msg += `• *Bénéficiaire :* Frère Mixage (+221 78 634 76 66)\n\n`;
+
+    msg += `📍 *COORDONNÉES DE LIVRAISON :*\n`;
+    msg += `• *Client :* ${order.customer?.firstName || ''} ${order.customer?.lastName || ''}\n`;
+    msg += `• *Téléphone :* ${order.customer?.phone || ''}\n`;
+    if (order.customer?.email) {
+      msg += `• *Email :* ${order.customer.email}\n`;
+    }
+    msg += `• *Adresse :* ${order.customer?.address || 'Dakar'}\n`;
+    msg += `• *Ville / Région :* ${order.customer?.city || 'Dakar'}\n`;
+    if (order.delivery?.name) {
+      msg += `• *Option d'envoi :* ${order.delivery.name}\n`;
+    }
+    if (order.customer?.notes) {
+      msg += `• *Instructions particulières :* ${order.customer.notes}\n`;
+    }
+
+    if (imageUrl) {
+      msg += `\n📸 *Photo de la pièce commandée :*\n${imageUrl}\n`;
+    }
+
+    msg += `\n_Merci de me confirmer la bonne réception du paiement et la mise en confection de ma tenue._ ✨`;
+    return msg;
+  },
+
+  /**
+   * Ouvre la conversation WhatsApp avec le message de confirmation de paiement
+   */
+  openPaymentConfirmationChat(order) {
+    const message = this.generatePaymentConfirmedMessage(order);
+    const url = this.buildUrl(message);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  },
+
+  /**
    * Ouvre la conversation WhatsApp dans un nouvel onglet
    */
   openOrderChat(params) {

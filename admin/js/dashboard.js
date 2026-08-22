@@ -1804,8 +1804,13 @@ class AdminDashboard {
         </div>
         <div style="display: flex; flex-direction: column; gap: 8px; font-size: 0.82rem;">
           <div><span style="color: var(--text-dim);">Téléphone :</span> <a href="tel:${order.customer.phone}" style="color: var(--gold-light);">${order.customer.phone}</a></div>
-          <div><span style="color: var(--text-dim);">Email :</span> ${order.customer.email}</div>
+          ${order.customer.email ? `<div><span style="color: var(--text-dim);">Email :</span> ${order.customer.email}</div>` : ''}
           <div><span style="color: var(--text-dim);">Adresse de livraison :</span> ${order.customer.address}</div>
+          <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 6px; margin-top: 2px;">
+            <div><span style="color: var(--text-dim);">Paiement :</span> <strong style="color: var(--gold-light);">${order.paymentMethod || 'Wave Sénégal'}</strong></div>
+            ${order.senderPhone ? `<div><span style="color: var(--text-dim);">Tél. Émetteur :</span> ${order.senderPhone}</div>` : ''}
+            ${order.txRef ? `<div><span style="color: var(--text-dim);">Réf. Transaction :</span> <code style="color: var(--gold-light);">${order.txRef}</code></div>` : ''}
+          </div>
         </div>
         <div style="margin-top: 1.25rem; display: flex; gap: 8px;">
           <a href="https://wa.me/${order.customer.phone.replace(/[^0-9]/g, '')}?text=Bonjour%20${encodeURIComponent(order.customer.name)},%20concernant%20votre%20commande%20Frère%20Mixage%20${order.id}..." target="_blank" class="btn btn-secondary btn-sm" style="flex-grow: 1; justify-content: center; background: #25D366; color: #FFF; border: none;">
