@@ -8,7 +8,7 @@ export const PaymentService = {
    * Construit le lien de paiement direct Wave pour mobile
    */
   getWaveDirectPaymentUrl(amount) {
-    const cleanPhone = CONFIG.paymentGateways.wave.accountClean || '221786347666';
+    const cleanPhone = CONFIG.paymentGateways.wave.accountClean || '221782414949';
     // Deep-link / Web URL de transfert Wave
     return `https://wave.com/send?phone=${cleanPhone}&amount=${amount}`;
   },

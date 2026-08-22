@@ -137,7 +137,7 @@ function updatePaymentDetailsPanel() {
       : `<img src="./assets/images/orange-money-logo.png" alt="Orange Money" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`;
   }
   if (labelEl) labelEl.textContent = `Numéro ${gateway.name} officiel :`;
-  if (phoneEl) phoneEl.textContent = gateway.accountNumber || '+221 78 634 76 66';
+  if (phoneEl) phoneEl.textContent = gateway.accountNumber || '+221 78 241 49 49';
 
   if (method === 'wave') {
     if (omUssdBox) omUssdBox.style.display = 'none';
@@ -301,7 +301,7 @@ export function initCheckoutModal() {
   const btnCopyMerchant = document.getElementById('btn-copy-merchant-phone');
   if (btnCopyMerchant) {
     btnCopyMerchant.addEventListener('click', () => {
-      const phoneText = document.getElementById('merchant-account-phone')?.textContent || '+221 78 634 76 66';
+      const phoneText = document.getElementById('merchant-account-phone')?.textContent || '+221 78 241 49 49';
       navigator.clipboard.writeText(phoneText.replace(/\s+/g, '')).then(() => {
         btnCopyMerchant.textContent = '✓ Copié !';
         setTimeout(() => {

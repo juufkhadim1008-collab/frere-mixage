@@ -123,9 +123,11 @@ export const WhatsAppService = {
       minute: '2-digit'
     });
 
+    const recipientPhone = isWave ? '+221 78 241 49 49' : '+221 78 634 76 66';
+
     let msg = `⚜️ *MAISON FRÈRE MIXAGE — NOUVELLE COMMANDE PAYÉE* ⚜️\n\n`;
     msg += `Bonjour Frère Mixage 👋🏽\n`;
-    msg += `Je viens d'effectuer le paiement de ma commande sur votre numéro officiel *+221 78 634 76 66*.\n\n`;
+    msg += `Je viens d'effectuer le paiement de ma commande sur votre numéro officiel *${recipientPhone}*.\n\n`;
 
     msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
     msg += `🔖 *N° COMMANDE :* ${order.orderNumber}\n`;
@@ -146,7 +148,7 @@ export const WhatsAppService = {
     if (order.payment?.txRef) {
       msg += `• *Réf. Transaction / SMS :* ${order.payment.txRef}\n`;
     }
-    msg += `• *Bénéficiaire :* Frère Mixage (+221 78 634 76 66)\n\n`;
+    msg += `• *Bénéficiaire :* Frère Mixage (${recipientPhone})\n\n`;
 
     msg += `📍 *COORDONNÉES DE LIVRAISON :*\n`;
     msg += `• *Client :* ${order.customer?.firstName || ''} ${order.customer?.lastName || ''}\n`;

@@ -30,8 +30,8 @@ export const CONFIG = {
       icon: 'wave',
       badge: 'Recommandé ⚡',
       color: '#1dc4ff',
-      accountNumber: '+221 78 634 76 66',
-      accountClean: '221786347666',
+      accountNumber: '+221 78 241 49 49',
+      accountClean: '221782414949',
       accountName: 'MAISON FRÈRE MIXAGE',
       isLive: true
     },
