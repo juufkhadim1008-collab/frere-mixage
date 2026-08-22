@@ -316,6 +316,43 @@ export function initCheckoutModal() {
     });
   }
 
+  // Bouton Wave direct (copie numéro + ouverture Wave)
+  const btnWaveDirect = document.getElementById('btn-wave-direct-action');
+  if (btnWaveDirect) {
+    btnWaveDirect.addEventListener('click', () => {
+      const phoneText = '786347666';
+      navigator.clipboard.writeText(phoneText).then(() => {
+        const origText = btnWaveDirect.innerHTML;
+        btnWaveDirect.innerHTML = '✓ Numéro Wave copié (78 634 76 66) !';
+        setTimeout(() => {
+          btnWaveDirect.innerHTML = origText;
+        }, 3000);
+      });
+
+      // Si appareil mobile, tenter de lancer directement l'application Wave
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = 'wave://';
+      }
+    });
+  }
+
+  // Bouton copie syntaxe USSD Orange Money
+  const btnOmUssd = document.getElementById('btn-om-copy-ussd');
+  if (btnOmUssd) {
+    btnOmUssd.addEventListener('click', () => {
+      const codeText = document.getElementById('om-ussd-code')?.textContent || '#144#391*786347666#';
+      navigator.clipboard.writeText(codeText.trim()).then(() => {
+        const strongEl = document.getElementById('om-ussd-code');
+        if (strongEl) {
+          const orig = strongEl.textContent;
+          strongEl.textContent = '✓ Code USSD copié !';
+          setTimeout(() => { strongEl.textContent = orig; }, 2500);
+        }
+      });
+    });
+  }
+
   if (!modal) return;
 
   const closeModal = () => {

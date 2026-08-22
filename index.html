@@ -996,12 +996,13 @@
           </div>
 
           <div class="payment-quick-actions" id="payment-quick-actions">
-            <a href="https://wave.com" target="_blank" rel="noopener noreferrer" class="btn-wave-direct" id="btn-wave-direct-action">
-              ⚡ Ouvrir l'application Wave pour payer
-            </a>
+            <button type="button" class="btn-wave-direct" id="btn-wave-direct-action">
+              ⚡ Copier le numéro Wave (+221 78 634 76 66) & Ouvrir l'application
+            </button>
             <div class="om-ussd-info" id="om-ussd-info" style="display:none;">
-              <span>📲 Syntaxe USSD : </span>
-              <strong id="om-ussd-code">#144#391*786347666*MONTANT#</strong>
+              <button type="button" class="btn-om-copy-ussd" id="btn-om-copy-ussd">
+                📋 Copier la syntaxe USSD : <strong id="om-ussd-code">#144#391*786347666*MONTANT#</strong>
+              </button>
             </div>
           </div>
 
