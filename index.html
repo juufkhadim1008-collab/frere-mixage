@@ -974,59 +974,29 @@
           </div>
         </div>
 
-        <!-- Panneau dynamique des instructions & vérification du paiement sur le numéro -->
+        <!-- Panneau dynamique de paiement sécurisé officiel -->
         <div class="payment-instructions-box" id="payment-instructions-box">
           <div class="pay-amount-banner">
-            <span class="pay-amount-label">Montant exact à payer :</span>
+            <span class="pay-amount-label">Montant total de la commande :</span>
             <span class="pay-amount-val" id="pay-instructions-amount">0 FCFA</span>
           </div>
 
-          <div class="merchant-account-card">
-            <div class="merchant-icon" id="merchant-method-icon">⚡</div>
-            <div class="merchant-details">
-              <div class="merchant-label" id="merchant-account-label">Numéro Wave de la Maison :</div>
-              <div class="merchant-phone-row">
-                <strong class="merchant-phone" id="merchant-account-phone">+221 78 241 49 49</strong>
-                <button type="button" class="btn-copy-num" id="btn-copy-merchant-phone" title="Copier le numéro">
-                  📋 Copier
-                </button>
+          <div class="payment-security-notice" style="display:flex; align-items:center; gap:var(--space-3); padding:14px; background:rgba(0,0,0,0.4); border:1px solid var(--gold-border); border-radius:var(--radius-sm); margin-top:var(--space-3);">
+            <div class="merchant-icon" id="merchant-method-icon" style="width:36px; height:36px; min-width:36px;">
+              <img src="./assets/images/wave-logo.jpg" alt="Wave" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
+            </div>
+            <div style="text-align:left;">
+              <div style="font-weight:700; font-size:var(--text-xs); color:var(--text-primary);" id="payment-gateway-title">
+                Paiement Sécurisé Wave Business
               </div>
-              <div class="merchant-name-badge">Titulaire : <strong>MAISON FRÈRE MIXAGE</strong></div>
+              <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+                Vous allez être redirigé vers l'interface de paiement officielle pour régler en toute sécurité.
+              </div>
             </div>
           </div>
 
-          <div class="payment-quick-actions" id="payment-quick-actions" style="margin-bottom:var(--space-3);">
-            <div class="om-ussd-info" id="om-ussd-info" style="display:none;">
-              <span>📲 Syntaxe USSD Orange Money : </span>
-              <strong id="om-ussd-code">#144#391*786347666*MONTANT#</strong>
-            </div>
-          </div>
-
-          <!-- Formulaire de validation obligatoire du paiement -->
-          <div class="payment-proof-form">
-            <div class="proof-form-title">
-              <span style="color:var(--gold);">🔒 Confirmation du règlement :</span>
-            </div>
-
-            <div class="form-group" style="margin-bottom:var(--space-3);">
-              <label class="form-label" for="pay-sender-phone">
-                Numéro ayant envoyé le paiement <span style="color:#EF4444;">*</span>
-              </label>
-              <input type="tel" id="pay-sender-phone" class="form-input" placeholder="Ex: 77 123 45 67" required />
-              <span class="input-hint">Le numéro utilisé pour effectuer le transfert Wave ou Orange Money.</span>
-            </div>
-
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="pay-tx-ref">
-                Référence de transaction / SMS reçu <span style="color:#EF4444;">*</span>
-              </label>
-              <input type="text" id="pay-tx-ref" class="form-input" placeholder="Ex: TX-984729 ou Référence SMS" required />
-              <span class="input-hint">Indiquez la référence reçue par SMS pour validation immédiate.</span>
-            </div>
-
-            <div class="pay-error-alert" id="pay-error-alert" style="display:none;">
-              ⚠️ Veuillez effectuer le paiement sur le numéro Frère Mixage et remplir les informations de confirmation ci-dessus.
-            </div>
+          <div class="pay-error-alert" id="pay-error-alert" style="display:none; margin-top:var(--space-3);">
+            ⚠️ Erreur lors de l'initialisation du paiement.
           </div>
         </div>
 
@@ -1034,8 +1004,8 @@
           <button type="button" class="btn btn-secondary" id="btn-back-to-2">
             ← Modifier mes coordonnées
           </button>
-          <button type="button" class="btn btn-primary btn-shimmer" id="btn-submit-order">
-            CONFIRMER LA COMMANDE
+          <button type="button" class="btn btn-primary btn-shimmer" id="btn-submit-order" style="min-width:240px;">
+            💙 PAYER AVEC WAVE
           </button>
         </div>
       </div>

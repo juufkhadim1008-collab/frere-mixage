@@ -117,41 +117,32 @@ function updateTotalsTable() {
 function updatePaymentDetailsPanel() {
   const method = orderState.paymentMethod || 'wave';
   const grandTotal = getGrandTotal();
-  const gateway = CONFIG.paymentGateways[method] || CONFIG.paymentGateways.wave;
 
   // Montant à payer
   const amountEl = document.getElementById('pay-instructions-amount');
   if (amountEl) amountEl.textContent = formatPrice(grandTotal);
 
-  // Numéro et libellé
+  // Logo & Titre
   const iconEl = document.getElementById('merchant-method-icon');
-  const labelEl = document.getElementById('merchant-account-label');
-  const phoneEl = document.getElementById('merchant-account-phone');
-  const waveDirectBtn = document.getElementById('btn-wave-direct-action');
-  const omUssdBox = document.getElementById('om-ussd-info');
-  const omUssdCode = document.getElementById('om-ussd-code');
+  const titleEl = document.getElementById('payment-gateway-title');
+  const submitBtn = document.getElementById('btn-submit-order');
 
   if (iconEl) {
     iconEl.innerHTML = method === 'wave'
       ? `<img src="./assets/images/wave-logo.jpg" alt="Wave" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`
       : `<img src="./assets/images/orange-money-logo.png" alt="Orange Money" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />`;
   }
-  if (labelEl) labelEl.textContent = `Numéro ${gateway.name} officiel :`;
-  if (phoneEl) phoneEl.textContent = gateway.accountNumber || '+221 78 241 49 49';
 
-  if (method === 'wave') {
-    if (omUssdBox) omUssdBox.style.display = 'none';
-  } else {
-    if (omUssdBox) {
-      omUssdBox.style.display = 'block';
-      if (omUssdCode) omUssdCode.textContent = PaymentService.getOrangeMoneyUSSD(grandTotal);
-    }
+  if (titleEl) {
+    titleEl.textContent = method === 'wave'
+      ? 'Paiement Sécurisé Wave Business'
+      : 'Paiement Sécurisé Orange Money Sénégal';
   }
 
-  // Pré-remplir le numéro émetteur si vide avec le téléphone du client
-  const senderPhoneInput = document.getElementById('pay-sender-phone');
-  if (senderPhoneInput && !senderPhoneInput.value && orderState.customer.phone) {
-    senderPhoneInput.value = orderState.customer.phone;
+  if (submitBtn) {
+    submitBtn.innerHTML = method === 'wave'
+      ? '💙 PAYER AVEC WAVE'
+      : '🟠 PAYER AVEC ORANGE MONEY';
   }
 }
 
@@ -237,51 +228,7 @@ function validateCustomerForm() {
   return isValid;
 }
 
-/**
- * Validation stricte du paiement de l'Étape 3
- */
-function validatePaymentForm() {
-  const senderPhoneInput = document.getElementById('pay-sender-phone');
-  const txRefInput = document.getElementById('pay-tx-ref');
-  const errorAlert = document.getElementById('pay-error-alert');
-
-  let isValid = true;
-  let errorMsg = '';
-
-  const senderPhone = senderPhoneInput ? senderPhoneInput.value.trim() : '';
-  const txRef = txRefInput ? txRefInput.value.trim() : '';
-
-  if (!senderPhone || senderPhone.length < 8) {
-    senderPhoneInput?.classList.add('error');
-    isValid = false;
-    errorMsg = 'Veuillez saisir le numéro de téléphone utilisé pour effectuer le paiement.';
-  } else {
-    senderPhoneInput?.classList.remove('error');
-    orderState.paymentProof.senderPhone = senderPhone;
-  }
-
-  if (!txRef || txRef.length < 3) {
-    txRefInput?.classList.add('error');
-    isValid = false;
-    if (!errorMsg) {
-      errorMsg = 'Veuillez renseigner la référence de transaction ou le message SMS de confirmation de transfert.';
-    }
-  } else {
-    txRefInput?.classList.remove('error');
-    orderState.paymentProof.txRef = txRef;
-  }
-
-  if (!isValid) {
-    if (errorAlert) {
-      errorAlert.textContent = `⚠️ ${errorMsg}`;
-      errorAlert.style.display = 'block';
-    }
-  } else {
-    if (errorAlert) errorAlert.style.display = 'none';
-  }
-
-  return isValid;
-}
+let isProcessingPayment = false;
 
 /**
  * Initialisation des gestionnaires d'événements du Checkout
@@ -296,20 +243,6 @@ export function initCheckoutModal() {
   const btnToStep3 = document.getElementById('btn-to-step-3');
   const btnBackTo2 = document.getElementById('btn-back-to-2');
   const btnSubmitOrder = document.getElementById('btn-submit-order');
-
-  // Bouton copie numéro marchand
-  const btnCopyMerchant = document.getElementById('btn-copy-merchant-phone');
-  if (btnCopyMerchant) {
-    btnCopyMerchant.addEventListener('click', () => {
-      const phoneText = document.getElementById('merchant-account-phone')?.textContent || '+221 78 241 49 49';
-      navigator.clipboard.writeText(phoneText.replace(/\s+/g, '')).then(() => {
-        btnCopyMerchant.textContent = '✓ Copié !';
-        setTimeout(() => {
-          btnCopyMerchant.textContent = '📋 Copier';
-        }, 2000);
-      });
-    });
-  }
 
   if (!modal) return;
 
@@ -355,34 +288,43 @@ export function initCheckoutModal() {
     });
   });
 
-  // Soumission finale de la commande & Paiement
+  // Soumission finale & Redirection vers la passerelle de paiement officielle
   btnSubmitOrder?.addEventListener('click', async () => {
-    // 1. Contrôle strict : Aucun validation de commande sans paiement renseigné sur le numéro
-    if (!validatePaymentForm()) {
-      return;
-    }
+    if (isProcessingPayment) return;
+    isProcessingPayment = true;
 
     btnSubmitOrder.disabled = true;
-    const originalText = btnSubmitOrder.innerHTML;
-    btnSubmitOrder.innerHTML = `<span class="spinner"></span> Confirmation en cours...`;
+    const method = orderState.paymentMethod || 'wave';
+    const isWave = method === 'wave';
+    const providerName = isWave ? 'Wave' : 'Orange Money';
+
+    btnSubmitOrder.innerHTML = `<span class="spinner"></span> Redirection vers ${providerName}...`;
+
+    const errorAlert = document.getElementById('pay-error-alert');
+    if (errorAlert) errorAlert.style.display = 'none';
 
     try {
       const grandTotal = getGrandTotal();
       const fullName = `${orderState.customer.firstName || ''} ${orderState.customer.lastName || ''}`.trim() || 'Client Frère Mixage';
-      const methodLabel = orderState.paymentMethod === 'wave' ? 'Wave Sénégal' : 'Orange Money Sénégal';
-      
-      // 2. Création atomique de la commande (Supabase + LocalStorage synchronisé)
-      const serverResult = await OrderService.createOrderAtomic({
-        customerName: fullName,
-        customerPhone: orderState.customer.phone,
-        customerEmail: orderState.customer.email || null,
-        deliveryAddress: orderState.customer.address || 'Dakar',
-        deliveryCity: orderState.customer.city || 'Dakar',
-        paymentMethod: methodLabel,
-        senderPhone: orderState.paymentProof.senderPhone,
-        txRef: orderState.paymentProof.txRef,
+      const orderNumber = `FM-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      const orderPayload = {
+        orderNumber,
         totalAmount: grandTotal,
-        notes: orderState.customer.notes || null,
+        paymentMethod: isWave ? 'wave' : 'orange_money',
+        customer: {
+          name: fullName,
+          firstName: orderState.customer.firstName,
+          lastName: orderState.customer.lastName,
+          phone: orderState.customer.phone,
+          email: orderState.customer.email,
+          address: orderState.customer.address,
+          city: orderState.customer.city,
+          notes: orderState.customer.notes
+        },
+        product: orderState.product,
+        size: orderState.size,
+        quantity: orderState.quantity,
         items: [{
           productId: orderState.product?.dbId || null,
           productSlug: orderState.product?.id,
@@ -391,49 +333,73 @@ export function initCheckoutModal() {
           quantity: orderState.quantity,
           unitPrice: orderState.product?.price || 0
         }]
-      });
-
-      const order = {
-        orderNumber: serverResult.order_number,
-        id: serverResult.order_id,
-        customer: orderState.customer,
-        product: orderState.product,
-        size: orderState.size,
-        quantity: orderState.quantity,
-        delivery: orderState.delivery,
-        totalAmount: grandTotal,
-        payment: {
-          method: orderState.paymentMethod,
-          methodLabel,
-          senderPhone: orderState.paymentProof.senderPhone,
-          txRef: orderState.paymentProof.txRef
-        }
       };
 
-      // 3. Si Wave : redirection / ouverture directe de l'application Wave
-      if (orderState.paymentMethod === 'wave') {
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        if (isMobile) {
-          window.location.href = 'wave://';
-        }
-      }
-
-      // 4. Envoi automatique du message WhatsApp avec TOUTES les informations de commande
+      // Sauvegarde préliminaire dans le Dashboard LocalStorage
       try {
-        WhatsAppService.openPaymentConfirmationChat(order);
-      } catch (waErr) {
-        console.warn('[CheckoutModal] Envoi WhatsApp auto :', waErr);
+        const STORAGE_KEY = 'frere_mixage_admin_state_v11';
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const state = JSON.parse(raw);
+          if (!state.orders) state.orders = [];
+          state.orders.unshift({
+            id: orderNumber,
+            date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }),
+            customer: {
+              name: fullName,
+              phone: orderState.customer.phone,
+              city: orderState.customer.city || 'Dakar',
+              address: orderState.customer.address || 'Dakar',
+              email: orderState.customer.email || ''
+            },
+            items: [{
+              name: orderState.product?.name || 'Création Frère Mixage',
+              size: orderState.size,
+              qty: orderState.quantity,
+              price: orderState.product?.price || grandTotal
+            }],
+            amount: grandTotal,
+            status: 'En attente de paiement',
+            paymentMethod: isWave ? 'Wave Sénégal' : 'Orange Money Sénégal',
+            paymentStatus: 'pending'
+          });
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch(e) {}
+
+      // Appel au backend Serverless pour créer la session officielle
+      const endpoint = isWave
+        ? '/api/payments/wave/create-checkout'
+        : '/api/payments/orange-money/create-checkout';
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderPayload,
+          hostOrigin: window.location.origin
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.checkoutUrl) {
+        throw new Error(result.error || `Impossible de créer la session de paiement ${providerName}.`);
       }
 
-      // 5. Fermeture du tunnel & Affichage de la confirmation de commande et du reçu
-      closeModal();
-      showConfirmationModal(order);
-    } catch (error) {
-      alert(error.message || 'Une erreur est survenue lors de la validation du paiement. Veuillez réessayer.');
-      console.error('[CheckoutModal] Erreur création commande :', error);
-    } finally {
+      // Redirection immédiate du client vers l'interface officielle Wave / Orange Money
+      window.location.href = result.checkoutUrl;
+
+    } catch (err) {
+      console.error('[CheckoutModal] Erreur initialisation session :', err);
+      if (errorAlert) {
+        errorAlert.textContent = `⚠️ ${err.message}`;
+        errorAlert.style.display = 'block';
+      }
       btnSubmitOrder.disabled = false;
-      btnSubmitOrder.innerHTML = originalText;
+      btnSubmitOrder.innerHTML = isWave ? '💙 PAYER AVEC WAVE' : '🟠 PAYER AVEC ORANGE MONEY';
+      isProcessingPayment = false;
     }
   });
 }

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statut de Paiement — Maison Frère Mixage</title>
+  <link rel="icon" type="image/png" href="./favicon.png" />
+
+  <!-- Fonts Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="./assets/css/variables.css" />
+  <link rel="stylesheet" href="./assets/css/base.css" />
+  <link rel="stylesheet" href="./assets/css/animations.css" />
+  <link rel="stylesheet" href="./assets/css/modals.css" />
+
+  <style>
+    body {
+      background: var(--bg-primary, #0A0A0C);
+      color: var(--text-primary, #FFFFFF);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .return-container {
+      width: 100%;
+      max-width: 620px;
+      background: var(--bg-card, #121216);
+      border: 1px solid var(--gold-border, rgba(198, 168, 104, 0.28));
+      border-radius: var(--radius-lg, 16px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(198, 168, 104, 0.15);
+      padding: 36px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .return-header-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.2em;
+      color: var(--gold, #C6A868);
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .status-badge-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      transition: all 0.3s ease;
+    }
+
+    .status-badge-success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 2px solid #22C55E;
+      color: #22C55E;
+      box-shadow: 0 0 25px rgba(34, 197, 94, 0.3);
+    }
+
+    .status-badge-failed {
+      background: rgba(239, 68, 68, 0.15);
+      border: 2px solid #EF4444;
+      color: #EF4444;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+    }
+
+    .status-badge-pending {
+      background: rgba(198, 168, 104, 0.15);
+      border: 2px solid var(--gold, #C6A868);
+      color: var(--gold, #C6A868);
+      box-shadow: 0 0 25px rgba(198, 168, 104, 0.3);
+    }
+
+    .return-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+      color: var(--text-primary, #FFFFFF);
+    }
+
+    .return-desc {
+      color: var(--text-secondary, #A1A1AA);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .order-summary-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(198, 168, 104, 0.15);
+      border-radius: var(--radius-md, 10px);
+      padding: 18px;
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.9rem;
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+      padding-top: 12px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--gold, #C6A868);
+    }
+
+    .summary-label {
+      color: var(--text-secondary, #A1A1AA);
+    }
+
+    .summary-val {
+      color: var(--text-primary, #FFFFFF);
+      font-weight: 600;
+    }
+
+    .actions-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-return-action {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: var(--radius-sm, 6px);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-wa-green {
+      background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-wa-green:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold-primary {
+      background: linear-gradient(135deg, #ECC880 0%, #C6A868 50%, #9E7D42 100%);
+      color: #000000;
+    }
+
+    .btn-gold-primary:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost-return {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-secondary, #A1A1AA);
+    }
+
+    .btn-ghost-return:hover {
+      border-color: var(--gold, #C6A868);
+      color: var(--text-primary, #FFFFFF);
+    }
+
+    .spinner-gold {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(198, 168, 104, 0.2);
+      border-top-color: var(--gold, #C6A868);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="return-container" id="return-card">
+    <div class="return-header-logo">⚜️ MAISON FRÈRE MIXAGE ⚜️</div>
+
+    <div id="loading-state">
+      <div class="spinner-gold" style="margin-bottom:20px;"></div>
+      <h1 class="return-title">VÉRIFICATION DU PAIEMENT</h1>
+      <p class="return-desc">Vérification de la confirmation du transfert auprès de la banque...</p>
+    </div>
+
+    <!-- État Succès (Confirmé) -->
+    <div id="success-state" style="display:none;">
+      <div class="status-badge-icon status-badge-success">✓</div>
+      <h1 class="return-title" style="color:#22C55E;">PAIEMENT CONFIRMÉ</h1>
+      <p class="return-desc">
+        Votre paiement a été vérifié avec succès. Votre commande est validée et transmise à nos maîtres tailleurs.
+      </p>
+
+      <div class="order-summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Numéro de Commande :</span>
+          <span class="summary-val" id="res-order-number">FM-2026-0000</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Moyen de paiement :</span>
+          <span class="summary-val" id="res-payment-method">Wave Business</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Statut :</span>
+          <span class="summary-val" style="color:#22C55E;">PAYÉE & CONFIRMÉE</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Montant total réglé :</span>
+          <span class="summary-val" id="res-total-amount">0 FCFA</span>
+        </div>
+      </div>
+
+      <div class="actions-stack">
+        <a href="#" id="btn-wa-confirmation" target="_blank" rel="noopener noreferrer" class="btn-return-action btn-wa-green">
+          💬 Ouvrir le suivi WhatsApp Frère Mixage
+        </a>
+        <a href="./" class="btn-return-action btn-ghost-return">
+          ← Retourner à la Vitrine
+        </a>
+      </div>
+    </div>
+
+    <!-- État Échec -->
+    <div id="failed-state" style="display:none;">
+      <div class="status-badge-icon status-badge-failed">✕</div>
+      <h1 class="return-title" style="color:#EF4444;">PAIEMENT NON FINALISÉ</h1>
+      <p class="return-desc" id="failed-desc">
+        La transaction n'a pas pu aboutir ou a été interrompue. Votre commande reste en attente.
+      </p>
+
+      <div class="order-summary-box">
+        <div class="summary-row">
+          <span class="summary-label">Numéro de Commande :</span>
+          <span class="summary-val" id="res-failed-order-number">FM-2026-0000</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Statut :</span>
+          <span class="summary-val" style="color:#EF4444;">ÉCHEC DE PAIEMENT</span>
+        </div>
+      </div>
+
+      <div class="actions-stack">
+        <a href="./" class="btn-return-action btn-gold-primary">
+          🔄 Réessayer ma commande
+        </a>
+        <a href="https://wa.me/221782414949" target="_blank" rel="noopener noreferrer" class="btn-return-action btn-ghost-return">
+          💬 Contacter le Service Client
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('order_id') || urlParams.get('orderNumber') || 'FM-2026-0000';
+    const statusParam = (urlParams.get('status') || '').toLowerCase();
+
+    function formatPrice(val) {
+      return new Intl.NumberFormat('fr-FR').format(val) + ' FCFA';
+    }
+
+    async function checkServerStatus(attempts = 0) {
+      const loadingEl = document.getElementById('loading-state');
+      const successEl = document.getElementById('success-state');
+      const failedEl = document.getElementById('failed-state');
+
+      try {
+        const response = await fetch(`/api/payments/verify-status?order_id=${encodeURIComponent(orderId)}`);
+        const data = await response.json();
+
+        if (data.success && (data.paymentStatus === 'paid' || data.orderStatus === 'confirmed' || statusParam === 'success')) {
+          // Succès confirmé
+          loadingEl.style.display = 'none';
+          failedEl.style.display = 'none';
+          successEl.style.display = 'block';
+
+          document.getElementById('res-order-number').textContent = data.orderNumber || orderId;
+          document.getElementById('res-payment-method').textContent = data.paymentMethod === 'wave' ? 'Wave Sénégal' : (data.paymentMethod === 'orange_money' ? 'Orange Money' : 'Paiement Sécurisé');
+          document.getElementById('res-total-amount').textContent = formatPrice(data.totalAmount || 0);
+
+          // WhatsApp link
+          const waBtn = document.getElementById('btn-wa-confirmation');
+          const msg = encodeURIComponent(`Bonjour Frère Mixage 👋🏽, je viens de finaliser le paiement de ma commande *${data.orderNumber || orderId}*. Pouvez-vous me confirmer la bonne réception ?`);
+          waBtn.href = `https://wa.me/221782414949?text=${msg}`;
+
+          // Sauvegarde dans l'état local du dashboard
+          try {
+            const STORAGE_KEY = 'frere_mixage_admin_state_v11';
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+              const state = JSON.parse(raw);
+              const existing = (state.orders || []).find(o => o.id === orderId);
+              if (existing) {
+                existing.paymentStatus = 'Payé';
+                existing.status = 'Confirmée (Payée)';
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+              }
+            }
+          } catch(e) {}
+
+          return;
+        }
+
+        // Si le webhook est en cours de transit (statut encore pending)
+        if (attempts < 4 && statusParam === 'success') {
+          setTimeout(() => checkServerStatus(attempts + 1), 2500);
+          return;
+        }
+
+        if (statusParam === 'failed' || statusParam === 'cancelled' || (data.paymentStatus && data.paymentStatus === 'failed')) {
+          loadingEl.style.display = 'none';
+          successEl.style.display = 'none';
+          failedEl.style.display = 'block';
+          document.getElementById('res-failed-order-number').textContent = orderId;
+          return;
+        }
+
+        // Si succès déclaré par le retour Wave
+        if (statusParam === 'success') {
+          loadingEl.style.display = 'none';
+          failedEl.style.display = 'none';
+          successEl.style.display = 'block';
+          document.getElementById('res-order-number').textContent = orderId;
+          document.getElementById('res-payment-method').textContent = 'Wave Sénégal';
+          document.getElementById('res-total-amount').textContent = 'Payé via Wave';
+          const waBtn = document.getElementById('btn-wa-confirmation');
+          waBtn.href = `https://wa.me/221782414949?text=${encodeURIComponent(`Bonjour Frère Mixage 👋🏽, commande ${orderId} payée avec succès sur Wave.`)}`;
+          return;
+        }
+
+        // Défaut : Affichage statut
+        loadingEl.style.display = 'none';
+        failedEl.style.display = 'block';
+        document.getElementById('res-failed-order-number').textContent = orderId;
+
+      } catch (err) {
+        console.warn('[OrderReturn] Erreur verify status :', err);
+        if (statusParam === 'success') {
+          loadingEl.style.display = 'none';
+          successEl.style.display = 'block';
+          document.getElementById('res-order-number').textContent = orderId;
+        } else {
+          loadingEl.style.display = 'none';
+          failedEl.style.display = 'block';
+          document.getElementById('res-failed-order-number').textContent = orderId;
+        }
+      }
+    }
+
+    checkServerStatus();
+  </script>
+</body>
+</html>
